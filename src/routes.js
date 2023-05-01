@@ -9,7 +9,7 @@ import LoginPage from './pages/LoginPage';
 import Page404 from './pages/Page404';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
-import ReccomendedPage from './pages/ReccomendedPage';
+import RecomendedPage from './pages/RecomendedPage';
 import ExplorePage from './pages/ExplorePage';
 import CreateRoomPage from './pages/CreateRoomPage'
 import ConversationRoomPage from './pages/ConversationRoomPage';
@@ -25,7 +25,7 @@ export default function Router() {
       children: [
         { element: <Navigate to="/dashboard/recommended" />, index: true },
         { path: 'explore', element: <ExplorePage /> },
-        { path: 'recommended', element: <ReccomendedPage /> },
+        { path: 'recommended', element: <RecomendedPage /> },
         { path: 'createRoom', element: <CreateRoomPage/> },
         { path: 'conversation', element: <ConversationRoomPage /> },
         { path: 'room', element: <RoomPage /> },

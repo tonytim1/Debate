@@ -5,13 +5,11 @@
     "es2021": true
   },
   "extends": [
-    "airbnb",
     "plugin:jsx-a11y/recommended",
     "plugin:react-hooks/recommended",
     "prettier"
   ],
   "plugins": [
-    "react",
     "react-hooks",
     "prettier"
   ],

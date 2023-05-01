@@ -1,29 +1,29 @@
 import { faker } from '@faker-js/faker';
-import { sample } from 'lodash';
+import { sample, sampleSize } from 'lodash';
+import ROOMS from './exploreRooms'
+import USERS from './user'
 
 // ----------------------------------------------------------------------
 
-const rooms = [...Array(3)].map((_, index) => ({
+// const room = sample(ROOMS);
+// const users = sampleSize(USERS, room.roomSize)
+const room = {
   id: faker.datatype.uuid(),
-  title: sample([
-    'what do you think on the reform?',
-    'why go vegan?',
-    'israel-palestine conflict',
-  ]),
-  topic: sample([
-    'politics',
-    'health',
-    'conspiracy',
-  ]),
-  hostName: faker.name.fullName(),
-  roomSize: sample([
-    '1/2',
-    '2/4',
-    '1/4',
-    '4/4',
-  ]),
-  teams: faker.datatype.boolean(),
-  viewers: faker.datatype.boolean(),
-}));
+  roomName: 'what do you think on the reform?',
+  topic: 'politics',
+  teams: false,
+  hostUser: USERS[0],
+  roomSize: 4,
+  users: [
+    {...USERS[0], ready: true},
+    {...USERS[1], ready: false},
+    {...USERS[2], ready: true},
+  ],
+  messages: [
+    {author: USERS[1], text: "Hi"},
+    {author: USERS[0], text: "Sup?"}
+  ],
+  currentUser: sample([USERS[0], USERS[1], USERS[2]])
+}
 
-export default rooms;
+export default room;

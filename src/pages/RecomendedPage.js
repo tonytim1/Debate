@@ -17,11 +17,11 @@ const SORT_OPTIONS = [
 
 // ----------------------------------------------------------------------
 
-export default function ReccomendedPage() {
+export default function RecomendedPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Reccomended | Minimal UI </title>
+        <title> Dashboard: Recomended | Minimal UI </title>
       </Helmet>
 
       <Container>

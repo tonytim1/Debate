@@ -33,7 +33,7 @@ import Scrollbar from '../components/scrollbar';
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 // mock
 import USERLIST from '../_mock/user';
-import ROOMSLIST from '../_mock/room';
+import ROOMSLIST from '../_mock/exploreRooms';
 
 // ----------------------------------------------------------------------
 
@@ -220,7 +220,7 @@ export default function ExplorePage() {
                         <TableCell align="left">{teams ? 'Yes' : 'No'}</TableCell>
 
                         <TableCell align="right">
-                          <Button variant="contained" onClick={() => {navigate('/dashboard/room')}}>
+                          <Button variant="contained" onClick={() => {navigate('/dashboard/room')}}> {/* `/dashboard/room/${row.id}` */}
                             join
                           </Button>
                         </TableCell>
