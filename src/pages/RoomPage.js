@@ -75,11 +75,11 @@ export default function RoomPage() {
     <>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-        <Typography variant="h5">{`${topic} - ${teams ? "teams" : "free for all"}`}</Typography>
-          <Typography variant="h3">{roomName}</Typography>
+          <Typography variant="h2">{roomName}</Typography>
+          <Typography variant="h5">{`${topic} - ${teams ? "teams" : "free for all"}`}</Typography>
         </Grid>
         {/* users */}
-        <Grid item xs={12}>
+        <Grid item xs={8}>
           <Typography variant="h6">Users ({users.length}/{roomSize})</Typography>
           <Paper variant="outlined">
             <List>
@@ -94,7 +94,8 @@ export default function RoomPage() {
                     <ListItemAvatar>
                       {user? <Avatar alt={user.name} src={user.avatarUrl}/>:undefined}             
                     </ListItemAvatar>
-                    <ListItemText primary={user ? user.name : 'Empty'} secondary={isRoomAdmin ? 'Admin' : (user ? (user.ready ? 'Ready' : 'Not ready') : '')} />
+                    <ListItemText primary={user ? user.name : 'Empty'} secondary={user ? (user.ready ? 'Ready' : 'Not ready') : ''} />
+                    {isRoomAdmin && <ListItemText primary='Admin'/>}
                   </ListItem>
                 );
               })}
@@ -102,7 +103,7 @@ export default function RoomPage() {
           </Paper>
         </Grid>
         {/* chat */}
-        <Grid item xs={12}>
+        <Grid item xs={8}>
           <Typography variant="h5">Chat</Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sx={{ height: '200px', overflowY: 'auto' }}>

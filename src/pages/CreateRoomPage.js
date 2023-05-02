@@ -33,6 +33,7 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 import TOPIC_LIST from '../_mock/topics'
+import {useNavigate, useHref} from 'react-router-dom';
 
 
 export default function CreateRoomPage() {
@@ -41,6 +42,7 @@ export default function CreateRoomPage() {
   const [size, setSize] = useState(2);
   const [allowSpectators, setAllowSpectators] = useState(false);
   const [mode, setMode] = useState('teams');
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -101,6 +103,7 @@ export default function CreateRoomPage() {
             <Button
               type="submit"
               variant="contained"
+              onClick={() => {navigate('/dashboard/room')}}
             >
               Create
             </Button>
