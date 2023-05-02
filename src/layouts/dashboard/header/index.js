@@ -67,7 +67,7 @@ export default function Header({ onOpenNav }) {
             sm: 1,
           }}
         >
-          <NotificationsPopover />
+          {/* <NotificationsPopover /> */}
           <AccountPopover />
         </Stack>
       </StyledToolbar>
