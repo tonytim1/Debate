@@ -18,7 +18,7 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
 
   const logo = (
     <Box>
-      Debate
+      Debate Center
     </Box>
   );
 

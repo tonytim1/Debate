@@ -9,23 +9,31 @@ import account from '../../../_mock/account';
 
 const MENU_OPTIONS = [
   {
+    title: 'Home',
+    path: '/dashboard/home',
     label: 'Home',
     icon: 'eva:home-fill',
   },
   {
+    title: 'Profile',
+    path: '/dashboard/profile',
     label: 'Profile',
     icon: 'eva:person-fill',
   },
-  {
-    label: 'Settings',
-    icon: 'eva:settings-2-fill',
-  },
+  // {
+  //   label: 'Settings',
+  //   icon: 'eva:settings-2-fill',
+  // },
 ];
 
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+
+  function moveTo(props){
+    window.location.href=props.path
+  }
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -89,7 +97,8 @@ export default function AccountPopover() {
 
         <Stack sx={{ p: 1 }}>
           {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={handleClose}>
+            <MenuItem key={option.label} onClick={() => 
+            {window.location.href=option.path;}}>
               {option.label}
             </MenuItem>
           ))}
