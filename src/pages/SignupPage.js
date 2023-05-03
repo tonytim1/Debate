@@ -9,7 +9,9 @@ import Logo from '../components/logo';
 import Iconify from '../components/iconify';
 // sections
 import { LoginForm } from '../sections/auth/login';
-
+import UserForm from 'src/sections/register/UserForm';
+import UserDetails from 'src/sections/register/UserDetails';
+import { LoadingButton } from '@mui/lab';
 // ----------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -46,37 +48,28 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Login </title>
+        <title> Sign Up </title>
       </Helmet>
-
-        <Container maxWidth="sm">
-            <Typography variant="h4" gutterBottom>
-              Sign In
+        <Container>
+        
+            <Typography variant="h4" gutterBottom style={{ textAlign: "center" }}>
+              Sign Up
             </Typography>
+            <UserForm />
+            <UserDetails />
+          </Container>
+          <Divider sx={{ my: 3 }}/>
+            <LoadingButton
+              sx={{ display: 'block', margin: '0 auto' }}
+              type="submit"
+              size="large"
+              variant="contained"
+              onClick={() => {navigate('/dashboard/profile')}}
+            >
+              Create Account
+            </LoadingButton>
 
-            <Typography variant="body2" sx={{ mb: 5 }}>
-              Don’t have an account? {''}
-              <Link variant="subtitle2" href="/dashboard/register">Get started</Link>
-            </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
-              </Button>
-
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
-              </Button>
-            </Stack>
-
-            <Divider sx={{ my: 3 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                OR
-              </Typography>
-            </Divider>
-
-            <LoginForm />
-        </Container>
     </>
   );
 }
