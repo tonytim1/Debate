@@ -33,19 +33,14 @@ const navConfig = [
   },
   {
     title: 'login',
-    path: '/login',
+    path: '/dashboard/login',
     icon: icon('ic_lock'),
   },
   {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic_disabled'),
-  },
-  {
-    title: 'Sign Up',
-    path: '/register',
-    icon: icon('ic_disabled'),
-  },
+    title: 'sign Up',
+    path: '/dashboard/register',
+    icon: icon('ic_lock'),
+  }
 ];
 
 export default navConfig;

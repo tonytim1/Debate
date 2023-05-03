@@ -1,77 +1,99 @@
-import React, { Component } from 'react';
-import UserDetails from './UserDetails';
-import Interests from './Interests';
-import Confirm from './Confirm';
-import Success from './Success';
+import { Helmet } from 'react-helmet-async';
+import { filter } from 'lodash';
+import { sentenceCase } from 'change-case';
+import { useState } from 'react';
+import { LoadingButton } from '@mui/lab';
+import POSTS from 'src/_mock/blog';
+import { BlogPostCard, BlogPostsSort, BlogPostsSearch } from 'src/sections/@dashboard/blog';
+// @mui
+import {
+  Card,
+  Table,
+  Stack,
+  Paper,
+  Avatar,
+  Button,
+  Popover,
+  Checkbox,
+  TableRow,
+  MenuItem,
+  TableBody,
+  TableCell,
+  Container,
+  Typography,
+  IconButton, 
+  TableContainer,
+  TablePagination,
+  TextField,
+  Autocomplete,
+  FormControlLabel,
+  Grid,
+  Divider
+} from '@mui/material';
+// sections
+import { UserListHead, UserListToolbar } from 'src/sections/@dashboard/user';
+import Gender from 'src/_mock/register'
+import {useNavigate, useHref} from 'react-router-dom';
 
-export class UserForm extends Component {
-  state = {
-    step: 1,
-    firstName: '',
-    lastName: '',
-    email: '',
-    occupation: '',
-    gender: ''
+
+export default function CreateRoomPage() {
+  const [name, setName] = useState('');
+  const [topic, setTopic] = useState(null);
+  const [size, setSize] = useState(2);
+  const [allowSpectators, setAllowSpectators] = useState(false);
+  const [mode, setMode] = useState('teams');
+  const navigate = useNavigate();
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // handle form submission here
   };
 
-  // Proceed to next step
-  nextStep = () => {
-    const { step } = this.state;
-    this.setState({
-      step: step + 1
-    });
-  };
+  return (
+    <>
+      <Helmet>
+        <title> Sign Up </title>
+      </Helmet>
+      <Container>
+        <Divider sx={{ my: 3 }}/>
+        
+        <Table style={{width: "70%", maxWidth: "none"}} sx={{ margin: '0 auto' }}>
+      <TableBody>
+        <TableRow>
+          <TableCell>
+            <TextField label="First Name" fullWidth />
+          </TableCell>
+          <TableCell>
+            <TextField label="Last Name" fullWidth />
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+            <TextField label="Email" fullWidth />
+          </TableCell>
+          <TableCell>
+            <TextField label="Phone Number" fullWidth />
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+            <TextField label="Password" fullWidth type="password" />
+          </TableCell>
+          <TableCell>
+            <TextField label="Confirm Password" fullWidth type="password" />
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+    <Divider sx={{ my: 3 }}/>
+    <Typography variant="h4" gutterBottom style={{ textAlign: "center" }}>
+    What Interest You?
+            </Typography>
 
-  // Go back to prev step
-  prevStep = () => {
-    const { step } = this.state;
-    this.setState({
-      step: step - 1
-    });
-  };
 
-  // Handle fields change
-  handleChange = input => e => {
-    this.setState({ [input]: e.target.value });
-  };
+        
 
-  render() {
-    const { step } = this.state;
-    const { firstName, lastName, email, occupation, city, bio } = this.state;
-    const values = { firstName, lastName, email, occupation, city, bio };
-
-    switch (step) {
-      case 1:
-        return (
-          <UserDetails
-            nextStep={this.nextStep}
-            handleChange={this.handleChange}
-            values={values}
-          />
-        );
-      case 2:
-        return (
-          <Interests
-            nextStep={this.nextStep}
-            prevStep={this.prevStep}
-            handleChange={this.handleChange}
-            values={values}
-          />
-        );
-      case 3:
-        return (
-          <Confirm
-            nextStep={this.nextStep}
-            prevStep={this.prevStep}
-            values={values}
-          />
-        );
-      case 4:
-        return <Success />;
-      default:
-        (console.log('This is a multi-step form built with React.'))
-    }
-  }
+      </Container>
+    </>
+  );
 }
-
-export default UserForm;

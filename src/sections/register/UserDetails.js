@@ -1,89 +1,57 @@
-import React, { Component } from 'react';
-import Dialog from '@mui/material/Dialog';
-import AppBar from '@mui/material/AppBar';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import { useState } from "react";
+import { FormControlLabel, FormGroup, Switch } from "@mui/material";
+import { Box } from "@mui/system";
+import { LoadingButton } from '@mui/lab';
 
-export class UserDetails extends Component {
-  continue = e => {
-    e.preventDefault();
-    this.props.nextStep();
+const musicGenres = [
+  "Politics",
+  "Culture",
+  "Sports",
+  "Technology",
+  "Education",
+  "Science",
+  "Religion and spirituality",
+  "Health",
+  "Climate change"
+];
+
+function MusicToggles() {
+  const [genres, setGenres] = useState(
+    musicGenres.reduce((obj, genre) => ({ ...obj, [genre]: false }), {})
+  );
+
+  const handleToggle = (event) => {
+    setGenres({ ...genres, [event.target.name]: event.target.checked });
   };
 
-  render() {
-    const { values, handleChange } = this.props;
-    return (
-      <MuiThemeProvider color="white">
-        <>
-          <Dialog
-            open
-            fullWidth
-            maxWidth='sm'
-          >
-            <AppBar title="Enter User Details" />
-            <TextField
-              placeholder="Enter Your First Name"
-              label="First Name"
-              onChange={handleChange('firstName')}
-              defaultValue={values.firstName}
-              margin="normal"
-              fullWidth
-            />
-            <br />
-            <TextField
-              placeholder="Enter Your Last Name"
-              label="Last Name"
-              onChange={handleChange('lastName')}
-              defaultValue={values.lastName}
-              margin="normal"
-              fullWidth
-            />
-            <br />
-            <TextField
-              placeholder="Enter Your Email"
-              label="Email"
-              onChange={handleChange('email')}
-              defaultValue={values.email}
-              margin="normal"
-              fullWidth
-            />
-            <br />
-            <TextField
-              placeholder="Enter Your Occupation"
-              label="Occupation"
-              onChange={handleChange('occupation')}
-              defaultValue={values.occupation}
-              margin="normal"
-              fullWidth
-            />
-            <br />
-            <TextField
-              placeholder="Enter Your Gender"
-              label="Gender"
-              onChange={handleChange('gender')}
-              defaultValue={values.city}
-              margin="normal"
-              fullWidth
-            />
-            <br />
-
-            <Button
-              color="secondary"
-              variant="contained"
-              onClick={this.back}
-            >Back</Button>
-
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={this.continue}
-            >Continue</Button>
-          </Dialog>
-        </>
-      </MuiThemeProvider>
-    );
-  }
+  return (
+    
+    <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <FormGroup sx={{ mt: 4 }}>
+        {musicGenres.map((genre) => (
+          <FormControlLabel
+            key={genre}
+            control={
+              <Switch
+                sx={{
+                  color: "primary.main",
+                  "& .Mui-checked": {
+                    color: "primary.main",
+                  },
+                }}
+                checked={genres[genre]}
+                onChange={handleToggle}
+                name={genre}
+              />
+            }
+            label={genre}
+          />
+        ))}
+      </FormGroup>
+      <img src={require('src/sections/register/discussion.png')}  alt="description" style={{ width: "200px", height: "200px" }}/>
+    </Box>
+    
+  );
 }
 
-export default UserDetails;
+export default MusicToggles;

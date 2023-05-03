@@ -53,6 +53,7 @@
     "react-hook-form": "^7.43.1",
     "react-router-dom": "^6.8.1",
     "react-scripts": "^5.0.1",
+    "react-switch": "^7.0.0",
     "simplebar-react": "^3.2.1",
     "web-vitals": "^3.1.1"
   },

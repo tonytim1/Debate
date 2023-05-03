@@ -8,10 +8,10 @@ import useResponsive from '../hooks/useResponsive';
 import Logo from '../components/logo';
 import Iconify from '../components/iconify';
 // sections
-
-import React from 'react';
-import { UserForm } from '../sections/register/UserForm';
-
+import { LoginForm } from '../sections/auth/login';
+import UserForm from 'src/sections/register/UserForm';
+import UserDetails from 'src/sections/register/UserDetails';
+import { LoadingButton } from '@mui/lab';
 // ----------------------------------------------------------------------
 
 const StyledRoot = styled('div')(({ theme }) => ({
@@ -35,7 +35,7 @@ const StyledContent = styled('div')(({ theme }) => ({
   margin: 'auto',
   minHeight: '100vh',
   display: 'flex',
-  justifyContent: 'top',
+  justifyContent: 'center',
   flexDirection: 'column',
   padding: theme.spacing(12, 0),
 }));
@@ -44,34 +44,32 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 export default function LoginPage() {
   const mdUp = useResponsive('up', 'md');
+
   return (
     <>
       <Helmet>
         <title> Sign Up </title>
       </Helmet>
-
-      <StyledRoot>
-        <Logo
-          sx={{
-            position: 'fixed',
-            top: { xs: 16, sm: 24, md: 40 },
-            left: { xs: 16, sm: 24, md: 40 },
-          }}
-        />
-
-
-
         <Container>
-          <StyledContent>
-            <Typography variant="h4">
-            Sign Up
+        
+            <Typography variant="h4" gutterBottom style={{ textAlign: "center" }}>
+              Sign Up
             </Typography>
-        </StyledContent>
-        <StyledSection>
-        <UserForm />
-        </StyledSection>
-        </Container>
-      </StyledRoot>
+            <UserForm />
+            <UserDetails />
+          </Container>
+          <Divider sx={{ my: 3 }}/>
+            <LoadingButton
+              sx={{ display: 'block', margin: '0 auto' }}
+              type="submit"
+              size="large"
+              variant="contained"
+              onClick={() => {navigate('/dashboard/room')}}
+            >
+              Create Account
+            </LoadingButton>
+
+
     </>
   );
 }

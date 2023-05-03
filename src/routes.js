@@ -6,7 +6,7 @@ import SimpleLayout from './layouts/simple';
 import BlogPage from './pages/BlogPage';
 import UserPage from './pages/UserPage';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import Signup from './pages/SignupPage';
 import Page404 from './pages/Page404';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
@@ -32,16 +32,18 @@ export default function Router() {
         { path: 'conversation', element: <ConversationRoomPage /> },
         { path: 'room', element: <RoomPage /> },
         { path: 'Profile', element: <ProfilePage /> },
+        { path: 'login', element: <LoginPage /> },
+        { path: 'register', element: <Signup /> },
       ],
     },
-    {
-      path: 'login',
-      element: <LoginPage />,
-    },
-    {
-      path: 'register',
-      element: <RegisterPage />,
-    },
+    // {
+    //   path: 'login',
+    //   element: <LoginPage />,
+    // },
+    // {
+    //   path: 'register',
+    //   element: <Signup />,
+    // },
     {
       element: <SimpleLayout />,
       children: [

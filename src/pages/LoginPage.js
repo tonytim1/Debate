@@ -49,24 +49,14 @@ export default function LoginPage() {
         <title> Login </title>
       </Helmet>
 
-      <StyledRoot>
-        <Logo
-          sx={{
-            position: 'fixed',
-            top: { xs: 16, sm: 24, md: 40 },
-            left: { xs: 16, sm: 24, md: 40 },
-          }}
-        />
-
         <Container maxWidth="sm">
-          <StyledContent>
             <Typography variant="h4" gutterBottom>
               Sign In
             </Typography>
 
             <Typography variant="body2" sx={{ mb: 5 }}>
               Don’t have an account? {''}
-              <Link variant="subtitle2" href="/register">Get started</Link>
+              <Link variant="subtitle2" href="/dashboard/register">Get started</Link>
             </Typography>
 
             <Stack direction="row" spacing={2}>
@@ -86,9 +76,7 @@ export default function LoginPage() {
             </Divider>
 
             <LoginForm />
-          </StyledContent>
         </Container>
-      </StyledRoot>
     </>
   );
 }
