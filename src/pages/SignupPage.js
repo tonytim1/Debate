@@ -64,7 +64,7 @@ export default function LoginPage() {
               type="submit"
               size="large"
               variant="contained"
-              onClick={() => {navigate('/dashboard/room')}}
+              onClick={() => {navigate('/dashboard/profile')}}
             >
               Create Account
             </LoadingButton>

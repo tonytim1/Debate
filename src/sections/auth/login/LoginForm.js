@@ -49,7 +49,7 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (Object.keys(formErrors).length === 0 && isSubmit) {
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard/profile', { replace: true });
     }
   }, [formErrors]);
 
