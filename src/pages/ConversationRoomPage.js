@@ -1,46 +1,16 @@
-import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
 import { useState } from 'react';
 // @mui
 import {
   Card,
-  Table,
-  Stack,
-  Paper,
-  Avatar,
   Button,
-  Popover,
-  Checkbox,
-  TableRow,
-  MenuItem,
-  TableBody,
-  TableCell,
   Container,
   Typography,
-  IconButton, 
-  TableContainer,
-  TablePagination,
   TextField,
-  Autocomplete,
-  FormControlLabel,
   Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemAvatar,
-} from '@mui/material';
-// components
-import Label from '../components/label';
-import Iconify from '../components/iconify';
-import Scrollbar from '../components/scrollbar';
-// sections
-import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
+} from '@mui/material';\
 import ROOM from '../_mock/room'
 
 export default function ConversationRoomPage() {
-
   const [messageInput, setMessageInput] = useState('');
   const { id, roomName, topic, teams, hostUser, roomSize, users, messages, currentUser } = ROOM
 
@@ -57,18 +27,19 @@ export default function ConversationRoomPage() {
 
   return (
     <Container>
-    <Grid>
       <Grid>
         <Typography variant='h3' align='center'>What do you think on the reform?</Typography>
       </Grid>
-      <Grid item xs={12}>
-        <video autoPlay muted style={{ width: '90%', height: 'auto', margin: '0 auto' }}>
-        <source src='/debate.mp4' type='video/mp4'/>
-        <track kind="captions"/>
-        </video>
-      </Grid>
-      {/* chat */}
-      <Grid item xs={12} sx={{ backgroundColor: '#edf3fc' }}>
+      <Grid container alignItems="stretch" xs={12}>
+        <Grid item xs={12} sx={{ width: '100%' }}>
+          <video autoPlay muted style={{ width: '100%', height: 'auto', margin: '0 auto' }}>
+            <source src='/debate.mp4' type='video/mp4'/>
+            <track kind="captions"/>
+          </video>
+        </Grid>
+        {/* chat */}
+        <Card sx={{ p: 2 }}>
+        <Grid padding={3} item xs={12} sx={{ backgroundColor: '#edf3fc' }}>
           <Typography variant="h5">Chat</Typography>
           <Grid container spacing={5}>
             <Grid item xs={12} sx={{ height: '200px', overflowY: 'auto' }}>
@@ -98,7 +69,9 @@ export default function ConversationRoomPage() {
             </Grid>
           </Grid>
         </Grid>
-    </Grid>
+        </Card>
+      </Grid>
     </Container>
   );
 }
+
