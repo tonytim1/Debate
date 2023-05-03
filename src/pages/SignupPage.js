@@ -48,7 +48,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Sign Up </title>
+        <title> Debate Center | Sign Up </title>
       </Helmet>
         <Container>
         

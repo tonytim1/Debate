@@ -157,7 +157,7 @@ export default function ExplorePage() {
   return (
     <>
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title> Debate | Explore </title>
       </Helmet>
 
 

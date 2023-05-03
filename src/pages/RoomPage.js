@@ -73,6 +73,9 @@ export default function RoomPage() {
 
   return (
     <>
+    <Helmet>
+      <title> Debate Center | Room Page </title>
+    </Helmet>
       <Container maxWidth="lg">
         <Grid container spacing={3}>
           <Grid item xs={12}>

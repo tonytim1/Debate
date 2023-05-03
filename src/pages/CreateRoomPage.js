@@ -52,7 +52,7 @@ export default function CreateRoomPage() {
   return (
     <>
       <Helmet>
-        <title> Create Room </title>
+        <title> Debate Center | Create Room </title>
       </Helmet>
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>

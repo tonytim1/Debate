@@ -20,7 +20,7 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Home | Minimal UI </title>
+        <title> Debate Center | Home </title>
       </Helmet>
 
       <Container>

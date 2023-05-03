@@ -46,7 +46,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Login </title>
+        <title> Debate Center | Login </title>
       </Helmet>
 
         <Container maxWidth="sm">
