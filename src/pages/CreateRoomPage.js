@@ -1,40 +1,8 @@
-import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
 import { useState } from 'react';
-// @mui
-import {
-  Card,
-  Table,
-  Stack,
-  Paper,
-  Avatar,
-  Button,
-  Popover,
-  Checkbox,
-  TableRow,
-  MenuItem,
-  TableBody,
-  TableCell,
-  Container,
-  Typography,
-  IconButton, 
-  TableContainer,
-  TablePagination,
-  TextField,
-  Autocomplete,
-  FormControlLabel,
-  Grid,
-} from '@mui/material';
-// components
-import Label from '../components/label';
-import Iconify from '../components/iconify';
-import Scrollbar from '../components/scrollbar';
-// sections
-import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
-import TOPIC_LIST from '../_mock/topics'
-import {useNavigate, useHref} from 'react-router-dom';
-
+import { Helmet } from 'react-helmet-async';
+import { TextField, Autocomplete, FormControlLabel, Grid, Button, Container, Typography } from '@mui/material';
+import axios from 'axios';
+import TOPIC_LIST from '../_mock/topics';
 
 export default function CreateRoomPage() {
   const [name, setName] = useState('');
@@ -42,24 +10,26 @@ export default function CreateRoomPage() {
   const [size, setSize] = useState(2);
   const [allowSpectators, setAllowSpectators] = useState(false);
   const [mode, setMode] = useState('teams');
-  const navigate = useNavigate();
+  const [msg, setMsg] = useState('')
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // handle form submission here
+  const handleSubmit = () => {
+    axios.get("http://localhost:5000/hello").then(response => {
+      setMsg(response.data.msg);
+    }).catch(error => {
+      console.error("Failed to get the msg:", error);
+    });
+    console.log(msg);
   };
 
   return (
     <>
       <Helmet>
-        <title> Debate Center | Create Room </title>
+        <title>Debate Center | Create Room</title>
       </Helmet>
       <Container>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-          <Typography variant="h4" gutterBottom>
-            Create Room
-          </Typography>
-        </Stack>
+        <Typography variant="h4" gutterBottom>
+          Create Room
+        </Typography>
         <Grid container spacing={4}>
           <Grid item xs={8}>
             <TextField
@@ -67,6 +37,8 @@ export default function CreateRoomPage() {
               label="Room Name"
               variant="outlined"
               fullWidth
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </Grid>
           <Grid item xs={8}>
@@ -76,6 +48,8 @@ export default function CreateRoomPage() {
               options={TOPIC_LIST}
               sx={{ width: 400 }}
               renderInput={(params) => <TextField {...params} label="Topic" />}
+              value={topic}
+              onChange={(e, newValue) => setTopic(newValue)}
             />
           </Grid>
           <Grid item xs={8}>
@@ -85,6 +59,8 @@ export default function CreateRoomPage() {
               options={['Teams', 'Free For All']}
               sx={{ width: 400 }}
               renderInput={(params) => <TextField {...params} label="Mode" />}
+              value={mode}
+              onChange={(e, newValue) => setMode(newValue)}
             />
           </Grid>
           <Grid item xs={8}>
@@ -94,16 +70,21 @@ export default function CreateRoomPage() {
               options={[...Array(10).keys()]}
               sx={{ width: 400 }}
               renderInput={(params) => <TextField {...params} label="Room Size" type="number" />}
+              value={size}
+              onChange={(e, newValue) => setSize(newValue)}
             />
           </Grid>
           <Grid item xs={12}>
-            <FormControlLabel control={<Checkbox defaultChecked />} label="Allow Spectators" />
+            <FormControlLabel
+              control={<input type="checkbox" checked={allowSpectators} onChange={(e) => setAllowSpectators(e.target.checked)} />}
+              label="Allow Spectators"
+            />
           </Grid>
           <Grid item xs={12}>
             <Button
               type="submit"
               variant="contained"
-              onClick={() => {navigate('/dashboard/room')}}
+              onClick={handleSubmit}
             >
               Create
             </Button>
