@@ -3,14 +3,11 @@ import { Navigate, useRoutes } from 'react-router-dom';
 import DashboardLayout from './layouts/dashboard';
 import SimpleLayout from './layouts/simple';
 //
-import BlogPage from './pages/BlogPage';
+import BlogPage from './pages/templates/BlogPage';
 import UserPage from './pages/UserPage';
 import LoginPage from './pages/LoginPage';
 import Signup from './pages/SignupPage';
 import Page404 from './pages/Page404';
-import ProductsPage from './pages/ProductsPage';
-import DashboardAppPage from './pages/DashboardAppPage';
-import RecomendedPage from './pages/RecomendedPage';
 import ExplorePage from './pages/ExplorePage';
 import CreateRoomPage from './pages/CreateRoomPage'
 import ConversationRoomPage from './pages/ConversationRoomPage';
