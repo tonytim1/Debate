@@ -14,7 +14,8 @@ export default function CreateRoomPage() {
   const [nameErr, setNameErr] = useState(false);
   const [name_msg, setName_msg] = useState('');
   const [tags, setTags] = useState([]);
-  const [time_to_start, setTime_to_start] = useState(15)
+  const [time_to_start, setTime_to_start] = useState(15);
+  const [tagsErr, setTagsErr] = useState(false);
   
   const check_roomName = () => {
     // checks if there are at least 3 words
@@ -30,16 +31,34 @@ export default function CreateRoomPage() {
 
   const check_tags = () => {
     if (tags.length < 1){
+      setTagsErr(true);
       return false;
-    };
-    return true;
+    }
+    else{
+      setTagsErr(false);
+      return true;
+    }
   };
 
-  const handleSubmit = () => {
-    // checks if there are at least 3 words
+  const handleSubmit = async () => {
     const name_ok = check_roomName();
     const tags_ok = check_tags();
-    console.log(name_ok && tags_ok)
+  
+    if (name_ok && tags_ok) {
+      try {
+        const response = await axios.post('http://localhost:5000/create_room', {
+          name: name,
+          tags: tags,
+          teams: teams,
+          time_to_start: time_to_start,
+          spectators: allowSpectators,
+        });
+  
+        console.log(response.data); // Log the response from the backend
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   const handleSizeSliderChange = (event, newValue) => {
@@ -61,7 +80,7 @@ export default function CreateRoomPage() {
         <title>Debate Center | Create Room</title>
       </Helmet>
       <Container>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom style={{marginBottom: "30px"}}>
           Create Room
         </Typography>
         <Grid container spacing={4}>
@@ -95,6 +114,8 @@ export default function CreateRoomPage() {
                 variant="outlined"
                 label="Tags (topic)"
                 placeholder="Choose topics or write your own tags"
+                error={tagsErr}
+                helperText={tagsErr ? "Choose or write at least 1" : ""}
               />
             )}
           />

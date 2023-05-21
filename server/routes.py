@@ -10,27 +10,28 @@ CORS(app)
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
-    name = request.form.get('name')
-    topic = request.form.get('topic')
-    # Add more fields as per your requirements
+    name = request.json.get('name')
+    tags = request.json.get('tags')
+    teams = request.json.get('teams')
+    time_to_start = request.json.get('time_to_start')
+    spectators = request.json.get('spectators')
 
     room = {
         'name': name,
-        'topic': topic
-        # Add more fields as per your requirements
+        'tags': tags,
+        'teams': teams,
+        'time_to_start': time_to_start,
+        "spectators": spectators
     }
 
-    rooms_collection = mongo.db.rooms
-    inserted_room = rooms_collection.insert_one(room)
+    # rooms_collection = mongo.db.rooms
+    # inserted_room = rooms_collection.insert_one(room)
 
-    if inserted_room.inserted_id:
-        return f"Room '{name}' created successfully!"
-    else:
-        return "Failed to create room."
-    
-@app.route("/hello")
-def say_hello():
-    return jsonify({'msg': "hello bitch"})
+    # if inserted_room.inserted_id:
+    #     return f"Room '{name}' created successfully!"
+    # else:
+    #     return "Failed to create room."
+    return jsonify({'msg': f"Room '{room['name']}' created successfully!"})
 
 if __name__ == "__main__":
     app.run(debug=True)
