@@ -1,24 +1,58 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { TextField, Autocomplete, FormControlLabel, Grid, Button, Container, Typography } from '@mui/material';
+import { TextField, Autocomplete, FormControlLabel, Box, Grid, Button, Container, Slider, Typography, Switch, Chip } from '@mui/material';
 import axios from 'axios';
 import TOPIC_LIST from '../_mock/topics';
 
 export default function CreateRoomPage() {
   const [name, setName] = useState('');
   const [topic, setTopic] = useState(null);
-  const [size, setSize] = useState(2);
+  const [size, setSize] = useState(4);
   const [allowSpectators, setAllowSpectators] = useState(false);
-  const [mode, setMode] = useState('teams');
-  const [msg, setMsg] = useState('')
+  const [teams, setTeams] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [nameErr, setNameErr] = useState(false);
+  const [name_msg, setName_msg] = useState('');
+  const [tags, setTags] = useState([]);
+  const [time_to_start, setTime_to_start] = useState(15)
+  
+  const check_roomName = () => {
+    // checks if there are at least 3 words
+    if (name.trim().split(/\s+/).length < 3){
+      setNameErr(true);
+      return false;
+    }
+    else {
+      setNameErr(false);
+      return true;
+    };
+  };
+
+  const check_tags = () => {
+    if (tags.length < 1){
+      return false;
+    };
+    return true;
+  };
 
   const handleSubmit = () => {
-    axios.get("http://localhost:5000/hello").then(response => {
-      setMsg(response.data.msg);
-    }).catch(error => {
-      console.error("Failed to get the msg:", error);
-    });
-    console.log(msg);
+    // checks if there are at least 3 words
+    const name_ok = check_roomName();
+    const tags_ok = check_tags();
+    console.log(name_ok && tags_ok)
+  };
+
+  const handleSizeSliderChange = (event, newValue) => {
+    setSize(newValue);
+  };
+
+  
+  const handleTimeSliderChange = (event, newValue) => {
+    setTime_to_start(newValue);
+  };
+
+  const handleTagsChange = (event, value) => {
+    setTags(value);
   };
 
   return (
@@ -36,50 +70,85 @@ export default function CreateRoomPage() {
               name="Name"
               label="Room Name"
               variant="outlined"
+              helperText={nameErr ? "Name needs to have at least 3 words" : ""}
               fullWidth
+              error={nameErr}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </Grid>
           <Grid item xs={8}>
-            <Autocomplete
-              disablePortal
-              id="Topic"
-              options={TOPIC_LIST}
-              sx={{ width: 400 }}
-              renderInput={(params) => <TextField {...params} label="Topic" />}
-              value={topic}
-              onChange={(e, newValue) => setTopic(newValue)}
-            />
+          <Autocomplete
+            multiple
+            id="tags-outlined"
+            options={tagOptions}
+            freeSolo
+            onChange={handleTagsChange}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Tags (topic)"
+                placeholder="Choose topics or write your own tags"
+              />
+            )}
+          />
           </Grid>
-          <Grid item xs={8}>
-            <Autocomplete
-              disablePortal
-              id="Topic"
-              options={['Teams', 'Free For All']}
-              sx={{ width: 400 }}
-              renderInput={(params) => <TextField {...params} label="Mode" />}
-              value={mode}
-              onChange={(e, newValue) => setMode(newValue)}
+
+          <Grid item xs={6}>
+            <Typography id="input-slider" gutterBottom>
+              Max Participants:
+            </Typography>
+            <Box display="flex" alignItems="center">
+            <Slider
+              aria-label=""
+              defaultValue={4}
+              // getAriaValueText={}
+              valueLabelDisplay="auto"
+              step={1}
+              marks
+              min={2}
+              max={10}
+              onChange={handleSizeSliderChange}
             />
-          </Grid>
-          <Grid item xs={8}>
-            <Autocomplete
-              disablePortal
-              id="Size"
-              options={[...Array(10).keys()]}
-              sx={{ width: 400 }}
-              renderInput={(params) => <TextField {...params} label="Room Size" type="number" />}
-              value={size}
-              onChange={(e, newValue) => setSize(newValue)}
+            <Typography variant="body1" style={{ marginLeft: '18px' }}>{size}</Typography>
+            </Box>
+            <Typography id="input-slider" gutterBottom>
+              Time To Start (mins):
+            </Typography>
+            <Box display="flex" alignItems="center">
+            <Slider
+              aria-label="aa"
+              defaultValue={15}
+              // getAriaValueText={}
+              valueLabelDisplay="auto"
+              step={5}
+              marks
+              min={5}
+              max={60}
+              onChange={handleTimeSliderChange}
+            />
+            <Typography variant="body1" style={{ marginLeft: '8px' }}>{time_to_start}</Typography>
+            </Box>
+          </Grid> 
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={<Switch checked={teams} onChange={() => {setTeams(!teams)}} name="gilad" />}
+              label="Teams"
             />
           </Grid>
           <Grid item xs={12}>
-            <FormControlLabel
-              control={<input type="checkbox" checked={allowSpectators} onChange={(e) => setAllowSpectators(e.target.checked)} />}
-              label="Allow Spectators"
+          <FormControlLabel
+              control={<Switch checked={allowSpectators} onChange={() => {setAllowSpectators(!allowSpectators)}} name="gilad" />}
+              label="Spectators"
             />
           </Grid>
+          
           <Grid item xs={12}>
             <Button
               type="submit"
@@ -94,3 +163,16 @@ export default function CreateRoomPage() {
     </>
   );
 }
+
+const tagOptions = [
+  "Music",
+  "Climate change",
+  "Health",
+  "Religion And Spirituality",
+  "Science",
+  "Education",
+  "Technology",
+  "Sports",
+  "Culture",
+  "Politics",
+]
