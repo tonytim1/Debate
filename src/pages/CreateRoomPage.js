@@ -2,9 +2,14 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { TextField, Autocomplete, FormControlLabel, Box, Grid, Button, Container, Slider, Typography, Switch, Chip } from '@mui/material';
 import axios from 'axios';
-import TOPIC_LIST from '../_mock/topics';
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+import { useNavigate } from 'react-router-dom';
+
+
 
 export default function CreateRoomPage() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [topic, setTopic] = useState(null);
   const [size, setSize] = useState(4);
@@ -46,15 +51,22 @@ export default function CreateRoomPage() {
   
     if (name_ok && tags_ok) {
       try {
-        const response = await axios.post('/create_room', {
+        // Create a new room object
+        const newRoom = {
           name: name,
           tags: tags,
           teams: teams,
           time_to_start: time_to_start,
           spectators: allowSpectators,
-        });
+        };
   
-        console.log(response.data); // Log the response from the backend
+        // Add the room to Firebase Firestore
+        const docRef = await addDoc(collection(firestore, 'rooms'), newRoom);
+        console.log("Room added with ID: ", docRef.id);
+
+        const roomURL = `/room/${docRef.id}`;
+        navigate(roomURL);
+
       } catch (error) {
         console.error(error);
       }
@@ -196,4 +208,4 @@ const tagOptions = [
   "Sports",
   "Culture",
   "Politics",
-]
+];

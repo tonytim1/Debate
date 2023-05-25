@@ -1,20 +1,15 @@
 import { Navigate, useRoutes } from 'react-router-dom';
-// layouts
 import DashboardLayout from './layouts/dashboard';
 import SimpleLayout from './layouts/simple';
-//
-import BlogPage from './pages/templates/BlogPage';
-import UserPage from './pages/UserPage';
 import LoginPage from './pages/LoginPage';
 import Signup from './pages/SignupPage';
 import Page404 from './pages/Page404';
 import ExplorePage from './pages/ExplorePage';
-import CreateRoomPage from './pages/CreateRoomPage'
+import CreateRoomPage from './pages/CreateRoomPage';
 import ConversationRoomPage from './pages/ConversationRoomPage';
 import RoomPage from './pages/RoomPage';
 import HomePage from './pages/HomePage';
-import ProfilePage  from './pages/ProfilePage';
-// ----------------------------------------------------------------------
+import ProfilePage from './pages/ProfilePage';
 
 export default function Router() {
   const routes = useRoutes([
@@ -25,22 +20,17 @@ export default function Router() {
         { element: <Navigate to="/dashboard/home" />, index: true },
         { path: 'home', element: <HomePage /> },
         { path: 'explore', element: <ExplorePage /> },
-        { path: 'createRoom', element: <CreateRoomPage/> },
+        { path: 'createRoom', element: <CreateRoomPage /> },
         { path: 'conversation', element: <ConversationRoomPage /> },
-        { path: 'room', element: <RoomPage /> },
-        { path: 'Profile', element: <ProfilePage /> },
+        { path: 'profile', element: <ProfilePage /> },
         { path: 'login', element: <LoginPage /> },
         { path: 'register', element: <Signup /> },
       ],
     },
-    // {
-    //   path: 'login',
-    //   element: <LoginPage />,
-    // },
-    // {
-    //   path: 'register',
-    //   element: <Signup />,
-    // },
+    {
+      path: 'room/:roomId',
+      element: <RoomPage />,
+    },
     {
       element: <SimpleLayout />,
       children: [
