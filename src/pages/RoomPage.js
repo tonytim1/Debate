@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import firestore from '../firebase';
 import { Typography, Grid, Paper, List, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button } from '@mui/material';
@@ -10,7 +10,7 @@ import { Typography, Grid, Paper, List, ListItem, ListItemAvatar, Avatar, ListIt
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
   const { roomId } = useParams();
-  const history = useHistory();
+  const history = useNavigate();
   const [roomData, setRoomData] = useState(null);
 
   useEffect(() => {
