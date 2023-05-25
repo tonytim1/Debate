@@ -1,6 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
@@ -21,7 +20,7 @@ def create_room():
         'tags': tags,
         'teams': teams,
         'time_to_start': time_to_start,
-        "spectators": spectators
+        "spectators": spectators,
     }
 
     # rooms_collection = mongo.db.rooms
@@ -32,6 +31,8 @@ def create_room():
     # else:
     #     return "Failed to create room."
     return jsonify({'msg': f"Room '{room['name']}' created successfully!"})
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
