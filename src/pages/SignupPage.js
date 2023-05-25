@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { Navigate, useRoutes } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Link, Container, Typography, Divider, Stack, Button } from '@mui/material';
@@ -64,7 +65,7 @@ export default function LoginPage() {
               type="submit"
               size="large"
               variant="contained"
-              onClick={() => {navigate('/dashboard/profile')}}
+              //onClick={() => {navigate('/dashboard/profile')}}
             >
               Create Account
             </LoadingButton>

@@ -45,15 +45,15 @@ export default function RoomPage() {
   const { id, roomName, topic, teams, hostUser, roomSize, users, messages, currentUser } = ROOM
 
   const handleReady = () => {
-    onReady();
+    // onReady();
   };
 
   const handleStart = () => {
-    onStart();
+    // onStart();
   };
 
   const handleLeave = () => {
-    onLeave();
+    // onLeave();
   };
 
   const handleMessageInput = (event) => {
@@ -62,13 +62,13 @@ export default function RoomPage() {
 
   const handleSendMessage = () => {
     if (messageInput) {
-      onMessage(messageInput);
+      // onMessage(messageInput);
       setMessageInput('');
     }
   };
 
   const handleSwapTeam = (user) => {
-    onSwapTeam(user);
+    // onSwapTeam(user);
   };
 
   return (

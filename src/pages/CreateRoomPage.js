@@ -46,7 +46,7 @@ export default function CreateRoomPage() {
   
     if (name_ok && tags_ok) {
       try {
-        const response = await axios.post('http://localhost:5000/create_room', {
+        const response = await axios.post('/create_room', {
           name: name,
           tags: tags,
           teams: teams,
