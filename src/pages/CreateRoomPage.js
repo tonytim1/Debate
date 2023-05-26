@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { TextField, Autocomplete, FormControlLabel, Box, Grid, Button, Container, Slider, Typography, Switch, Chip } from '@mui/material';
-import axios from 'axios';
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
+import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+import firestore from "../firebase"
 import { useNavigate } from 'react-router-dom';
 
 
@@ -56,12 +55,23 @@ export default function CreateRoomPage() {
           name: name,
           tags: tags,
           teams: teams,
+          room_size: size,
           time_to_start: time_to_start,
           spectators: allowSpectators,
+          ready_list: [],
+          spectators_list: [],
+          moderator: "moderator",
         };
-  
+        
+        const user = {
+          name:"moderator",
+          id:"manual_id", 
+          ready:false
+        }
+
         // Add the room to Firebase Firestore
         const docRef = await addDoc(collection(firestore, 'rooms'), newRoom);
+        const usersRef = await setDoc(doc(firestore, 'rooms', docRef.id, 'users', 'manual_id'), user);
         console.log("Room added with ID: ", docRef.id);
 
         const roomURL = `/room/${docRef.id}`;

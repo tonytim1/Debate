@@ -3,37 +3,66 @@ import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import firestore from '../firebase';
 import { Typography, Grid, Paper, List, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button } from '@mui/material';
 
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
   const { roomId } = useParams();
-  const history = useNavigate();
+  const navigate = useNavigate(); // Use useNavigate for navigation
   const [roomData, setRoomData] = useState(null);
+  const [usersData, setUsersData] = useState(new Map());
+  const [currUserData, setCurrUserData] = useState(null);
+
+  const curr_user_id = "manual_id"
+
+  // Fetch room data from Firestore
+  const fetchRoomData = async () => {
+    console.log("in fetchRoomData")
+    const roomRef = doc(firestore, 'rooms', roomId);
+    try {
+      const roomSnapshot = await getDoc(roomRef);
+      if (roomSnapshot.exists()) {
+        const room = roomSnapshot.data();
+        setRoomData(room);
+      } else {
+        // Room not found, navigate to 404 page
+        navigate('/404');
+      }
+    } catch (error) {
+      console.error('Error fetching room data:', error);
+    }
+  };
+
+  // Function to fetch all users in the users collection for a room
+  const fetchUsers = async () => {
+    try {
+      const usersRef = collection(firestore, 'rooms', roomId, 'users');
+      const querySnapshot = await getDocs(usersRef);
+  
+      const usersMap = new Map();
+  
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const { id, name, ready } = userData;
+        usersMap.set(id, { name, ready });
+      });
+  
+      setUsersData(usersMap);
+    } catch (error) {
+      console.error(error);
+      return new Map();
+    }
+
+    console.log("now usersData is:", {usersData})
+    setCurrUserData(usersData.get(curr_user_id))
+  };
 
   useEffect(() => {
-    // Fetch room data from Firestore
-    const fetchRoomData = async () => {
-      const roomRef = doc(firestore, 'rooms', roomId);
-
-      try {
-        const roomSnapshot = await getDoc(roomRef);
-        if (roomSnapshot.exists()) {
-          const room = roomSnapshot.data();
-          setRoomData(room);
-        } else {
-          // Room not found, redirect to 404 page
-          history.push('/404');
-        }
-      } catch (error) {
-        console.error('Error fetching room data:', error);
-      }
-    };
-
     fetchRoomData();
-  }, [roomId, history]);
+    fetchUsers();
+  }, []);
 
   const handleReady = () => {
     // Handle ready logic
@@ -54,17 +83,55 @@ export default function RoomPage() {
   const handleSendMessage = () => {
     // Handle send message logic
   };
-  
 
   const handleSwapTeam = (user) => {
     // Handle swap team logic
   };
 
-  if (!roomData) {
-    return <div>Loading...</div>;
+  const handleReadyClick = async () => {
+    try {
+      // Get the current user's ID
+      const userId = "manual_id"; // Replace with the actual user ID
+      
+      // Update the 'ready' field of the user in Firebase Firestore
+      const userRef = doc(firestore, "rooms", roomId, "users", userId);
+      await updateDoc(userRef, {
+        ready: true
+      });
+      
+      fetchUsers();
+
+      console.log("User's ready status updated successfully.");
+  
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleStartClick = async () => {
   }
 
-  const { roomName, topic, teams, hostUser, roomSize, users, messages, currentUser } = roomData;
+  if (!roomData) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          fontSize: '24px',
+          color: 'blue',
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
+  
+  
+  console.log(roomData);
+  console.log(usersData);
+  const { name, teams, hostUser, room_size, users, messages, currentUser } = roomData;
 
   return (
     <>
@@ -73,15 +140,15 @@ export default function RoomPage() {
       </Helmet>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Typography variant="h2">{roomName}</Typography>
-          <Typography variant="h5">{`${topic} - ${teams ? 'teams' : 'free for all'}`}</Typography>
+          <Typography variant="h2">{name}</Typography>
+          <Typography variant="h5">{`${teams ? 'teams' : 'free for all'}`}</Typography>
         </Grid>
         {/* users */}
         <Grid item xs={8}>
-          <Typography variant="h6">Users ({users.length}/{roomSize})</Typography>
+          {/* <Typography variant="h6">Users ({users.length}/{room_size})</Typography> */}
           <Paper variant="outlined">
             <List>
-              {Array.from({ length: roomSize }, (_, i) => {
+              {/* {Array.from({ length: room_size }, (_, i) => {
                 const user = users[i];
                 const isRoomAdmin = user && user.id === hostUser.id;
                 const isCurrentUser = user && user.id === currentUser.id;
@@ -95,12 +162,21 @@ export default function RoomPage() {
                     {isRoomAdmin && <ListItemText primary="Admin" />}
                   </ListItem>
                 );
+              })} */}
+
+              {Array.from({ length: usersData.length }, (_, i) => {
+                const user = usersData[i];
+                return (
+                  <ListItem key={i}>
+                    {user.ready ? "ready" : ""} {user.name}
+                  </ListItem>
+                );
               })}
             </List>
           </Paper>
         </Grid>
         {/* chat */}
-        <Grid item xs={8}>
+        {/* <Grid item xs={8}>
           <Typography variant="h5">Chat</Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sx={{ height: '200px', overflowY: 'auto' }}>
@@ -129,9 +205,9 @@ export default function RoomPage() {
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
+        </Grid> */}
         {/* buttons */}
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Grid container spacing={2}>
             {currentUser.id !== hostUser.id && (
               <Grid item xs={4}>
@@ -142,7 +218,7 @@ export default function RoomPage() {
             )}
             {currentUser.id === hostUser.id && (
               <Grid item xs={4}>
-                <Button variant="contained" onClick={handleStart} fullWidth disabled={users.length < roomSize}>
+                <Button variant="contained" onClick={handleStart} fullWidth disabled={users.length < room_size}>
                   Start
                 </Button>
               </Grid>
@@ -153,7 +229,26 @@ export default function RoomPage() {
               </Button>
             </Grid>
           </Grid>
-        </Grid>
+        </Grid> */}
+      </Grid>
+      <Grid item xs={12}>
+            <Button
+              type="submit"
+              variant="contained"
+              onClick={handleReadyClick}
+            >
+              Ready
+            </Button>
+      </Grid>
+      <Grid item xs={12}>
+            <Button
+              type="submit"
+              variant="contained"
+              onClick={handleStartClick}
+              disabled
+            >
+              Start
+            </Button>
       </Grid>
     </>
   );
