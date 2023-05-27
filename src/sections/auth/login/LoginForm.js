@@ -6,11 +6,17 @@ import { LoadingButton } from '@mui/lab';
 // components
 import Iconify from '../../../components/iconify';
 import basestyle from "../../../BaseStyle.module.css";
+import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+import firebase from "src/firebase.js";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
+
 
 // ----------------------------------------------------------------------
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const { firestore, auth } = firebase;
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
   const [user, setUserDetails] = useState({
@@ -18,6 +24,9 @@ export default function LoginForm() {
     password: "",
   })
   const [showPassword, setShowPassword] = useState(false);
+  
+
+
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -34,17 +43,34 @@ export default function LoginForm() {
   };
 
   const validateForm = (values) => {
-    const error = {};
+    const errors = {};
     const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    let flag = 0;
     if (!values.email) {
-      error.email = "Email is required";
+      errors.email = "Email is required";
+      flag = 1;
     } else if (!regex.test(values.email)) {
-      error.email = "Please enter a valid email address";
+      errors.email = "Please enter a valid email address";
+      flag = 1;
     }
     if (!values.password) {
-      error.password = "Password is required";
+      errors.password = "Password is required";
+      flag = 1;
     }
-    return error;
+    if (flag == 0){
+      signInWithEmailAndPassword(auth, user.email, user.password)
+      .then((userCredential) => {
+        // User login successful
+        const user = userCredential.user
+      }).catch((error) => {
+        console.error(error);
+        // ..
+      });
+    }
+    else{
+      errors.login = "User not found"
+    }
+    return errors;
   };
 
   useEffect(() => {
@@ -77,7 +103,8 @@ export default function LoginForm() {
         />
         <p className={basestyle.error}>{formErrors.password}</p>
       </Stack>
-      <Divider sx={{ my: 3 }}/>
+      <Divider sx={{ my: 3 }} />
+      <span className={basestyle.error}>{formErrors.login}</span>
       <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleClick}>
         Login
       </LoadingButton>

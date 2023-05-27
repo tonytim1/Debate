@@ -2,6 +2,9 @@ import { useState } from "react";
 import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 import { Box } from "@mui/system";
 import { LoadingButton } from '@mui/lab';
+import {
+  tags,
+} from 'src/pages/SignupPage.js';
 
 const musicGenres = [
   "Politics",
@@ -48,7 +51,7 @@ function MusicToggles() {
           />
         ))}
       </FormGroup>
-      <img src={require('src/sections/register/discussion.png')}  alt="description" style={{ width: "200px", height: "200px" }}/>
+      <img src={require('src/sections/register/placeholder.png')}  alt="description" style={{ width: "200px", height: "200px" }}/>
     </Box>
     
   );
