@@ -32,6 +32,10 @@ export default function Router() {
       element: <RoomPage />,
     },
     {
+      path: 'user/:userId',
+      element: <ProfilePage />,
+    },
+    {
       element: <SimpleLayout />,
       children: [
         { element: <Navigate to="/dashboard/home" />, index: true },

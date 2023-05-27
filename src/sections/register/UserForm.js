@@ -5,6 +5,17 @@ import { useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import POSTS from 'src/_mock/blog';
 import { BlogPostCard, BlogPostsSort, BlogPostsSearch } from 'src/sections/@dashboard/blog';
+// import {
+//   first_name,
+//   last_name,
+//   email,
+//   phone,
+//   password,
+  
+// } from 'src/pages/SignupPage.js';
+
+import SignUpPage from 'src/pages/SignupPage';
+
 // @mui
 import {
   Card,
@@ -61,23 +72,32 @@ export default function CreateRoomPage() {
       <TableBody>
         <TableRow>
           <TableCell>
-            <TextField label="First Name" fullWidth />
+            <TextField label="First Name" 
+            fullWidth 
+            value={SignUpPage.first_name} 
+            onChange={(e) => SignUpPage.setFirstName(e.target.value)}/>
           </TableCell>
           <TableCell>
-            <TextField label="Last Name" fullWidth />
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            <TextField label="Email" fullWidth />
-          </TableCell>
-          <TableCell>
-            <TextField label="Phone Number" fullWidth />
+            <TextField label="Last Name"
+            fullWidth 
+            value={SignUpPage.last_name}
+            onChange={(e) => SignUpPage.setLastName(e.target.value)}/>
           </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>
-            <TextField label="Password" fullWidth type="password" />
+            <TextField label="Email"
+            fullWidth
+            value={SignUpPage.email}
+            onChange={(e) => SignUpPage.setEmail(e.target.value)}/>
+          </TableCell>
+          <TableCell>
+            <TextField label="Phone Number" fullWidth value={SignUpPage.phone}/>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+            <TextField label="Password" fullWidth type="password" value={SignUpPage.password}/>
           </TableCell>
           <TableCell>
             <TextField label="Confirm Password" fullWidth type="password" />
