@@ -1,37 +1,48 @@
-from flask import Flask, request, jsonify
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+from flask import Flask, jsonify, request
 
+# Initialize Flask app
 app = Flask(__name__)
 
-# Configure your Firebase project
-firebase_config = {
-    "apiKey": "AIzaSyDgh6sFpRq3YmEJDW4Z-L4ReInFSkA6NSY",
-    "authDomain": "debate-center-dd720.firebaseapp.com",
-    # "databaseURL": "YOUR_DATABASE_URL",
-    "projectId": "debate-center-dd720",
-    "storageBucket": "debate-center-dd720.appspot.com",
-    "messagingSenderId": "524928099280",
-    "appId": "1:524928099280:web:9b24e083399f9bfae0cfd5",
-    # "measurementId": "YOUR_MEASUREMENT_ID"
-}
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate(".\debate-center-dd720-firebase-adminsdk-pepv1-07be2008cd.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
-firebase = pyrebase.initialize_app(firebase_config)
-db = firebase.database()
-
-@app.route('/api/create-room', methods=['POST'])
+@app.route('/create_room', methods=['POST'])
 def create_room():
-    try:
-        # Get the room data from the request body
-        room_data = request.get_json()
-        
-        # Push the room data to the "rooms" collection in Firebase Realtime Database
-        room_ref = db.child("rooms").push(room_data)
+    # Get the request data
+    room_data = request.get_json()
+    name = room_data.get('name')
+    tags = room_data.get('tags')
+    teams = room_data.get('teams')
+    room_size = room_data.get('room_size')
+    time_to_start = room_data.get('time_to_start')
+    spectators = room_data.get('spectators')
+    moderator = room_data.get('moderator')
 
-        # Return the created room ID
-        return jsonify({'roomId': room_ref.key()}), 200
+    # Create a new room document
+    new_room = {
+        'name': name,
+        'tags': tags,
+        'teams': teams,
+        'room_size': room_size,
+        'time_to_start': time_to_start,
+        'spectators': spectators,
+        'ready_list': [],
+        'spectators_list': [],
+        'moderator': moderator
+    }
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Add the room to the Firestore collection
+    room_ref = db.collection('rooms').document()
+    room_ref.set(new_room)
 
+    # Return the room ID as a response
+    return jsonify({'roomId': room_ref.id}), 200
+
+# Run the Flask app
 if __name__ == '__main__':
     app.run()

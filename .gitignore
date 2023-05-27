@@ -26,3 +26,4 @@ yarn-error.log*
 .eslintcache
 
 server/venv/
+server/debate-center-dd720-firebase-adminsdk-pepv1-07be2008cd.json
