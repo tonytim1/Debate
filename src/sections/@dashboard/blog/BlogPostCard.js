@@ -52,21 +52,14 @@ const StyledCover = styled('img')({
 // ----------------------------------------------------------------------
 
 BlogPostCard.propTypes = {
-  post: PropTypes.object.isRequired,
+  room: PropTypes.object.isRequired,
   index: PropTypes.number,
 };
 
-export default function BlogPostCard({ post, index }) {
-  const { cover, title, view, comment, share, author, createdAt } = post;
+export default function BlogPostCard({ room, index }) {
+  const { name, tags, moderator, time_to_start, spectators, teams} = room;
   const latestPostLarge = index === 0;
   const latestPost = index === 1 || index === 2;
-
-  const POST_INFO = [
-    { number: comment, icon: 'eva:message-circle-fill' },
-    { number: view, icon: 'eva:eye-fill' },
-    { number: share, icon: 'eva:share-fill' },
-  ];
-
   return (
     <Grid item xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 3}>
       <Card sx={{ position: 'relative' }}>
@@ -105,8 +98,8 @@ export default function BlogPostCard({ post, index }) {
             }}
           />
           <StyledAvatar
-            alt={author.name}
-            src={author.avatarUrl}
+            alt={moderator}
+            // src={}
             sx={{
               ...((latestPostLarge || latestPost) && {
                 zIndex: 9,
@@ -118,7 +111,7 @@ export default function BlogPostCard({ post, index }) {
             }}
           />
 
-          <StyledCover alt={title} src={cover} />
+          {/* <StyledCover alt={name} src={cover} /> */}
         </StyledCardMedia>
 
         <CardContent
@@ -131,9 +124,9 @@ export default function BlogPostCard({ post, index }) {
             }),
           }}
         >
-          {/* <Typography gutterBottom variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
-            {fDate(createdAt)}
-          </Typography> */}
+          <Typography gutterBottom variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
+            starts at: {time_to_start}
+          </Typography>
 
           <StyledTitle
             color="inherit"
@@ -146,27 +139,8 @@ export default function BlogPostCard({ post, index }) {
               }),
             }}
           >
-            {title}
+            {name}
           </StyledTitle>
-
-          <StyledInfo>
-            {POST_INFO.map((info, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  ml: index === 0 ? 0 : 1.5,
-                  ...((latestPostLarge || latestPost) && {
-                    color: 'grey.500',
-                  }),
-                }}
-              >
-                {/* <Iconify icon={info.icon} sx={{ width: 16, height: 16, mr: 0.5 }} /> */}
-                {/* <Typography variant="caption">{fShortenNumber(info.number)}</Typography> */}
-              </Box>
-            ))}
-          </StyledInfo>
         </CardContent>
       </Card>
     </Grid>

@@ -1,56 +1,46 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { TextField, Autocomplete, FormControlLabel, Box, Grid, Button, Container, Slider, Typography, Switch, Chip } from '@mui/material';
-import { collection, addDoc, setDoc, doc } from "firebase/firestore";
-import firestore from "../firebase"
 import { useNavigate } from 'react-router-dom';
-
-
 
 export default function CreateRoomPage() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
-  const [topic, setTopic] = useState(null);
+  const [tags, setTags] = useState([]);
   const [size, setSize] = useState(4);
   const [allowSpectators, setAllowSpectators] = useState(false);
   const [teams, setTeams] = useState(false);
-  const [msg, setMsg] = useState('');
   const [nameErr, setNameErr] = useState(false);
-  const [name_msg, setName_msg] = useState('');
-  const [tags, setTags] = useState([]);
-  const [time_to_start, setTime_to_start] = useState(15);
   const [tagsErr, setTagsErr] = useState(false);
-  
-  const check_roomName = () => {
+  const [time_to_start, setTime_to_start] = useState(15);
+
+  const checkRoomName = () => {
     // checks if there are at least 3 words
-    if (name.trim().split(/\s+/).length < 3){
+    if (name.trim().split(/\s+/).length < 3) {
       setNameErr(true);
       return false;
-    }
-    else {
+    } else {
       setNameErr(false);
       return true;
-    };
+    }
   };
 
-  const check_tags = () => {
-    if (tags.length < 1){
+  const checkTags = () => {
+    if (tags.length < 1) {
       setTagsErr(true);
       return false;
-    }
-    else{
+    } else {
       setTagsErr(false);
       return true;
     }
   };
 
   const handleSubmit = async () => {
-    const name_ok = check_roomName();
-    const tags_ok = check_tags();
-  
+    const name_ok = checkRoomName();
+    const tags_ok = checkTags();
+
     if (name_ok && tags_ok) {
       try {
-        // Create a new room object
         const newRoom = {
           name: name,
           tags: tags,
@@ -62,21 +52,22 @@ export default function CreateRoomPage() {
           spectators_list: [],
           moderator: "moderator",
         };
-        
-        const user = {
-          name:"moderator",
-          id:"manual_id", 
-          ready:false
+
+        // Send the new room data to the backend server
+        const response = await fetch('/api/create-room', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newRoom),
+        });
+
+        if (response.ok) {
+          const roomURL = `/room/${response.data.roomId}`;
+          navigate(roomURL);
+        } else {
+          console.error('Failed to create room');
         }
-
-        // Add the room to Firebase Firestore
-        const docRef = await addDoc(collection(firestore, 'rooms'), newRoom);
-        const usersRef = await setDoc(doc(firestore, 'rooms', docRef.id, 'users', 'manual_id'), user);
-        console.log("Room added with ID: ", docRef.id);
-
-        const roomURL = `/room/${docRef.id}`;
-        navigate(roomURL);
-
       } catch (error) {
         console.error(error);
       }
@@ -87,7 +78,6 @@ export default function CreateRoomPage() {
     setSize(newValue);
   };
 
-  
   const handleTimeSliderChange = (event, newValue) => {
     setTime_to_start(newValue);
   };
@@ -102,7 +92,7 @@ export default function CreateRoomPage() {
         <title>Debate Center | Create Room</title>
       </Helmet>
       <Container>
-        <Typography variant="h4" gutterBottom style={{marginBottom: "30px"}}>
+        <Typography variant="h4" gutterBottom style={{ marginBottom: "30px" }}>
           Create Room
         </Typography>
         <Grid container spacing={4}>
@@ -119,28 +109,28 @@ export default function CreateRoomPage() {
             />
           </Grid>
           <Grid item xs={8}>
-          <Autocomplete
-            multiple
-            id="tags-outlined"
-            options={tagOptions}
-            freeSolo
-            onChange={handleTagsChange}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="outlined"
-                label="Tags (topic)"
-                placeholder="Choose topics or write your own tags"
-                error={tagsErr}
-                helperText={tagsErr ? "Choose or write at least 1" : ""}
-              />
-            )}
-          />
+            <Autocomplete
+              multiple
+              id="tags-outlined"
+              options={tagOptions}
+              freeSolo
+              onChange={handleTagsChange}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Tags (topic)"
+                  placeholder="Choose topics or write your own tags"
+                  error={tagsErr}
+                  helperText={tagsErr ? "Choose or write at least 1" : ""}
+                />
+              )}
+            />
           </Grid>
 
           <Grid item xs={6}>
@@ -148,50 +138,50 @@ export default function CreateRoomPage() {
               Max Participants:
             </Typography>
             <Box display="flex" alignItems="center">
-            <Slider
-              aria-label=""
-              defaultValue={4}
-              // getAriaValueText={}
-              valueLabelDisplay="auto"
-              step={1}
-              marks
-              min={2}
-              max={10}
-              onChange={handleSizeSliderChange}
-            />
-            <Typography variant="body1" style={{ marginLeft: '18px' }}>{size}</Typography>
+              <Slider
+                aria-label=""
+                defaultValue={4}
+                // getAriaValueText={}
+                valueLabelDisplay="auto"
+                step={1}
+                marks
+                min={2}
+                max={10}
+                onChange={handleSizeSliderChange}
+              />
+              <Typography variant="body1" style={{ marginLeft: '18px' }}>{size}</Typography>
             </Box>
             <Typography id="input-slider" gutterBottom>
               Time To Start (mins):
             </Typography>
             <Box display="flex" alignItems="center">
-            <Slider
-              aria-label="aa"
-              defaultValue={15}
-              // getAriaValueText={}
-              valueLabelDisplay="auto"
-              step={5}
-              marks
-              min={5}
-              max={60}
-              onChange={handleTimeSliderChange}
-            />
-            <Typography variant="body1" style={{ marginLeft: '8px' }}>{time_to_start}</Typography>
+              <Slider
+                aria-label="aa"
+                defaultValue={15}
+                // getAriaValueText={}
+                valueLabelDisplay="auto"
+                step={5}
+                marks
+                min={5}
+                max={60}
+                onChange={handleTimeSliderChange}
+              />
+              <Typography variant="body1" style={{ marginLeft: '8px' }}>{time_to_start}</Typography>
             </Box>
-          </Grid> 
+          </Grid>
           <Grid item xs={12}>
             <FormControlLabel
-              control={<Switch checked={teams} onChange={() => {setTeams(!teams)}} name="gilad" />}
+              control={<Switch checked={teams} onChange={() => { setTeams(!teams) }} name="gilad" />}
               label="Teams"
             />
           </Grid>
           <Grid item xs={12}>
-          <FormControlLabel
-              control={<Switch checked={allowSpectators} onChange={() => {setAllowSpectators(!allowSpectators)}} name="gilad" />}
+            <FormControlLabel
+              control={<Switch checked={allowSpectators} onChange={() => { setAllowSpectators(!allowSpectators) }} name="gilad" />}
               label="Spectators"
             />
           </Grid>
-          
+
           <Grid item xs={12}>
             <Button
               type="submit"

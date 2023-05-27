@@ -4,7 +4,6 @@ import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
-import firestore from '../firebase';
 import { Typography, Grid, Paper, List, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button } from '@mui/material';
 
 export default function RoomPage() {

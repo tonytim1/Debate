@@ -6,6 +6,10 @@ import Iconify from '../components/iconify';
 import { BlogPostCard, BlogPostsSort, BlogPostsSearch } from '../sections/@dashboard/blog';
 // mock
 import POSTS from '../_mock/blog';
+//firebase
+import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
+
+import { useState, useEffect } from 'react';
 // ----------------------------------------------------------------------
 
 const SORT_OPTIONS = [
@@ -17,6 +21,38 @@ const SORT_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function HomePage() {
+  const [roomsData, setRoomsData] = useState([]);
+
+  // Function to fetch all rooms from the "rooms" collection
+  const fetchRooms = async () => {
+    try {
+      // Get a reference to the "rooms" collection
+      const roomsRef = collection(firestore, 'rooms');
+
+      // Get all documents in the "rooms" collection
+      const querySnapshot = await getDocs(roomsRef);
+
+      // Create an array to store the fetched rooms
+      const rooms = [];
+
+      // Loop through the documents and extract the room data
+      querySnapshot.forEach((doc) => {
+        const roomData = doc.data();
+        rooms.push(roomData);
+      });
+
+      // Set the state with the fetched rooms
+      setRoomsData(rooms);
+      console.log({rooms})
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -34,19 +70,17 @@ export default function HomePage() {
         </Stack>
         <Stack direction="row"  alignItems="center" justifyContent="space-between" mb={1}>
           <Typography variant="h8" align="center" >
-          welcome to our platform where people from all backgrounds can come together to engage in thoughtful and informed discussions about political, economic, environmental, and other important issues.
-           Our mission is to promote knowledge sharing, cultural exchange, and mutual understanding through civil and respectful discourse. 
-           Join us in exploring diverse perspectives and gaining new insights on the topics that matter most.
+            Discover diverse perspectives, ignite meaningful discussions
           </Typography>
         </Stack>
         {/* <Stack mb={5} direction="row" alignItems="center" justifyContent="space-between"> */}
         <Stack mb={3} direction="row" alignItems="center" justifyContent="space-between">
-            <BlogPostsSearch posts={POSTS} placeholder="Search for debates"/>
+            <BlogPostsSearch posts={roomsData} placeholder="Search for debates"/>
         </Stack>
 
         <Grid container spacing={3}>
-          {POSTS.map((post, index) => (
-            <BlogPostCard key={post.id} post={post} index={index} />
+          {roomsData.map((room, index) => (
+            <BlogPostCard key={index} index={index} room={room} />
           ))}
         </Grid>
       </Container>
