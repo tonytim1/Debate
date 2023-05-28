@@ -345,5 +345,6 @@ const ConversationRoomPage = (props) => {
     </>
   );
 };
+};
 
-export default ConversationRoomPage;
+export default ConversationRoomPage
