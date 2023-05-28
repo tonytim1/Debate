@@ -1,3 +1,5 @@
+from collections import defaultdict
+import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db, firestore
@@ -15,16 +17,8 @@ app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
 db_firestore = firestore.client(app_firestore)
 
 
-@app.route('/api/create_room', methods=['POST', 'OPTIONS'])
-def create_debate_room():
-    if request.method == 'OPTIONS':
-        # Set CORS headers for the preflight request
-        response = jsonify({'roomId': ''})
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'POST'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-
+@app.route('/create_room', methods=['POST'])
+def create_room():
     # Get the request data
     room_data = request.get_json()
     name = room_data.get('name')
