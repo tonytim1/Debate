@@ -14,6 +14,9 @@ socketname = {}
 micSocket = {}
 videoSocket = {}
 roomBoard = {}
+_users_in_room = {} # stores room wise user list
+_room_of_sid = {} # stores room joined by an used
+_name_of_sid = {} # stores display name of users
 
 @app.route('/')
 def index():
