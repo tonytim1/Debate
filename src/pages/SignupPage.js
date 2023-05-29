@@ -66,7 +66,7 @@ export default function SignUpPage() {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://localhost:5000/api/signup', {
+      const response = await fetch('http://10.90.184.194:5000/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

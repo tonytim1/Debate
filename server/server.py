@@ -1,5 +1,5 @@
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, auth
 from firebase_admin import db, firestore
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -10,7 +10,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 # Initialize Firebase Admin SDK for Firestore
-cred_firestore = credentials.Certificate("D:\VSC\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-07be2008cd.json")
+cred_firestore = credentials.Certificate("C:\\Users\\t-idobanyan\Desktop\DebateApp\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-d71611e36a.json")
 app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
 db_firestore = firestore.client(app_firestore)
 
@@ -18,6 +18,45 @@ db_firestore = firestore.client(app_firestore)
 @socketio.on('connect')
 def handle_connect():
     print('Client connected. id=', request.sid)
+
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    print("HEREEEEEEEEE")
+    email_new = "test@gmail.com"
+    pass_new = "7878"
+    # user = auth_new.create_user_with_email_and_password(email_new, pass_new)
+    user_data = request.get_json()
+    kwargs = {"app": app_firestore, "email": user_data.get('email'), "password": user_data.get('password')}
+
+    email = user_data.get('email')
+    password = user_data.get('password')
+    name = user_data.get('name')
+    username = user_data.get('username')
+    tags = user_data.get('tags')
+    print(email, password)
+    try:
+        page = auth.list_users(app=app_firestore)
+        while page:
+            for user in page.users:
+                print("user: ", user.uid)
+            page = page.get_next_page()
+        print(auth.list_users(app=app_firestore))
+        # Create the user in Firebase Authentication
+        user = auth.create_user(kwargs)
+        # Additional user data can be added here, such as display name, etc.
+
+        print("AFTERRRRRRRRRRRR")
+        # Return success response
+        response = jsonify({'message': 'Sign-up successful', 'uid': user.uid})
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        return jsonify({'message': 'Sign-up successful', 'uid': user.uid}), 200
+    except auth.EmailAlreadyExistsError:
+        # Handle case when the provided email already exists
+        return jsonify({'error': 'Email already exists'}), 400
+    except Exception as e:
+        # Handle other errors
+        return jsonify({'error': str(e)}), 500
 
 
 # ---------- CREATE ROOM PAGE ---------- #
@@ -183,4 +222,4 @@ def switch_team():
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='10.0.0.20', port=5000, debug=True)
+    socketio.run(app, host='10.90.184.194', port=5000, debug=True)
