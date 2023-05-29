@@ -7,7 +7,7 @@ import { LoadingButton } from '@mui/lab';
 import Iconify from '../../../components/iconify';
 import basestyle from "../../../BaseStyle.module.css";
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
-import firebase from "src/firebase.js";
+// import firebase from "src/firebase.js";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 
@@ -16,7 +16,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { firestore, auth } = firebase;
+  //const { firestore, auth } = firebase;
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
   const [user, setUserDetails] = useState({
@@ -37,41 +37,41 @@ export default function LoginForm() {
   };
 
   const handleClick = (e) => {
-    e.preventDefault();
-    setFormErrors(validateForm(user));
-    setIsSubmit(true);
+    // e.preventDefault();
+    // setFormErrors(validateForm(user));
+    // setIsSubmit(true);
   };
 
-  const validateForm = (values) => {
-    const errors = {};
-    const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
-    let flag = 0;
-    if (!values.email) {
-      errors.email = "Email is required";
-      flag = 1;
-    } else if (!regex.test(values.email)) {
-      errors.email = "Please enter a valid email address";
-      flag = 1;
-    }
-    if (!values.password) {
-      errors.password = "Password is required";
-      flag = 1;
-    }
-    if (flag == 0){
-      signInWithEmailAndPassword(auth, user.email, user.password)
-      .then((userCredential) => {
-        // User login successful
-        const user = userCredential.user
-      }).catch((error) => {
-        console.error(error);
-        // ..
-      });
-    }
-    else{
-      errors.login = "User not found"
-    }
-    return errors;
-  };
+  // const validateForm = (values) => {
+  //   const errors = {};
+  //   const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  //   let flag = 0;
+  //   if (!values.email) {
+  //     errors.email = "Email is required";
+  //     flag = 1;
+  //   } else if (!regex.test(values.email)) {
+  //     errors.email = "Please enter a valid email address";
+  //     flag = 1;
+  //   }
+  //   if (!values.password) {
+  //     errors.password = "Password is required";
+  //     flag = 1;
+  //   }
+  //   if (flag == 0){
+  //     signInWithEmailAndPassword(auth, user.email, user.password)
+  //     .then((userCredential) => {
+  //       // User login successful
+  //       const user = userCredential.user
+  //     }).catch((error) => {
+  //       console.error(error);
+  //       // ..
+  //     });
+  //   }
+  //   else{
+  //     errors.login = "User not found"
+  //   }
+  //   return errors;
+  // };
 
   useEffect(() => {
     if (Object.keys(formErrors).length === 0 && isSubmit) {

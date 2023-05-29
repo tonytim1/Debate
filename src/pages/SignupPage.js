@@ -23,20 +23,20 @@ import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
 import { collection, addDoc, setDoc, doc, getFirestore } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import firestore from "../firebase";
-import firebase from "src/firebase.js";
+// import firestore from "../firebase";
+// import firebase from "src/firebase.js";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import axios from 'axios';
 
 
 
 export default function SignUpPage() {
 
   const navigate = useNavigate();
-  const { firestore, auth } = firebase;
-  const [first_name, setFirstName] = useState('');
-  const [last_name, setLastName] = useState('');
+  //const { firestore, auth } = firebase;
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [tags, setTags] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -54,6 +54,52 @@ export default function SignUpPage() {
     "Politics",
   ];
 
+  const handleSignUp = async () => {
+    try {
+      //user details
+      const newUser = {
+        email: email,
+        password: password,
+        name: name,
+        username: username,
+        tags: tags,
+      };
+
+      // Send the new user data to the backend server
+      const response = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      if (response.ok) {
+        const userURL = `/user/${response.data.uid}`;
+        navigate(userURL);
+      } else {
+        console.error('Failed to create user');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
+  const handleSignUp1 = () => {
+    axios
+      .post('/signup', { email, password, name, username, tags })
+      .then((response) => {
+        // Sign-up successful, do something with the response
+        console.log(response.data);
+      })
+      .catch((error) => {
+        // Handle sign-up errors
+        console.error("gggggggggggggggg");
+        console.error(error.response.data);
+      });
+  };
+
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     setSelectedImage(URL.createObjectURL(file));
@@ -63,45 +109,45 @@ export default function SignUpPage() {
     setTags(value);
   };
 
-  const handleSubmit = async () => {
-    try {
-      // Create a new room object
-      const newUser = {
-        first_name: first_name,
-        last_name: last_name,
-        email: email,
-        phone: phone,
-        password: password,
-        tags: tags,
-      };
+  // const handleSubmit = async () => {
+  //   try {
+  //     // Create a new room object
+  //     const newUser = {
+  //       first_name: first_name,
+  //       last_name: last_name,
+  //       email: email,
+  //       username: username,
+  //       password: password,
+  //       tags: tags,
+  //     };
 
-      // const firestore = getFirestore();
-      // const storage = getStorage();
+  //     // const firestore = getFirestore();
+  //     // const storage = getStorage();
 
-      // if (selectedImage) {
-      //   const storageRef = ref(storage, `images/${selectedImage.name}`);
-      //   const storageSnapshot = await uploadBytes(storageRef, selectedImage);
-      //   const imageUrl = await getDownloadURL(storageSnapshot.ref);
+  //     // if (selectedImage) {
+  //     //   const storageRef = ref(storage, `images/${selectedImage.name}`);
+  //     //   const storageSnapshot = await uploadBytes(storageRef, selectedImage);
+  //     //   const imageUrl = await getDownloadURL(storageSnapshot.ref);
 
-      //   newUser.image = imageUrl;
-      // }
+  //     //   newUser.image = imageUrl;
+  //     // }
 
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+  //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
 
 
-      // Add the user to Firebase Firestore
-      const docRef = await addDoc(collection(firestore, 'users'), newUser);
-      //const usersRef = await setDoc(doc(firestore, 'users', docRef.id));
-      console.log("User added with ID: ", docRef.id);
+  //     // Add the user to Firebase Firestore
+  //     const docRef = await addDoc(collection(firestore, 'users'), newUser);
+  //     //const usersRef = await setDoc(doc(firestore, 'users', docRef.id));
+  //     console.log("User added with ID: ", docRef.id);
 
-      const userURL = `/user/${docRef.id}`;
-      navigate(userURL);
+  //     const userURL = `/user/${docRef.id}`;
+  //     navigate(userURL);
 
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   return (
     <>
@@ -119,16 +165,14 @@ export default function SignUpPage() {
           <TableBody>
             <TableRow>
               <TableCell>
-                <TextField label="First Name"
+                <TextField label="Your Name"
                   fullWidth
-                  value={first_name}
-                  onChange={(e) => setFirstName(e.target.value)} />
+                  value={name}
+                  onChange={(e) => setName(e.target.value)} />
               </TableCell>
               <TableCell>
                 <TextField label="Last Name"
-                  fullWidth
-                  value={last_name}
-                  onChange={(e) => setLastName(e.target.value)} />
+                  fullWidth/>
               </TableCell>
               <TableCell rowSpan={3}>
                 <Grid item xs={12} textAlign="center">
@@ -172,10 +216,10 @@ export default function SignUpPage() {
                   onChange={(e) => setEmail(e.target.value)} />
               </TableCell>
               <TableCell>
-                <TextField label="Phone Number"
+                <TextField label="Username"
                   fullWidth
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)} />
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)} />
               </TableCell>
             </TableRow>
             <TableRow>
@@ -229,7 +273,7 @@ export default function SignUpPage() {
         type="submit"
         size="large"
         variant="contained"
-        onClick={handleSubmit}
+        onClick={handleSignUp}
       >
         Create Account
       </LoadingButton>
