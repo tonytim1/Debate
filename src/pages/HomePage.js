@@ -23,35 +23,35 @@ const SORT_OPTIONS = [
 export default function HomePage() {
   const [roomsData, setRoomsData] = useState([]);
 
-  // Function to fetch all rooms from the "rooms" collection
-  const fetchRooms = async () => {
-    try {
-      // Get a reference to the "rooms" collection
-      const roomsRef = collection(firestore, 'rooms');
+  // // Function to fetch all rooms from the "rooms" collection
+  // const fetchRooms = async () => {
+  //   try {
+  //     // Get a reference to the "rooms" collection
+  //     // const roomsRef = collection(firestore, 'rooms');
 
-      // Get all documents in the "rooms" collection
-      const querySnapshot = await getDocs(roomsRef);
+  //     // Get all documents in the "rooms" collection
+  //     const querySnapshot = await getDocs(roomsRef);
 
-      // Create an array to store the fetched rooms
-      const rooms = [];
+  //     // Create an array to store the fetched rooms
+  //     const rooms = [];
 
-      // Loop through the documents and extract the room data
-      querySnapshot.forEach((doc) => {
-        const roomData = doc.data();
-        rooms.push(roomData);
-      });
+  //     // Loop through the documents and extract the room data
+  //     querySnapshot.forEach((doc) => {
+  //       const roomData = doc.data();
+  //       rooms.push(roomData);
+  //     });
 
-      // Set the state with the fetched rooms
-      setRoomsData(rooms);
-      console.log({rooms})
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //     // Set the state with the fetched rooms
+  //     setRoomsData(rooms);
+  //     console.log({rooms})
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
   
-  useEffect(() => {
-    fetchRooms();
-  }, []);
+  // useEffect(() => {
+  //   fetchRooms();
+  // }, []);
 
   return (
     <>

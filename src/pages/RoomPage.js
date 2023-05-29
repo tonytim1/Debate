@@ -2,141 +2,122 @@ import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Await, useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
-import { Typography, Grid, Paper, List, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import UsersShow from 'src/components/roomPage/UsersShow';
+import { Typography, Grid, Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
+import { io } from 'socket.io-client';
+
 
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
   const { roomId } = useParams();
   const navigate = useNavigate(); // Use useNavigate for navigation
-  const [roomData, setRoomData] = useState(null);
+  const [roomData, setRoomData] = useState(new Map());
   const [usersData, setUsersData] = useState(new Map());
   const [currUserData, setCurrUserData] = useState(null);
+  const [isModerator, setIsModerator] = useState(false);
+  const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
 
-  const curr_user_id = "manual_id"
+  const socket = io('ws://10.0.0.20:5000');
 
-  // Fetch room data from Firestore
-  const fetchRoomData = async () => {
-    console.log("in fetchRoomData")
-    const roomRef = doc(firestore, 'rooms', roomId);
-    try {
-      const roomSnapshot = await getDoc(roomRef);
-      if (roomSnapshot.exists()) {
-        const room = roomSnapshot.data();
-        setRoomData(room);
-      } else {
-        // Room not found, navigate to 404 page
-        navigate('/404');
-      }
-    } catch (error) {
-      console.error('Error fetching room data:', error);
-    }
+  const join_room = () => {
+    socket.emit('join_room', { roomId });
+  
+    socket.once('join', (roomData) => {
+      setRoomData(roomData);
+      setRoomState(1);
+    });
+    socket.once('room not found', () => {
+      navigate('/404');
+    });
+    socket.once('room is full', () => {
+      setRoomState(3);
+    });
   };
-
-  // Function to fetch all users in the users collection for a room
-  const fetchUsers = async () => {
-    try {
-      const usersRef = collection(firestore, 'rooms', roomId, 'users');
-      const querySnapshot = await getDocs(usersRef);
   
-      const usersMap = new Map();
-  
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        const { id, name, ready } = userData;
-        usersMap.set(id, { name, ready });
-      });
-  
-      setUsersData(usersMap);
-    } catch (error) {
-      console.error(error);
-      return new Map();
-    }
-
-    console.log("now usersData is:", {usersData})
-    setCurrUserData(usersData.get(curr_user_id))
-  };
-
   useEffect(() => {
-    fetchRoomData();
-    fetchUsers();
+    const fetchData = async () => {
+      join_room();
+      socket.on('room_data_updated', (roomData) => {
+        setRoomData(roomData);
+      });
+
+      return () => {
+        socket.off('room_data_updated');
+      };
+    };
+  
+    fetchData();
   }, []);
 
-  const handleReady = () => {
-    // Handle ready logic
-  };
-
-  const handleStart = () => {
-    // Handle start logic
-  };
-
-  const handleLeave = () => {
-    // Handle leave logic
-  };
-
-  const handleMessageInput = (event) => {
-    setMessageInput(event.target.value);
-  };
-
-  const handleSendMessage = () => {
-    // Handle send message logic
-  };
-
-  const handleSwapTeam = (user) => {
-    // Handle swap team logic
-  };
-
-  const handleReadyClick = async () => {
-    try {
-      // Get the current user's ID
-      const userId = "manual_id"; // Replace with the actual user ID
-      
-      // Update the 'ready' field of the user in Firebase Firestore
-      const userRef = doc(firestore, "rooms", roomId, "users", userId);
-      await updateDoc(userRef, {
-        ready: true
-      });
-      
-      fetchUsers();
-
-      console.log("User's ready status updated successfully.");
-  
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleStartClick = async () => {
-  }
-
-  if (!roomData) {
+  // loading screen
+  if (roomState === 0) {
     return (
       <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          fontSize: '24px',
-          color: 'blue',
-        }}
-      >
-        Loading...
-      </div>
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh', // Adjust the height to fit your requirements
+      }}
+    >
+      <Stack style={{alignItems: 'center'}}>
+        <div style={{ fontSize: '24px', color: 'blue' }}>
+          Loading...
+        </div>
+        <CircularProgress />
+      </Stack>
+    </div>
     );
   }
   
-  
+  // room full screen
+  if (roomState === 3){
+    return (
+      <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh', // Adjust the height to fit your requirements
+      }}
+    >
+      <Stack>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '24px',
+            color: 'blue',
+          }}
+        >
+          Sorry, The Room Is Full
+        </div>
+        <Button variant="contained" href='/'>
+          Go Back to Home
+        </Button>
+      </Stack>
+      </div>
+    );
+  }
+
   console.log(roomData);
-  console.log(usersData);
-  const { name, teams, hostUser, room_size, users, messages, currentUser } = roomData;
+  console.log(Object.keys(roomData.users_list).length)
+  const { name, teams, hostUser, room_size, users_list, messages, currentUser } = roomData;
 
   return (
     <>
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
+      <Container>
+        <UsersShow teams={teams} usersList={users_list}>
+
+        </UsersShow>
+      </Container>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Typography variant="h2">{name}</Typography>
@@ -144,7 +125,7 @@ export default function RoomPage() {
         </Grid>
         {/* users */}
         <Grid item xs={8}>
-          {/* <Typography variant="h6">Users ({users.length}/{room_size})</Typography> */}
+          <Typography variant="h6">Users ({Object.keys(roomData.users_list).length}/{roomData["room_size"]})</Typography>
           <Paper variant="outlined">
             <List>
               {/* {Array.from({ length: room_size }, (_, i) => {
@@ -234,7 +215,7 @@ export default function RoomPage() {
             <Button
               type="submit"
               variant="contained"
-              onClick={handleReadyClick}
+              // onClick={handleReadyClick}
             >
               Ready
             </Button>
@@ -243,7 +224,7 @@ export default function RoomPage() {
             <Button
               type="submit"
               variant="contained"
-              onClick={handleStartClick}
+              // onClick={handleStartClick}
               disabled
             >
               Start

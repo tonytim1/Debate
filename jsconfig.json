@@ -6,7 +6,7 @@
   },
   "include": [
     "src/**/*"
-, "server/firebase.js"  ],
+, "server/firebase.js", "setupPoxy.js"  ],
   "exclude": [
     "node_modules"
   ]
