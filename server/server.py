@@ -192,13 +192,12 @@ def fetch_room_data(data):
 # -------------------------------------- #
 
 # ---------- USERS SHOW ---------- #
-@app.route('/api/switch_team', methods=['POST'])
-def switch_team():
-    details = request.json
+@socketio.on('switch_team')
+def switch_team(details):
     print(details)
 
     # Fetch the room data from Firestore
-    room_ref = db_firestore.collection('rooms').document(details.roomId)
+    room_ref = db_firestore.collection('rooms').document(details['roomId'])
     room_doc = room_ref.get()
 
     if not room_doc.exists:
@@ -207,19 +206,45 @@ def switch_team():
     room_data = room_doc.to_dict()
     users_list = room_data.get('users_list', {})
 
-    if details.userId not in users_list:
+    if details['userId'] not in users_list:
         return
     
-    user = users_list[details.userId]
-    users_list.update({details.userId: {'ready': user.ready, 'team': not user.team}})
+    user = users_list[details['userId']]
+    users_list.update({details['userId']: {'ready': user['ready'], 'team': not user['team']}})
     room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
 
     updated_room_doc = room_ref.get()
     updated_room_data = updated_room_doc.to_dict()
 
     # Notify all users in the room about the change
-    emit('room_data_updated', updated_room_data, room=details.roomId)
+    emit('room_data_updated', updated_room_data, room=details['roomId'])
 
+@socketio.on('ready_click')
+def handle_ready_click(details):
+    print(details)
+
+    # Fetch the room data from Firestore
+    room_ref = db_firestore.collection('rooms').document(details['roomId'])
+    room_doc = room_ref.get()
+
+    if not room_doc.exists:
+        return
+    
+    room_data = room_doc.to_dict()
+    users_list = room_data.get('users_list', {})
+
+    if details['userId'] not in users_list:
+        return
+    
+    user = users_list[details['userId']]
+    users_list.update({details['userId']: {'ready': not user['ready'], 'team': user['team']}})
+    room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
+
+    updated_room_doc = room_ref.get()
+    updated_room_data = updated_room_doc.to_dict()
+
+    # Notify all users in the room about the change
+    emit('room_data_updated', updated_room_data, room=details['roomId'])
 
 if __name__ == '__main__':
     socketio.run(app, host='10.90.184.194', port=5000, debug=True)

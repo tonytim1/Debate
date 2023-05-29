@@ -5,33 +5,19 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Checkbox from '@mui/material/Checkbox';
 import Avatar from '@mui/material/Avatar';
 import { Container, Stack, Box, Button} from '@mui/material';
+import { io } from 'socket.io-client';
 
-const UsersShow = ({ teams, usersList, roomId }) => {
+const socket = io('ws://10.0.0.20:5000');
+
+const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
     const handle_switch = async () => {
-        try {
-
-            const details = {
-                "roomId": "123",
-                "userId": "10.0.0.20",
-            }
-
-            // Send the new room data to the backend server
-            const response = await fetch('http://10.0.0.20:5000/api/switch_team', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(details),
-            });
-
-          } catch (error) {
-            console.error(error);
-          }
+        socket.emit('switch_team', { 
+            'roomId': roomId, 
+            'userId': currUserId,
+        });
     };
-
 
     return (
     <Container>
@@ -46,7 +32,7 @@ const UsersShow = ({ teams, usersList, roomId }) => {
                     {Object.entries(usersList).map(([userId, user]) => {
                         if (user.team) {
                             return (
-                            <ListItem alignItems="flex-start">
+                            <ListItem key={userId} alignItems="flex-start">
                                 <ListItemAvatar>
                                     <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                                 </ListItemAvatar>
@@ -74,7 +60,7 @@ const UsersShow = ({ teams, usersList, roomId }) => {
                     {Object.entries(usersList).map(([userId, user]) => {
                         if (!user.team) {
                             return (
-                            <ListItem alignItems="flex-start">
+                            <ListItem key={userId} alignItems="flex-start">
                                 <ListItemAvatar>
                                     <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                                 </ListItemAvatar>

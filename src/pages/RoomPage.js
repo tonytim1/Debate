@@ -6,7 +6,8 @@ import { Await, useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import CircularProgress from '@mui/material/CircularProgress';
 import UsersShow from 'src/components/roomPage/UsersShow';
-import { Typography, Grid, Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
+import AdminControl from 'src/components/roomPage/AdminControl';
+import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
 
 
@@ -21,6 +22,8 @@ export default function RoomPage() {
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
 
   const socket = io('ws://10.0.0.20:5000');
+  // const currUserId = '10.0.0.20'
+  const currUserId = 'moderator'
 
   const join_room = () => {
     socket.emit('join_room', { roomId });
@@ -34,6 +37,10 @@ export default function RoomPage() {
     });
     socket.once('room is full', () => {
       setRoomState(3);
+    });
+    socket.once('in conversation', () => {
+      const conversationURL = `/conversation/${roomId}`;
+      navigate(conversationURL);
     });
   };
   
@@ -51,6 +58,11 @@ export default function RoomPage() {
   
     fetchData();
   }, []);
+
+  const handle_ready_click = () => {
+    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });
+  }
+
 
   // loading screen
   if (roomState === 0) {
@@ -106,54 +118,28 @@ export default function RoomPage() {
 
   console.log(roomData);
   console.log(Object.keys(roomData.users_list).length)
-  const { name, teams, hostUser, room_size, users_list, messages, currentUser } = roomData;
+  const { name, teams, room_size, users_list, moderator} = roomData;
+
 
   return (
     <>
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <Container>
-        <UsersShow teams={teams} usersList={users_list}>
-
-        </UsersShow>
+      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Stack direction="column" alignItems="center" spacing={3}>
+          <Typography variant="h2">{name}</Typography>
+          <UsersShow teams={teams} usersList={users_list} currUserId={"10.0.0.20"} roomId={roomId} />
+          <Card>
+            chat
+          </Card>
+          <Button type="submit" variant="contained" onClick={handle_ready_click}>
+            Ready
+          </Button>
+          <AdminControl moderatorId={moderator} currUserId={currUserId}/>
+        </Stack>
       </Container>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Typography variant="h2">{name}</Typography>
-          <Typography variant="h5">{`${teams ? 'teams' : 'free for all'}`}</Typography>
-        </Grid>
-        {/* users */}
-        <Grid item xs={8}>
-          <Typography variant="h6">Users ({Object.keys(roomData.users_list).length}/{roomData["room_size"]})</Typography>
-          <Paper variant="outlined">
-            <List>
-              {/* {Array.from({ length: room_size }, (_, i) => {
-                const user = users[i];
-                const isRoomAdmin = user && user.id === hostUser.id;
-                const isCurrentUser = user && user.id === currentUser.id;
-
-                return (
-                  <ListItem key={i} sx={{ backgroundColor: isCurrentUser ? '#E0EFFF' : undefined }}>
-                    <ListItemAvatar>
-                      {user ? <Avatar alt={user.name} src={user.avatarUrl} /> : undefined}
-                    </ListItemAvatar>
-                    <ListItemText primary={user ? user.name : 'Empty'} secondary={user ? (user.ready ? 'Ready' : 'Not ready') : ''} />
-                    {isRoomAdmin && <ListItemText primary="Admin" />}
-                  </ListItem>
-                );
-              })} */}
-
-              {Array.from({ length: usersData.length }, (_, i) => {
-                const user = usersData[i];
-                return (
-                  <ListItem key={i}>
-                    {user.ready ? "ready" : ""} {user.name}
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Paper>
         </Grid>
         {/* chat */}
         {/* <Grid item xs={8}>
@@ -210,26 +196,6 @@ export default function RoomPage() {
             </Grid>
           </Grid>
         </Grid> */}
-      </Grid>
-      <Grid item xs={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              // onClick={handleReadyClick}
-            >
-              Ready
-            </Button>
-      </Grid>
-      <Grid item xs={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              // onClick={handleStartClick}
-              disabled
-            >
-              Start
-            </Button>
-      </Grid>
     </>
   );
 }
