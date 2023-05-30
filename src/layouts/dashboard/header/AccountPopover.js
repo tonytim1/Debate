@@ -4,36 +4,14 @@ import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
-
-// ----------------------------------------------------------------------
-
-const MENU_OPTIONS = [
-  {
-    title: 'Home',
-    path: '/dashboard/home',
-    label: 'Home',
-    icon: 'eva:home-fill',
-  },
-  {
-    title: 'Profile',
-    path: '/dashboard/profile',
-    label: 'Profile',
-    icon: 'eva:person-fill',
-  },
-  // {
-  //   label: 'Settings',
-  //   icon: 'eva:settings-2-fill',
-  // },
-];
+import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const navigate = useNavigate();
 
-  function moveTo(props){
-    window.location.href=props.path
-  }
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -41,6 +19,18 @@ export default function AccountPopover() {
 
   const handleClose = () => {
     setOpen(null);
+  };
+
+  const handleProfile = () => {
+    const userId = localStorage.getItem("userId");
+    navigate(`/user/${userId}`);
+  };
+
+  const handleLogout = () => {
+    console.log("logout");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    navigate('/dashboard/login');
   };
 
   return (
@@ -86,7 +76,7 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {localStorage.getItem("userId")}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
             {account.email}
@@ -96,17 +86,17 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Stack sx={{ p: 1 }}>
-          {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={() => 
-            {window.location.href=option.path;}}>
-              {option.label}
-            </MenuItem>
-          ))}
+          <MenuItem onClick={() => window.location.href="/dashboard/home"} sx={{ m: 1 }}>
+            Home
+          </MenuItem>
+          <MenuItem onClick={handleProfile} sx={{ m: 1 }}>
+            Profile
+          </MenuItem>
         </Stack>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
+        <MenuItem onClick={handleLogout} sx={{ m: 1 }}>
           Logout
         </MenuItem>
       </Popover>

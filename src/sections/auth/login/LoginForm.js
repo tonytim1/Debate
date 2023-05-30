@@ -6,7 +6,6 @@ import { LoadingButton } from '@mui/lab';
 // components
 import Iconify from '../../../components/iconify';
 import basestyle from "../../../BaseStyle.module.css";
-import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 
 // ----------------------------------------------------------------------
 
@@ -62,6 +61,7 @@ export default function LoginForm() {
         const responseData = await response.json();
         setUserUid(responseData.userId);
         localStorage.setItem('token', responseData.token);
+        localStorage.setItem('userId', responseData.userId);
         console.log(localStorage.getItem("token"));
         setIsSubmit(true);
         setFormErrors(validateForm(user));

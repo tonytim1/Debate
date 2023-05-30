@@ -15,6 +15,8 @@ export default function CreateRoomPage() {
   const [tagsErr, setTagsErr] = useState(false);
   const [time_to_start, setTime_to_start] = useState(15);
 
+  const currUserId = localStorage.getItem("userId")
+
   const checkRoomName = () => {
     // checks if there are at least 3 words
     if (name.trim().split(/\s+/).length < 3) {
@@ -51,7 +53,7 @@ export default function CreateRoomPage() {
           spectators: allowSpectators,
           ready_list: [],
           spectators_list: [],
-          moderator: "moderator",  // change to currUser
+          moderator: currUserId,
         };
 
         // Send the new room data to the backend server

@@ -152,7 +152,7 @@ def create_room():
     time_to_start_in_minutes = room_data.get('time_to_start')
     time_to_start = time.time() + time_to_start_in_minutes * 60 
     spectators = room_data.get('spectators')
-    moderator = request.remote_addr # change to room_data.get('moderator') when ready
+    moderator = room_data.get('moderator') # change to username when ready
 
     # Create a new room document
     new_room = {
@@ -172,6 +172,8 @@ def create_room():
     room_ref = db_firestore.collection('rooms').document()
     room_ref.set(new_room)
 
+    socketio.emit("rooms_updated") # broadcast=True
+
     # Return the room ID as a response
     return jsonify({'roomId': room_ref.id})
 # -------------------------------------- #
@@ -183,8 +185,8 @@ def join_debate_room(data):
     # Get the request data
     rec_data = data
     room_id = rec_data.get('roomId')
-    # user_id = rec_data.get('userId')
-    user_id = f"{request.remote_addr}"  # change to user_id when ready
+    user_id = rec_data.get('userId')
+    # user_id = f"{request.remote_addr}"  # change to user_id when ready
     
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -216,7 +218,7 @@ def join_debate_room(data):
 
     # Join the SocketIO broadcast room
     join_room(room_id)
-    emit('join', {"roomData": room_data, "userId": user_id} ,room=request.sid) # temporary solution to get user_id to the frontend
+    emit('user_join', room_data ,room=request.sid)
 
 
 @socketio.on('leave_click')
@@ -224,7 +226,7 @@ def leave_debate_room(data):
     # Get the request data
     rec_data = data
     room_id = rec_data.get('roomId')
-    user_id = f"{request.remote_addr}"  # change to user_id when ready
+    user_id = rec_data.get('userId') # f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -233,6 +235,7 @@ def leave_debate_room(data):
     if not room_doc.exists:
         # Room not found, send a specific response
         emit('leave_room_error', {'error': 'Room not found'})
+        leave_room(room_id)
         return
 
     room_data = room_doc.to_dict()
@@ -240,6 +243,7 @@ def leave_debate_room(data):
 
     if user_id not in users_dict:
         emit('leave_room_error', {'error': 'User is not in the room'})
+        leave_room(room_id)
         return
 
     users_dict.pop(user_id)
@@ -247,7 +251,9 @@ def leave_debate_room(data):
 
     if not users_dict:
         # Delete the room if no users are left
+        emit("rooms_updated", broadcast=True)
         room_ref.delete()
+        leave_room(room_id)
         return
 
     # If the moderator left, assign a new moderator
@@ -313,7 +319,7 @@ def switch_team(details):
 @socketio.on('ready_click')
 def handle_ready_click(details):
     print(details)
-    user_id = f"{request.remote_addr}"  # change to user_id when ready
+    user_id = details.get('userId') # f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(details['roomId'])
@@ -384,7 +390,7 @@ def handle_send_message(payload):
     print(f"received message: {payload}")
     message = payload['message']
     room_id = payload['roomId']
-    user_id = f"{request.remote_addr}"  # change to user_id when ready
+    user_id = payload.get('userId') # f"{request.remote_addr}"  # change to user_id when ready
     emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
 
 

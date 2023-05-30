@@ -41,7 +41,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
                                 key={userId}
                                 alignItems="flex-start"
                                 sx={{
-                                    backgroundColor: user.ready ? 'lightgreen' : 'inherit',
+                                    backgroundColor: user.ready ? '#D1FFBD' : 'inherit',
                                   }}
                             >
                                 <ListItemAvatar>
@@ -75,7 +75,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
                                 key={userId} 
                                 alignItems="flex-start"
                                 sx={{
-                                    backgroundColor: user.ready ? 'lightgreen' : 'inherit',
+                                    backgroundColor: user.ready ? '#D1FFBD' : 'inherit',
                                   }}
                             >
                                 <ListItemAvatar>
@@ -104,7 +104,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
                 return (
                     <ListItem alignItems="flex-start" 
                         sx={{
-                            backgroundColor: user.ready ? 'lightgreen' : 'inherit',
+                            backgroundColor: user.ready ? '#D1FFBD' : 'inherit',
                         }}>
                         <ListItemAvatar>
                             <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />

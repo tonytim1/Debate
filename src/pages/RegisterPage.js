@@ -42,7 +42,7 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const mdUp = useResponsive('up', 'md');
   return (
     <>
