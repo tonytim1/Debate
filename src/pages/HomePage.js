@@ -6,7 +6,8 @@ import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import { io } from 'socket.io-client';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { random, clamp } from 'lodash';
+import { alpha, styled } from '@mui/material/styles';
 
 // ----------------------------------------------------------------------
 
@@ -20,7 +21,23 @@ const SORT_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function HomePage() {
+  const colors = [
+    '#263238', // Dark Blue Grey
+    '#9C27B0', // Deep Purple
+    '#6A1B9A', // Dark Purple
+    '#303F9F', // Indigo
+    '#1A237E', // Midnight Blue
+    '#004D40', // Dark Teal
+    '#006064', // Dark Cyan
+    '#01579B', // Dark Blue
+    '#FF6F00', // Dark Orange
+    '#E65100', // Dark Amber
+  ];
+  const getRandomColor = () => alpha(colors[random(0, colors.length - 1)], 0.72);  
+
   const [roomsData, setRoomsData] = useState(new Map());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredRooms, setFilteredRooms] = useState([]);
   const navigate = useNavigate();
 
   const socket = io('ws://' + window.location.hostname + ':5000');
@@ -33,16 +50,32 @@ export default function HomePage() {
     const fetchData = async () => {
       fetchRooms();
       socket.once('all_rooms', (rooms) => {
-        setRoomsData(new Map(Object.entries(rooms)));
+        const mappedRooms = new Map(Object.entries(rooms));
+        mappedRooms.forEach((data) => {
+          data.color = getRandomColor(); // Add random color to each room
+        });
+        setRoomsData(mappedRooms);
       });
     };
-    
+
     fetchData();
   }, []);
 
   useEffect(() => {
-    console.log(typeof(roomsData));
+    console.log(roomsData);
+    filterRooms('');
   }, [roomsData]);
+
+  const filterRooms = (query) => {
+    const filtered = Array.from(roomsData).filter(([roomId, data]) => {
+      const tags = data.tags || [];
+      const name = data.name || '';
+      const lowerQuery = query.toLowerCase();
+      return tags.some((tag) => tag.toLowerCase().includes(lowerQuery)) || name.toLowerCase().includes(lowerQuery);
+    });
+    setFilteredRooms(filtered);
+  };
+
 
   return (
     <>
@@ -59,15 +92,24 @@ export default function HomePage() {
             Discover diverse perspectives, ignite meaningful discussions
           </Typography>
           <Stack spacing={2} mb={3} direction="row" alignItems="center" justifyContent="center" sx={{width:'100%'}}>
-              <TextField label="Search for debates" sx={{width:'90%'}}/>
-              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
-                Create Room
-              </Button>
+            <TextField
+              label="Search for debates"
+              sx={{ width: '90%' }}
+              value={searchQuery}
+              onChange={(e) => {
+                const query = e.target.value;
+                setSearchQuery(query);
+                filterRooms(query);
+              }}
+            />
+            <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
+              Create Room
+            </Button>
           </Stack>
           <Grid container spacing={3} justifyContent="center">
-            {Array.from(roomsData).map(([roomId, data]) => (
-              <BlogPostCard key={roomId} room={data} roomId={roomId} />
-              ))}
+            {filteredRooms.map(([roomId, data]) => (
+              <BlogPostCard key={roomId} room={data} roomId={roomId} color={data.color} />
+            ))}
           </Grid>
         </Stack>
       </Container>
