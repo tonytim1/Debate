@@ -35,7 +35,7 @@ def create_room():
     room_size = room_data.get('room_size')
     time_to_start = room_data.get('time_to_start')
     spectators = room_data.get('spectators')
-    moderator = room_data.get('moderator')
+    moderator = request.remote_addr # change to room_data.get('moderator') when ready
 
     # Create a new room document
     new_room = {
@@ -99,7 +99,7 @@ def join_debate_room(data):
 
     # Join the SocketIO broadcast room
     join_room(room_id)
-    emit('join', room_data ,room=request.sid)
+    emit('join', {"roomData": room_data, "userId": user_id} ,room=request.sid) # temporary solution to get user_id to the frontend
 
 
 @socketio.on('leave_room')
@@ -217,6 +217,23 @@ def handle_ready_click(details):
 
 # -------------- CONVERSATION PAGE ------------- #
 
+@socketio.on('start_conversation_click')  # TODO: add a thread that will start the conversation after the needed time
+def handle_conversation_start(details):
+    print(details)
+    # Notify all users in the room about the change
+    emit('conversation_start', room=details['roomId'])
+
+@socketio.on('joinConversationRoom')
+def handle_join_room(payload):
+    room_id = payload['roomId']
+    username = payload['username']
+    join_room(room_id)
+    # query user from database
+    users_in_this_room = [socket_to_user[sid] for sid in room_to_sockets[room_id]]
+    socket_to_user[request.sid] = username
+    room_to_sockets[room_id].append(request.sid)
+    emit('usersInRoom', users_in_this_room, room=room_id)
+    
 @socketio.on('sendingSignal')
 def handle_sending_signal(payload):
     user_id_to_send_signal = payload['userIdToSendSignal']
@@ -227,13 +244,25 @@ def handle_returning_signal(payload):
     caller_id = payload['callerId']
     emit('returningSignalAck', {'signal': payload['signal'], 'id': request.sid}, to=caller_id)
 
+@socketio.on('disconnect')
+def handle_disconnect():
+    room_id = None
+    for room, clients in socketio.server.rooms.items():
+        if request.sid in clients:
+            room_id = room
+            clients.remove(request.sid)
+            break
+    if room_id is not None:
+        leave_room(room_id)
+        emit('userLeft', request.sid, room=room_id)
+
 @socketio.on('sendMessage')
 def handle_send_message(payload):
+    print(f"received message: {payload}")
     message = payload['message']
     room_id = payload['roomId']
-    username = payload['username']
-    # save message to database ?
-    emit('receiveMessage', {'message': message, 'username': username}, room=room_id)
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
+    emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
 
 
 

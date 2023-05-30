@@ -9,6 +9,8 @@ import UsersShow from 'src/components/roomPage/UsersShow';
 import AdminControl from 'src/components/roomPage/AdminControl';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
+import ConversationRoomPage from './ConversationRoomPage';
+import Chat from 'src/components/messages/Chat';
 
 
 export default function RoomPage() {
@@ -22,14 +24,15 @@ export default function RoomPage() {
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
 
   const socket = io('ws://' + window.location.hostname + ':5000');
-  // const currUserId = '127.0.0.1'
-  const currUserId = 'moderator'  // change to real user id
+  //const currUserId = 'moderator'  // change to real user id
+  const [currUserId, setCurrUserId] = useState(0);
 
   const join_room = () => {
     socket.emit('join_room', { roomId });
   
-    socket.once('join', (roomData) => {
+    socket.once('join', ( { roomData, userId } ) => {
       setRoomData(roomData);
+      setCurrUserId(userId);
       setRoomState(1);
     });
     socket.once('room not found', () => {
@@ -38,7 +41,8 @@ export default function RoomPage() {
     socket.once('room is full', () => {
       setRoomState(3);
     });
-    socket.once('in conversation', () => {
+    socket.once('conversation_start', () => {
+      console.log('conversation_start')
       const conversationURL = `/conversation/${roomId}`;
       navigate(conversationURL);
     });
@@ -62,7 +66,6 @@ export default function RoomPage() {
   const handle_ready_click = () => {
     socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
   }
-
 
   // loading screen
   if (roomState === 0) {
@@ -117,7 +120,8 @@ export default function RoomPage() {
   }
 
   console.log(roomData);
-  console.log(Object.keys(roomData.users_list).length)
+  console.log(Object.keys(roomData.users_list).length);
+  console.log(currUserId);
   const { name, teams, room_size, users_list, moderator} = roomData;
 
 
@@ -129,18 +133,19 @@ export default function RoomPage() {
       <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Stack direction="column" alignItems="center" spacing={3}>
           <Typography variant="h2">{name}</Typography>
-          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} />
+          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} />
           <Card>
             chat
           </Card>
           <Button type="submit" variant="contained" onClick={handle_ready_click}>
             Ready
           </Button>
-          <AdminControl moderatorId={moderator} currUserId={currUserId}/>
+          <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
         </Stack>
       </Container>
       <Grid container spacing={3}>
         </Grid>
+      <Chat roomId={roomId} socket={socket} />
         {/* chat */}
         {/* <Grid item xs={8}>
           <Typography variant="h5">Chat</Typography>
