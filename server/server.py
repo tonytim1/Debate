@@ -346,4 +346,5 @@ def handle_send_message(payload):
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, keyfile='./server/key.pem', certfile='./server/cert.pem')
+    # socketio.run(app, host='0.0.0.0', port=5000, debug=True, keyfile='./server/key.pem', certfile='./server/cert.pem')
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
