@@ -37,6 +37,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [tags, setTags] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [image, setImage] = useState('');
 
   const tagOptions = [
     "Music",
@@ -60,6 +61,7 @@ export default function SignUpPage() {
         name: name,
         username: username,
         tags: tags,
+        image: image
       };
 
       // Send the new user data to the backend server
@@ -86,54 +88,15 @@ export default function SignUpPage() {
   };
 
 
-  const handleImageChange = (event) => {
+  const handleImageChange = async (event) => {
     const file = event.target.files[0];
     setSelectedImage(URL.createObjectURL(file));
+    setImage(file);
   };
 
   const handleTagsChange = (event, value) => {
     setTags(value);
   };
-
-  // const handleSubmit = async () => {
-  //   try {
-  //     // Create a new room object
-  //     const newUser = {
-  //       first_name: first_name,
-  //       last_name: last_name,
-  //       email: email,
-  //       username: username,
-  //       password: password,
-  //       tags: tags,
-  //     };
-
-  //     // const firestore = getFirestore();
-  //     // const storage = getStorage();
-
-  //     // if (selectedImage) {
-  //     //   const storageRef = ref(storage, `images/${selectedImage.name}`);
-  //     //   const storageSnapshot = await uploadBytes(storageRef, selectedImage);
-  //     //   const imageUrl = await getDownloadURL(storageSnapshot.ref);
-
-  //     //   newUser.image = imageUrl;
-  //     // }
-
-  //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  //     const user = userCredential.user;
-
-
-  //     // Add the user to Firebase Firestore
-  //     const docRef = await addDoc(collection(firestore, 'users'), newUser);
-  //     //const usersRef = await setDoc(doc(firestore, 'users', docRef.id));
-  //     console.log("User added with ID: ", docRef.id);
-
-  //     const userURL = `/user/${docRef.id}`;
-  //     navigate(userURL);
-
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
   return (
     <>
@@ -156,10 +119,7 @@ export default function SignUpPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)} />
               </TableCell>
-              <TableCell>
-                <TextField label="Last Name"
-                  fullWidth/>
-              </TableCell>
+              <TableCell></TableCell>
               <TableCell rowSpan={3}>
                 <Grid item xs={12} textAlign="center">
                   <input

@@ -1,5 +1,7 @@
 import time
 import firebase_admin
+import datetime
+from firebase_admin import storage
 from firebase_admin import credentials, auth
 from firebase_admin.auth import UserRecord
 from firebase_admin import db, firestore
@@ -27,7 +29,10 @@ config = {
 
 # Initialize Firebase Admin SDK for Firestore
 cred_firestore = credentials.Certificate("./server/debate-center-firebase-key.json")
-app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
+app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore', options={
+    'storageBucket': config['storageBucket']
+})
+
 db_firestore = firestore.client(app_firestore)
 
 # Auth
@@ -53,7 +58,10 @@ def signup():
     name = user_data.get('name')
     username = user_data.get('username')
     tags = user_data.get('tags')
+    image = user_data.get('image')
 
+    print(image)
+    
     try:
         # create new user base on email and password
         new_user = auths.create_user_with_email_and_password(email=email, password=password)
@@ -61,6 +69,32 @@ def signup():
         token = login_user['idToken']
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
+
+        # Add user details to database
+        user_ref = db_firestore.collection('users').document(user_id)
+        user_ref.set({
+            'name': name,
+            'username': username,
+            'tags':tags
+        })
+
+        # Add image
+        destination_blob_name = f'users/{user_id}/profile _image'
+        bucket = storage.bucket(app=app_firestore)
+        blob = bucket.blob(destination_blob_name)
+        blob.upload_from_filename('C:\\Users\\t-idobanyan\Desktop\pic.jpg')
+
+        # Get the download URL of the uploaded image
+        download_url = blob.generate_signed_url(
+            version='v4',
+            expiration=datetime.timedelta(days=7),
+            method='GET'
+        )
+
+        # Store the download URL in the user's document in Firestore
+        user_ref.update({'image': download_url})
+        
+        
         # Return success response
         return jsonify({'message': 'Signup successful', 'userId': user_id, 'token': token}), 200
     
