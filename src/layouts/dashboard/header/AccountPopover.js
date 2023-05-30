@@ -78,9 +78,6 @@ export default function AccountPopover() {
           <Typography variant="subtitle2" noWrap>
             {localStorage.getItem("userId")}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
-          </Typography>
         </Box>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

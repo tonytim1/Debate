@@ -141,6 +141,9 @@ def get_all_rooms():
         room_id = room.id
         rooms[room_id] = room_data
 
+    # sort by current users in room
+    rooms = {k: v for k, v in sorted(rooms.items(), key=lambda item: -len(item[1]["users_list"]))}
+
     socketio.emit("all_rooms", rooms, room=request.sid)    
 
 
