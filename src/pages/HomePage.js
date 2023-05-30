@@ -5,6 +5,8 @@ import { BlogPostCard, BlogPostsSort, BlogPostsSearch } from '../sections/@dashb
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import { io } from 'socket.io-client';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 // ----------------------------------------------------------------------
 
@@ -19,7 +21,8 @@ const SORT_OPTIONS = [
 
 export default function HomePage() {
   const [roomsData, setRoomsData] = useState(new Map());
-  
+  const navigate = useNavigate();
+
   const socket = io('ws://' + window.location.hostname + ':5000');
 
   const fetchRooms = async () => {
@@ -57,7 +60,7 @@ export default function HomePage() {
           </Typography>
           <Stack spacing={2} mb={3} direction="row" alignItems="center" justifyContent="center" sx={{width:'100%'}}>
               <TextField label="Search for debates" sx={{width:'90%'}}/>
-              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />}>
+              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
                 Create Room
               </Button>
           </Stack>
