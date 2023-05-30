@@ -10,7 +10,7 @@ import Divider from '@mui/material/Divider';
 import { Container, Stack, Box, Button, Card} from '@mui/material';
 import { io } from 'socket.io-client';
 
-const UsersShow = ({ teams, usersList, roomId, currUserId, socket}) => {
+const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) => {
     const handle_switch = async () => {
         socket.emit('switch_team', { 
             'roomId': roomId, 
@@ -48,8 +48,8 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket}) => {
                                     <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={<>{userId} </>}
-                                    secondary={<a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a>}
+                                    primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
+                                    secondary={moderator === userId ? "Moderator" : "" }
                                 />
                             </ListItem>
                             );
@@ -83,6 +83,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket}) => {
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
+                                    secondary={moderator === userId ? "Moderator" : ""}
                                 />
                             </ListItem>
                             );
@@ -107,7 +108,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket}) => {
                         </ListItemAvatar>
                         <ListItemText
                             primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
-                            secondary={null}
+                            secondary={moderator === userId ? "Moderator" : ""}
                         />
                     </ListItem>
                     );

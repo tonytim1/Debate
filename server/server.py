@@ -116,12 +116,12 @@ def join_debate_room(data):
     emit('join', {"roomData": room_data, "userId": user_id} ,room=request.sid) # temporary solution to get user_id to the frontend
 
 
-@socketio.on('leave_room')
+@socketio.on('leave_click')
 def leave_debate_room(data):
     # Get the request data
     rec_data = data
     room_id = rec_data.get('roomId')
-    user_id = rec_data.get('userId')
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -134,16 +134,24 @@ def leave_debate_room(data):
 
     room_data = room_doc.to_dict()
     users_list = room_data.get('users_list', [])
-    room_size = room_data.get('room_size', 0)
 
     if user_id not in users_list:
         emit('leave_room_error', {'error': 'User is not in the room'})
         return
 
-    users_list.remove(user_id)
+    users_list.pop(user_id)
     room_ref.update({'users_list': users_list})
 
-    # Join the SocketIO broadcast room
+    if not users_list:
+        # Delete the room if no users are left
+        room_ref.delete()
+        return
+
+    # If the moderator left, assign a new moderator
+    if user_id == room_data['moderator']:
+        room_ref.update({'moderator': users_list[0]})
+
+    # leave the SocketIO broadcast room
     leave_room(room_id)
 
     updated_room_doc = room_ref.get()

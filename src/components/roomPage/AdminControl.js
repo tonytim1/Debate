@@ -17,7 +17,7 @@ const AdminControl = ({ moderatorId, currUserId, roomId, socket}) => {
 
     return (
         currUserId === moderatorId ? (
-            <Button type="submit" onClick={handle_start_click}>
+            <Button variant="contained" type="submit" onClick={handle_start_click}>
                 Start
             </Button>
         ) : (<></>)

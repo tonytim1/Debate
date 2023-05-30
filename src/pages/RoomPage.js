@@ -74,6 +74,11 @@ export default function RoomPage() {
     socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
   }
 
+  const handle_leave_click = () => {
+    socket.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
+    navigate('/');
+  }
+
   // loading screen
   if (roomState === 0) {
     return (
@@ -127,6 +132,7 @@ export default function RoomPage() {
   }
 
   const { name, teams, room_size, users_list, moderator} = roomData;
+  console.log(users_list);
 
   return (
     <>
@@ -142,14 +148,14 @@ export default function RoomPage() {
         <Stack direction="row" sx={{ width: '100%' }}>
         <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
           <Typography variant="h2">{name}</Typography>
-          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} />
-          <Card>
-            chat
-          </Card>
+          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} />
           <Button type="submit" variant="contained" onClick={handle_ready_click}>
             Ready
           </Button>
           <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
+          <Button onClick={handle_leave_click}>
+            Leave
+          </Button>
         </Stack>
           <SpectatorsList/>
         </Stack>
