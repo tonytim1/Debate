@@ -1,3 +1,4 @@
+import time
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db, firestore
@@ -47,7 +48,8 @@ def create_room():
     tags = room_data.get('tags')
     teams = room_data.get('teams')
     room_size = room_data.get('room_size')
-    time_to_start = room_data.get('time_to_start')
+    time_to_start_in_minutes = room_data.get('time_to_start')
+    time_to_start = time.time() + time_to_start_in_minutes * 60 
     spectators = room_data.get('spectators')
     moderator = request.remote_addr # change to room_data.get('moderator') when ready
 
