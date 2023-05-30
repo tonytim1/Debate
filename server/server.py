@@ -133,23 +133,23 @@ def leave_debate_room(data):
         return
 
     room_data = room_doc.to_dict()
-    users_list = room_data.get('users_list', [])
+    users_dict = room_data.get('users_list', [])
 
-    if user_id not in users_list:
+    if user_id not in users_dict:
         emit('leave_room_error', {'error': 'User is not in the room'})
         return
 
-    users_list.pop(user_id)
-    room_ref.update({'users_list': users_list})
+    users_dict.pop(user_id)
+    room_ref.update({'users_list': users_dict})
 
-    if not users_list:
+    if not users_dict:
         # Delete the room if no users are left
         room_ref.delete()
         return
 
     # If the moderator left, assign a new moderator
     if user_id == room_data['moderator']:
-        room_ref.update({'moderator': users_list[0]})
+        room_ref.update({'moderator': list(users_dict.keys())[0]})
 
     # leave the SocketIO broadcast room
     leave_room(room_id)

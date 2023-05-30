@@ -20,7 +20,7 @@ const SORT_OPTIONS = [
 export default function HomePage() {
   const [roomsData, setRoomsData] = useState(new Map());
   
-  const socket = io('ws://10.0.0.20:5000');
+  const socket = io('ws://' + window.location.hostname + ':5000');
 
   // const fetchRooms = async () => {
     
