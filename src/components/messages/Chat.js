@@ -20,7 +20,7 @@ const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages
     }
 
   return (
-    <Grid item xs={12} md={6}>
+    <Grid item xs={12} md={6} sx={{ width: '100%' }}>
     <Card sx={{ p: 2 }}>
       <Typography variant="h5">Chat</Typography>
       <Scrollbar style={{ height: 200 }}>

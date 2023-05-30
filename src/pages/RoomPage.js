@@ -145,77 +145,27 @@ export default function RoomPage() {
         alignItems: 'flex-start',
         height: '60vh',
       }}>
-        <Stack direction="row" sx={{ width: '100%' }}>
         <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
           <Typography variant="h2">{name}</Typography>
+        <Stack direction="row" sx={{ width: '100%' }}>
           <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} />
-          <Button type="submit" variant="contained" onClick={handle_ready_click}>
+          <SpectatorsList/>
+        </Stack>
+        <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+        <Stack direction="row" spacing={8}>
+          <Button variant="contained" onClick={handle_leave_click} color="error">
+            Leave
+          </Button>
+          <Button type="submit" variant="contained" onClick={handle_ready_click} color="success">
             Ready
           </Button>
           <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
-          <Button onClick={handle_leave_click}>
-            Leave
-          </Button>
         </Stack>
-          <SpectatorsList/>
         </Stack>
       </Container>
-      <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
-        {/* chat */}
-        {/* <Grid item xs={8}>
-          <Typography variant="h5">Chat</Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sx={{ height: '200px', overflowY: 'auto' }}>
-              {messages.map((message, i) => {
-                const user = message.author;
-
-                return (
-                  <Grid item key={i}>
-                    <Typography variant="body1">
-                      <strong>{user.name}</strong>: {message.text}
-                    </Typography>
-                  </Grid>
-                );
-              })}
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={9}>
-                  <TextField label="Type a message" onChange={handleMessageInput} fullWidth />
-                </Grid>
-                <Grid item xs={3}>
-                  <Button variant="contained" onClick={handleSendMessage} fullWidth>
-                    Send
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid> */}
-        {/* buttons */}
-        {/* <Grid item xs={12}>
-          <Grid container spacing={2}>
-            {currentUser.id !== hostUser.id && (
-              <Grid item xs={4}>
-                <Button variant="contained" onClick={handleReady} fullWidth>
-                  Ready
-                </Button>
-              </Grid>
-            )}
-            {currentUser.id === hostUser.id && (
-              <Grid item xs={4}>
-                <Button variant="contained" onClick={handleStart} fullWidth disabled={users.length < room_size}>
-                  Start
-                </Button>
-              </Grid>
-            )}
-            <Grid item xs={4}>
-              <Button variant="contained" onClick={handleLeave} fullWidth>
-                Leave
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid> */}
+      
+      
+        
     </>
   );
 }
