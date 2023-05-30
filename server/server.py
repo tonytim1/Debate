@@ -78,25 +78,25 @@ def signup():
             'tags':tags
         })
 
-        # Add image
-        destination_blob_name = f'users/{user_id}/profile _image'
-        bucket = storage.bucket(app=app_firestore)
-        blob = bucket.blob(destination_blob_name)
-        blob.upload_from_filename('C:\\Users\\t-idobanyan\Desktop\pic.jpg')
+        # # # Add image
+        # # destination_blob_name = f'users/{user_id}/profile _image'
+        # # bucket = storage.bucket(app=app_firestore)
+        # # blob = bucket.blob(destination_blob_name)
+        # # blob.upload_from_filename('C:\\Users\\t-idobanyan\Desktop\pic.jpg')
 
-        # Get the download URL of the uploaded image
-        download_url = blob.generate_signed_url(
-            version='v4',
-            expiration=datetime.timedelta(days=7),
-            method='GET'
-        )
+        # # # Get the download URL of the uploaded image
+        # # download_url = blob.generate_signed_url(
+        # #     version='v4',
+        # #     expiration=datetime.timedelta(days=7),
+        # #     method='GET'
+        # # )
 
-        # Store the download URL in the user's document in Firestore
-        user_ref.update({'image': download_url})
+        # # Store the download URL in the user's document in Firestore
+        # user_ref.update({'image': download_url})
         
         
         # Return success response
-        return jsonify({'message': 'Signup successful', 'userId': user_id, 'token': token}), 200
+        return jsonify({'message': 'Signup successful', 'userId': username, 'token': token }), 200
     
     except auth.EmailAlreadyExistsError:
         # Handle case when the provided email already exists
@@ -117,10 +117,13 @@ def signin():
         token = login_user['idToken']
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
-        # db_firestore.collection('users')
-        # user_name = user_info['displayName']
+
+        users_ref = db_firestore.collection('users').document(user_id)
+        users_user_data = users_ref.get().to_dict()
+        username = users_user_data['username']
+
         # Return success response
-        return jsonify({'message': 'Login successful', 'userId': user_id, 'token': token}), 200
+        return jsonify({'message': 'Login successful', 'userId': username, 'token': token }), 200
     
     except Exception as e:
         # Handle other errors
