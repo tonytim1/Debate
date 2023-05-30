@@ -9,7 +9,7 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 import pyrebase
 import os
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\\Users\\t-idobanyan\Desktop\DebateApp\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-103f2d1f33.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./server/debate-center-firebase-key.json"
 
 app = Flask(__name__)
 CORS(app)
@@ -33,11 +33,6 @@ db_firestore = firestore.client(app_firestore)
 # Auth
 firebase_auth = pyrebase.initialize_app(config)
 auths = firebase_auth.auth()
-
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html') 
-
 
 @app.route('/', methods=['GET'])
 def index():
@@ -351,4 +346,4 @@ def handle_send_message(payload):
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, keyfile='./server/key.pem', certfile='./server/cert.pem')
