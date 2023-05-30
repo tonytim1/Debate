@@ -9,7 +9,7 @@ import Avatar from '@mui/material/Avatar';
 import { Container, Stack, Box, Button} from '@mui/material';
 import { io } from 'socket.io-client';
 
-const socket = io('ws://10.0.0.20:5000');
+const socket = io('ws://' + window.location.hostname + ':5000');
 
 const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
     const handle_switch = async () => {

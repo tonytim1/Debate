@@ -21,9 +21,9 @@ export default function RoomPage() {
   const [isModerator, setIsModerator] = useState(false);
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
 
-  const socket = io('ws://10.0.0.20:5000');
-  // const currUserId = '10.0.0.20'
-  const currUserId = 'moderator'
+  const socket = io('ws://' + window.location.hostname + ':5000');
+  // const currUserId = '127.0.0.1'
+  const currUserId = 'moderator'  // change to real user id
 
   const join_room = () => {
     socket.emit('join_room', { roomId });
@@ -60,7 +60,7 @@ export default function RoomPage() {
   }, []);
 
   const handle_ready_click = () => {
-    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });
+    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
   }
 
 
@@ -129,7 +129,7 @@ export default function RoomPage() {
       <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Stack direction="column" alignItems="center" spacing={3}>
           <Typography variant="h2">{name}</Typography>
-          <UsersShow teams={teams} usersList={users_list} currUserId={"10.0.0.20"} roomId={roomId} />
+          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} />
           <Card>
             chat
           </Card>

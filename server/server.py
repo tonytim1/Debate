@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db, firestore
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
 
@@ -10,9 +10,14 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 # Initialize Firebase Admin SDK for Firestore
-cred_firestore = credentials.Certificate("./debate-center-dd720-firebase-adminsdk-pepv1-07be2008cd.json")
+cred_firestore = credentials.Certificate("./server/debate-center-firebase-key.json")
 app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
 db_firestore = firestore.client(app_firestore)
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html') 
 
 
 @socketio.on('connect')
@@ -62,7 +67,7 @@ def join_debate_room(data):
     rec_data = data
     room_id = rec_data.get('roomId')
     # user_id = rec_data.get('userId')
-    user_id = request.remote_addr
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
     
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -183,6 +188,7 @@ def switch_team(details):
 @socketio.on('ready_click')
 def handle_ready_click(details):
     print(details)
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(details['roomId'])
@@ -194,11 +200,11 @@ def handle_ready_click(details):
     room_data = room_doc.to_dict()
     users_list = room_data.get('users_list', {})
 
-    if details['userId'] not in users_list:
+    if user_id not in users_list:
         return
     
-    user = users_list[details['userId']]
-    users_list.update({details['userId']: {'ready': not user['ready'], 'team': user['team']}})
+    user = users_list[user_id]
+    users_list.update({user_id: {'ready': not user['ready'], 'team': user['team']}})
     room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
 
     updated_room_doc = room_ref.get()
@@ -207,5 +213,39 @@ def handle_ready_click(details):
     # Notify all users in the room about the change
     emit('room_data_updated', updated_room_data, room=details['roomId'])
 
+# -------------------------------------- #
+
+# -------------- CONVERSATION PAGE ------------- #
+
+@socketio.on('sendingSignal')
+def handle_sending_signal(payload):
+    user_id_to_send_signal = payload['userIdToSendSignal']
+    emit('userJoined', {'signal': payload['signal'], 'callerId': payload['callerId']}, to=user_id_to_send_signal)
+
+@socketio.on('returningSignal')
+def handle_returning_signal(payload):
+    caller_id = payload['callerId']
+    emit('returningSignalAck', {'signal': payload['signal'], 'id': request.sid}, to=caller_id)
+
+@socketio.on('sendMessage')
+def handle_send_message(payload):
+    message = payload['message']
+    room_id = payload['roomId']
+    username = payload['username']
+    # save message to database ?
+    emit('receiveMessage', {'message': message, 'username': username}, room=room_id)
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
-    socketio.run(app, host='127.0.0.1', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
