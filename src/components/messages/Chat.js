@@ -45,7 +45,7 @@ const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages
         <TextField label="Type a message" value={messageRef} onChange={(e) => setMessageRef(e.target.value)} fullWidth />
       </Grid>
       <Grid item xs={3}>
-        <Button variant="contained" onClick={sendMessage} fullWidth>
+        <Button variant="contained" onClick={sendMessage} >
         Send
         </Button>
       </Grid>

@@ -42,7 +42,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const isAuthenticated = useAuthentication();
-  
+
   const socket = io('ws://' + window.location.hostname + ':5000');
 
   const fetchRooms = async () => {
@@ -58,12 +58,17 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       fetchRooms();
-      socket.once('all_rooms', (rooms) => {
+      socket.on('all_rooms', (rooms) => {
         const mappedRooms = new Map(Object.entries(rooms));
         mappedRooms.forEach((data) => {
           data.color = getRandomColor(); // Add random color to each room
         });
         setRoomsData(mappedRooms);
+      });
+      socket.on('rooms_updated', () => {
+        console.log('rooms updated');
+        fetchRooms();
+        // set roomsData to new data
       });
     };
 

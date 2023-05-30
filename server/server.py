@@ -118,7 +118,7 @@ def create_room():
     time_to_start_in_minutes = room_data.get('time_to_start')
     time_to_start = time.time() + time_to_start_in_minutes * 60 
     spectators = room_data.get('spectators')
-    moderator = room_data.get('moderator') # request.remote_addr # change to username when ready
+    moderator = room_data.get('moderator') # change to username when ready
 
     # Create a new room document
     new_room = {
@@ -137,6 +137,8 @@ def create_room():
     # Add the room to Firestore (assuming you have initialized the Firestore client)
     room_ref = db_firestore.collection('rooms').document()
     room_ref.set(new_room)
+
+    socketio.emit("rooms_updated") # broadcast=True
 
     # Return the room ID as a response
     return jsonify({'roomId': room_ref.id})
@@ -199,6 +201,7 @@ def leave_debate_room(data):
     if not room_doc.exists:
         # Room not found, send a specific response
         emit('leave_room_error', {'error': 'Room not found'})
+        leave_room(room_id)
         return
 
     room_data = room_doc.to_dict()
@@ -206,6 +209,7 @@ def leave_debate_room(data):
 
     if user_id not in users_dict:
         emit('leave_room_error', {'error': 'User is not in the room'})
+        leave_room(room_id)
         return
 
     users_dict.pop(user_id)
@@ -213,7 +217,9 @@ def leave_debate_room(data):
 
     if not users_dict:
         # Delete the room if no users are left
+        emit("rooms_updated", broadcast=True)
         room_ref.delete()
+        leave_room(room_id)
         return
 
     # If the moderator left, assign a new moderator
