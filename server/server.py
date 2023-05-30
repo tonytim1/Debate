@@ -1,19 +1,42 @@
 import time
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, auth
+from firebase_admin.auth import UserRecord
 from firebase_admin import db, firestore
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
+import pyrebase
+import os
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\\Users\\t-idobanyan\Desktop\DebateApp\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-103f2d1f33.json"
 
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
+config = {
+  'apiKey': "AIzaSyDgh6sFpRq3YmEJDW4Z-L4ReInFSkA6NSY",
+  'authDomain': "debate-center-dd720.firebaseapp.com",
+  'databaseURL': "https://debate-center-dd720-default-rtdb.europe-west1.firebasedatabase.app",
+  'projectId': "debate-center-dd720",
+  'storageBucket': "debate-center-dd720.appspot.com",
+  'messagingSenderId': "524928099280",
+  'appId': "1:524928099280:web:9b24e083399f9bfae0cfd5"
+}
+
 # Initialize Firebase Admin SDK for Firestore
 cred_firestore = credentials.Certificate("./server/debate-center-firebase-key.json")
 app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
 db_firestore = firestore.client(app_firestore)
+
+# Auth
+firebase_auth = pyrebase.initialize_app(config)
+auths = firebase_auth.auth()
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html') 
 
 
 @app.route('/', methods=['GET'])
@@ -25,6 +48,46 @@ def index():
 def handle_connect():
     print('Client connected. id=', request.sid)
 
+
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    user_data = request.get_json()
+    email = user_data.get('email')
+    password = user_data.get('password')
+    
+    name = user_data.get('name')
+    username = user_data.get('username')
+    tags = user_data.get('tags')
+
+    try:
+        # create new user base on email and password
+        new_user = auths.create_user_with_email_and_password(email=email, password=password)
+        user_uid = auths.get_account_info(new_user['idToken'])['users'][0]['localId']
+        # Return success response
+        return jsonify({'message': 'Sign-up successful', 'uid': user_uid}), 200
+    
+    except auth.EmailAlreadyExistsError:
+        # Handle case when the provided email already exists
+        return jsonify({'error': 'Email already exists'}), 400
+    
+    except Exception as e:
+        # Handle other errors
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/signin', methods=['POST'])
+def signin():
+    user_data = request.get_json()
+    email = user_data.get('email')
+    password = user_data.get('password')
+    try:
+        login_user = auths.sign_in_with_email_and_password(email, password)
+        user_uid = auths.get_account_info(login_user['idToken'])['users'][0]['localId']
+        # Return success response
+        return jsonify({'message': 'Sign-up successful', 'uid': user_uid}), 200
+    
+    except Exception as e:
+        # Handle other errors
+        return jsonify({'error': str(e)}), 500
 
 # ---------- HOME PAGE ---------- #
 @socketio.on("fetch_all_rooms")
