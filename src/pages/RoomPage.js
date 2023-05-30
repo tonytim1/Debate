@@ -7,6 +7,7 @@ import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import CircularProgress from '@mui/material/CircularProgress';
 import UsersShow from 'src/components/roomPage/UsersShow';
 import AdminControl from 'src/components/roomPage/AdminControl';
+import SpectatorsList from 'src/components/roomPage/SpectatorsList';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
 
@@ -22,8 +23,8 @@ export default function RoomPage() {
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
 
   const socket = io('ws://10.0.0.20:5000');
-  // const currUserId = '10.0.0.20'
-  const currUserId = 'moderator'
+  const currUserId = '10.0.0.20'
+  // const currUserId = 'moderator'
 
   const join_room = () => {
     socket.emit('join_room', { roomId });
@@ -126,17 +127,25 @@ export default function RoomPage() {
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Stack direction="column" alignItems="center" spacing={3}>
+      <Container style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        height: '100vh',
+      }}>
+        <Stack direction="row" sx={{ width: '100%' }}>
+        <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
           <Typography variant="h2">{name}</Typography>
           <UsersShow teams={teams} usersList={users_list} currUserId={"10.0.0.20"} roomId={roomId} />
-          <Card>
+          <Card sx={{width: '90%'}}>
             chat
           </Card>
           <Button type="submit" variant="contained" onClick={handle_ready_click}>
             Ready
           </Button>
           <AdminControl moderatorId={moderator} currUserId={currUserId}/>
+        </Stack>
+          <SpectatorsList/>
         </Stack>
       </Container>
       <Grid container spacing={3}>

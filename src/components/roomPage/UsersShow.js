@@ -6,7 +6,8 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import { Container, Stack, Box, Button} from '@mui/material';
+import Divider from '@mui/material/Divider';
+import { Container, Stack, Box, Button, Card} from '@mui/material';
 import { io } from 'socket.io-client';
 
 const socket = io('ws://10.0.0.20:5000');
@@ -21,24 +22,36 @@ const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
 
     return (
     <Container>
+    <Card>
       {teams ? (
-        <Stack direction="row" spacing={2}>
-            <Box>
+        <Stack direction="row" spacing={2} 
+        style={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}>
+            <Box sx={{width:'50%'}}>
                 <List subheader={
-                    <ListSubheader component="div" id="nested-list-subheader">
+                    <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
                     Team 1
                     </ListSubheader>
-                }>
+                }
+                >
                     {Object.entries(usersList).map(([userId, user]) => {
                         if (user.team) {
                             return (
-                            <ListItem key={userId} alignItems="flex-start">
+                            <ListItem 
+                                key={userId}
+                                alignItems="flex-start"
+                                sx={{
+                                    backgroundColor: user.ready ? 'lightgreen' : 'inherit',
+                                  }}
+                            >
                                 <ListItemAvatar>
                                     <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={<>{user.ready ? 'Ready' : ''}  {userId}</>}
-                                    secondary={null}
+                                    primary={<>{userId} </>}
+                                    secondary={<a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a>}
                                 />
                             </ListItem>
                             );
@@ -48,25 +61,30 @@ const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
                     
                 </List>
             </Box>
-            <Button onClick={handle_switch}>
+            <Button onClick={handle_switch} sx={{width:'0%'}}>
                 change team
             </Button>
-            <Box>
+            <Box sx={{width:'50%'}}>
                 <List subheader={
-                    <ListSubheader component="div" id="nested-list-subheader">
+                    <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
                     Team 2
                     </ListSubheader>
                 }>
                     {Object.entries(usersList).map(([userId, user]) => {
                         if (!user.team) {
                             return (
-                            <ListItem key={userId} alignItems="flex-start">
+                            <ListItem 
+                                key={userId} 
+                                alignItems="flex-start"
+                                sx={{
+                                    backgroundColor: user.ready ? 'lightgreen' : 'inherit',
+                                  }}
+                            >
                                 <ListItemAvatar>
                                     <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={<>{user.ready ? 'Ready' : ''}  {userId}</>}
-                                    secondary={null}
+                                    primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
                                 />
                             </ListItem>
                             );
@@ -79,18 +97,18 @@ const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
         </Stack>
       ) : (
         <List subheader={
-            <ListSubheader component="div" id="nested-list-subheader">
-            Team 1
+            <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
+                Users
             </ListSubheader>
         }>
             {Object.entries(usersList).map(([userId, user]) => {
                 return (
-                    <ListItem alignItems="flex-start">
+                    <ListItem alignItems="flex-start" >
                         <ListItemAvatar>
                             <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                         </ListItemAvatar>
                         <ListItemText
-                            primary={<>{user.ready ? 'Ready' : ''}  {userId}</>}
+                            primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
                             secondary={null}
                         />
                     </ListItem>
@@ -99,6 +117,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
             )}  
         </List>
       )}
+    </Card>
     </Container>
   );
 };
