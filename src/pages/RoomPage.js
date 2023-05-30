@@ -137,7 +137,7 @@ export default function RoomPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        height: '100vh',
+        height: '60vh',
       }}>
         <Stack direction="row" sx={{ width: '100%' }}>
         <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
@@ -154,8 +154,6 @@ export default function RoomPage() {
           <SpectatorsList/>
         </Stack>
       </Container>
-      <Grid container spacing={3}>
-        </Grid>
       <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
         {/* chat */}
         {/* <Grid item xs={8}>
