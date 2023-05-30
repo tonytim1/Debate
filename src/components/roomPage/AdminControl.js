@@ -9,13 +9,15 @@ import Avatar from '@mui/material/Avatar';
 import { Container, Stack, Box, Button} from '@mui/material';
 import { io } from 'socket.io-client';
 
-const socket = io('ws://10.0.0.20:5000');
+const AdminControl = ({ moderatorId, currUserId, roomId, socket}) => {
 
-const AdminControl = ({ moderatorId, currUserId}) => {
+    const handle_start_click = () => {
+        socket.emit('start_conversation_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
+      }
 
     return (
         currUserId === moderatorId ? (
-            <Button>
+            <Button variant="contained" type="submit" onClick={handle_start_click}>
                 Start
             </Button>
         ) : (<></>)

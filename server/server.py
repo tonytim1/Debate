@@ -1,8 +1,9 @@
+import time
 import firebase_admin
 from firebase_admin import credentials, auth
 from firebase_admin.auth import UserRecord
 from firebase_admin import db, firestore
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import pyrebase
@@ -25,13 +26,23 @@ config = {
 }
 
 # Initialize Firebase Admin SDK for Firestore
-cred_firestore = credentials.Certificate("C:\\Users\\t-idobanyan\Desktop\DebateApp\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-103f2d1f33.json")
+cred_firestore = credentials.Certificate("./server/debate-center-firebase-key.json")
 app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
 db_firestore = firestore.client(app_firestore)
 
 # Auth
 firebase_auth = pyrebase.initialize_app(config)
 auths = firebase_auth.auth()
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html') 
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html') 
+
 
 @socketio.on('connect')
 def handle_connect():
@@ -78,6 +89,20 @@ def signin():
         # Handle other errors
         return jsonify({'error': str(e)}), 500
 
+# ---------- HOME PAGE ---------- #
+@socketio.on("fetch_all_rooms")
+def get_all_rooms():
+    rooms_ref = db_firestore.collection('rooms')
+
+    rooms = {}
+    for room in rooms_ref.stream():
+        room_data = room.to_dict()
+        room_id = room.id
+        rooms[room_id] = room_data
+
+    socketio.emit("all_rooms", rooms, room=request.sid)    
+
+
 # ---------- CREATE ROOM PAGE ---------- #
 @app.route('/api/create_room', methods=['POST'])
 def create_room():
@@ -86,9 +111,10 @@ def create_room():
     tags = room_data.get('tags')
     teams = room_data.get('teams')
     room_size = room_data.get('room_size')
-    time_to_start = room_data.get('time_to_start')
+    time_to_start_in_minutes = room_data.get('time_to_start')
+    time_to_start = time.time() + time_to_start_in_minutes * 60 
     spectators = room_data.get('spectators')
-    moderator = room_data.get('moderator')
+    moderator = request.remote_addr # change to room_data.get('moderator') when ready
 
     # Create a new room document
     new_room = {
@@ -120,7 +146,7 @@ def join_debate_room(data):
     rec_data = data
     room_id = rec_data.get('roomId')
     # user_id = rec_data.get('userId')
-    user_id = request.remote_addr
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
     
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -152,15 +178,15 @@ def join_debate_room(data):
 
     # Join the SocketIO broadcast room
     join_room(room_id)
-    emit('join', room_data ,room=request.sid)
+    emit('join', {"roomData": room_data, "userId": user_id} ,room=request.sid) # temporary solution to get user_id to the frontend
 
 
-@socketio.on('leave_room')
+@socketio.on('leave_click')
 def leave_debate_room(data):
     # Get the request data
     rec_data = data
     room_id = rec_data.get('roomId')
-    user_id = rec_data.get('userId')
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -172,17 +198,25 @@ def leave_debate_room(data):
         return
 
     room_data = room_doc.to_dict()
-    users_list = room_data.get('users_list', [])
-    room_size = room_data.get('room_size', 0)
+    users_dict = room_data.get('users_list', [])
 
-    if user_id not in users_list:
+    if user_id not in users_dict:
         emit('leave_room_error', {'error': 'User is not in the room'})
         return
 
-    users_list.remove(user_id)
-    room_ref.update({'users_list': users_list})
+    users_dict.pop(user_id)
+    room_ref.update({'users_list': users_dict})
 
-    # Join the SocketIO broadcast room
+    if not users_dict:
+        # Delete the room if no users are left
+        room_ref.delete()
+        return
+
+    # If the moderator left, assign a new moderator
+    if user_id == room_data['moderator']:
+        room_ref.update({'moderator': list(users_dict.keys())[0]})
+
+    # leave the SocketIO broadcast room
     leave_room(room_id)
 
     updated_room_doc = room_ref.get()
@@ -210,7 +244,7 @@ def fetch_room_data(data):
         emit('fetch_room_data_error', {'error': 'Room not found'})
 # -------------------------------------- #
 
-# ---------- USERS SHOW ---------- #
+# ------------- USERS SHOW ------------- #
 @socketio.on('switch_team')
 def switch_team(details):
     print(details)
@@ -229,7 +263,7 @@ def switch_team(details):
         return
     
     user = users_list[details['userId']]
-    users_list.update({details['userId']: {'ready': user['ready'], 'team': not user['team']}})
+    users_list.update({details['userId']: {'ready': False, 'team': not user['team']}})
     room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
 
     updated_room_doc = room_ref.get()
@@ -241,6 +275,7 @@ def switch_team(details):
 @socketio.on('ready_click')
 def handle_ready_click(details):
     print(details)
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(details['roomId'])
@@ -252,11 +287,11 @@ def handle_ready_click(details):
     room_data = room_doc.to_dict()
     users_list = room_data.get('users_list', {})
 
-    if details['userId'] not in users_list:
+    if user_id not in users_list:
         return
     
-    user = users_list[details['userId']]
-    users_list.update({details['userId']: {'ready': not user['ready'], 'team': user['team']}})
+    user = users_list[user_id]
+    users_list.update({user_id: {'ready': not user['ready'], 'team': user['team']}})
     room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
 
     updated_room_doc = room_ref.get()
@@ -265,5 +300,55 @@ def handle_ready_click(details):
     # Notify all users in the room about the change
     emit('room_data_updated', updated_room_data, room=details['roomId'])
 
+# -------------------------------------- #
+
+# -------------- CONVERSATION PAGE ------------- #
+
+@socketio.on('start_conversation_click')  # TODO: add a thread that will start the conversation after the needed time
+def handle_conversation_start(details):
+    print(details)
+    # Notify all users in the room about the change
+    emit('conversation_start', room=details['roomId'])
+
+@socketio.on('joinConversationRoom')
+def handle_join_room(payload):
+    room_id = payload['roomId']
+    username = payload['username']
+    join_room(room_id)
+    # query user from database
+    users_in_this_room = [socket_to_user[sid] for sid in room_to_sockets[room_id]]
+    socket_to_user[request.sid] = username
+    room_to_sockets[room_id].append(request.sid)
+    emit('usersInRoom', users_in_this_room, room=room_id)
+    
+@socketio.on('sendingSignal')
+def handle_sending_signal(payload):
+    user_id_to_send_signal = payload['userIdToSendSignal']
+    emit('userJoined', {'signal': payload['signal'], 'callerId': payload['callerId']}, to=user_id_to_send_signal)
+
+@socketio.on('returningSignal')
+def handle_returning_signal(payload):
+    caller_id = payload['callerId']
+    emit('returningSignalAck', {'signal': payload['signal'], 'id': request.sid}, to=caller_id)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+# Get the request data
+    print('Client disconnected')
+    # Join the SocketIO broadcast room
+    leave_room(request.sid)
+
+
+# ---------- CHAT ---------- #        
+
+@socketio.on('sendMessage')
+def handle_send_message(payload):
+    print(f"received message: {payload}")
+    message = payload['message']
+    room_id = payload['roomId']
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
+    emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
+
+
 if __name__ == '__main__':
-    socketio.run(app, host='10.100.102.6', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

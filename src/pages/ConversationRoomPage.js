@@ -11,27 +11,29 @@ import {
 import React, { useEffect, useRef, useState, createRef } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Video from '../components/conversation_room/Video';
 import Spectator from 'src/components/conversation_room/Spectator';
 //import "./RoomScreen.css";
-const config = {
-  iceServers: [
-    {
-      urls: "stun:stun.l.google.com:19302"
-    }
-  ]
-}
 
 const ConversationRoomPage = (props) => {
+  console.log(useParams());
+  console.log(props);
+  const config = {
+    iceServers: [
+      {
+        urls: "stun:stun.l.google.com:19302"
+      }
+    ]
+  };
   const [ peers, setPeers ] = useState([]); //state for rendering and also have stream of peers
   const socketRef = useRef(); //own socket
-  const myVideo = useRef(); //for display own video
+  const myVideo = createRef(); //for display own video
   const webcamStream = useRef(); //own webcam stream
   const peersRef = useRef([]); //collection of peers who are currently connect to a room
   const screenCaptureStream = useRef(); //screen capture stream
-  const conversationRoomId = "123456789"; // props.match.params.roomId; //joined room id
+  const conversationRoomId = useParams(); //joined room id
   const roomName = "cool room"; //props.match.params.roomName; //joined room name
   const [ isVideoMuted, setIsVideoMuted ] = useState(false);
   const [ isAudioMuted, setIsAudioMuted ] = useState(false);
@@ -109,12 +111,10 @@ const ConversationRoomPage = (props) => {
 
   const connectToSocketAndWebcamStream = async() => {
     //connecting to server using socket
-    socketRef.current = io.connect(process.env.REACT_APP_BASE_URL, {
-      query: {
-        token: localStorage.getItem('Token')
-      }
-    });
+    socketRef.current = io('ws://' + window.location.hostname + ':5000');
     webcamStream.current = await getWebcamStream();
+    console.log(webcamStream.current);
+    console.log(myVideo.current);
     myVideo.current.srcObject = webcamStream.current;
     if(!webcamStream.current.getAudioTracks()[0].enabled) webcamStream.current.getAudioTracks()[0].enabled = true;
   }

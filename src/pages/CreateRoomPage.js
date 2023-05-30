@@ -51,11 +51,11 @@ export default function CreateRoomPage() {
           spectators: allowSpectators,
           ready_list: [],
           spectators_list: [],
-          moderator: "moderator",
+          moderator: "moderator",  // change to currUser
         };
 
         // Send the new room data to the backend server
-        const response = await fetch('http://10.0.0.20:5000/api/create_room', {
+        const response = await fetch('http://' + window.location.hostname +':5000/api/create_room', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

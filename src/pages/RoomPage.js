@@ -7,8 +7,11 @@ import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import CircularProgress from '@mui/material/CircularProgress';
 import UsersShow from 'src/components/roomPage/UsersShow';
 import AdminControl from 'src/components/roomPage/AdminControl';
+import SpectatorsList from 'src/components/roomPage/SpectatorsList';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
+import ConversationRoomPage from './ConversationRoomPage';
+import Chat from 'src/components/messages/Chat';
 
 
 export default function RoomPage() {
@@ -20,16 +23,19 @@ export default function RoomPage() {
   const [currUserData, setCurrUserData] = useState(null);
   const [isModerator, setIsModerator] = useState(false);
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
+  const [ messageRef, setMessageRef ] = useState(''); 
+  const [ messages, setMessages ] = useState([]); 
 
-  const socket = io('ws://10.0.0.20:5000');
-  // const currUserId = '10.0.0.20'
-  const currUserId = 'moderator'
+  const socket = io('ws://' + window.location.hostname + ':5000');
+  //const currUserId = 'moderator'  // change to real user id
+  const [currUserId, setCurrUserId] = useState(0);
 
   const join_room = () => {
     socket.emit('join_room', { roomId });
   
-    socket.once('join', (roomData) => {
+    socket.once('join', ( { roomData, userId } ) => {
       setRoomData(roomData);
+      setCurrUserId(userId);
       setRoomState(1);
     });
     socket.once('room not found', () => {
@@ -38,9 +44,14 @@ export default function RoomPage() {
     socket.once('room is full', () => {
       setRoomState(3);
     });
-    socket.once('in conversation', () => {
+    socket.once('conversation_start', () => {
+      console.log('conversation_start')
       const conversationURL = `/conversation/${roomId}`;
       navigate(conversationURL);
+    });
+    socket.on('receiveMessage', payload => {
+      console.log("recieved message");
+      setMessages(messages => [...messages, payload]);
     });
   };
   
@@ -60,9 +71,13 @@ export default function RoomPage() {
   }, []);
 
   const handle_ready_click = () => {
-    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });
+    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
   }
 
+  const handle_leave_click = () => {
+    socket.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
+    navigate('/');
+  }
 
   // loading screen
   if (roomState === 0) {
@@ -72,7 +87,7 @@ export default function RoomPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh', // Adjust the height to fit your requirements
+        height: '100vh', 
       }}
     >
       <Stack style={{alignItems: 'center'}}>
@@ -116,31 +131,36 @@ export default function RoomPage() {
     );
   }
 
-  console.log(roomData);
-  console.log(Object.keys(roomData.users_list).length)
   const { name, teams, room_size, users_list, moderator} = roomData;
-
+  console.log(users_list);
 
   return (
     <>
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Stack direction="column" alignItems="center" spacing={3}>
+      <Container style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        height: '60vh',
+      }}>
+        <Stack direction="row" sx={{ width: '100%' }}>
+        <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
           <Typography variant="h2">{name}</Typography>
-          <UsersShow teams={teams} usersList={users_list} currUserId={"10.0.0.20"} roomId={roomId} />
-          <Card>
-            chat
-          </Card>
+          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} />
           <Button type="submit" variant="contained" onClick={handle_ready_click}>
             Ready
           </Button>
-          <AdminControl moderatorId={moderator} currUserId={currUserId}/>
+          <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
+          <Button onClick={handle_leave_click}>
+            Leave
+          </Button>
+        </Stack>
+          <SpectatorsList/>
         </Stack>
       </Container>
-      <Grid container spacing={3}>
-        </Grid>
+      <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
         {/* chat */}
         {/* <Grid item xs={8}>
           <Typography variant="h5">Chat</Typography>

@@ -1,15 +1,13 @@
 import { Helmet } from 'react-helmet-async';
-// @mui
-import { Grid, Button, Container, Stack, Typography } from '@mui/material';
-// components
+import { Grid, Button, Container, TextField, Stack, Typography, Autocomplete } from '@mui/material';
 import Iconify from '../components/iconify';
 import { BlogPostCard, BlogPostsSort, BlogPostsSearch } from '../sections/@dashboard/blog';
-// mock
-import POSTS from '../_mock/blog';
-//firebase
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
-
+import { io } from 'socket.io-client';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+
 // ----------------------------------------------------------------------
 
 const SORT_OPTIONS = [
@@ -18,40 +16,33 @@ const SORT_OPTIONS = [
   { value: 'oldest', label: 'Oldest' },
 ];
 
+
 // ----------------------------------------------------------------------
 
 export default function HomePage() {
-  const [roomsData, setRoomsData] = useState([]);
+  const [roomsData, setRoomsData] = useState(new Map());
+  const navigate = useNavigate();
 
-  // // Function to fetch all rooms from the "rooms" collection
-  // const fetchRooms = async () => {
-  //   try {
-  //     // Get a reference to the "rooms" collection
-  //     // const roomsRef = collection(firestore, 'rooms');
+  const socket = io('ws://' + window.location.hostname + ':5000');
 
-  //     // Get all documents in the "rooms" collection
-  //     const querySnapshot = await getDocs(roomsRef);
+  const fetchRooms = async () => {
+    socket.emit('fetch_all_rooms');
+  };
 
-  //     // Create an array to store the fetched rooms
-  //     const rooms = [];
+  useEffect(() => {
+    const fetchData = async () => {
+      fetchRooms();
+      socket.once('all_rooms', (rooms) => {
+        setRoomsData(new Map(Object.entries(rooms)));
+      });
+    };
+    
+    fetchData();
+  }, []);
 
-  //     // Loop through the documents and extract the room data
-  //     querySnapshot.forEach((doc) => {
-  //       const roomData = doc.data();
-  //       rooms.push(roomData);
-  //     });
-
-  //     // Set the state with the fetched rooms
-  //     setRoomsData(rooms);
-  //     console.log({rooms})
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-  
-  // useEffect(() => {
-  //   fetchRooms();
-  // }, []);
+  useEffect(() => {
+    console.log(typeof(roomsData));
+  }, [roomsData]);
 
   return (
     <>
@@ -60,29 +51,25 @@ export default function HomePage() {
       </Helmet>
 
       <Container>
-        <Stack alignItems="center" justifyContent="space-between"  mb={1}>
+        <Stack spacing={2} alignItems="center" justifyContent="center"  mb={1}>
           <Typography variant="h2">
             Debate Center
           </Typography>
-          {/* <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            Create room
-          </Button> */}
-        </Stack>
-        <Stack direction="row"  alignItems="center" justifyContent="space-between" mb={1}>
-          <Typography variant="h8" align="center" >
+          <Typography variant="h8">
             Discover diverse perspectives, ignite meaningful discussions
           </Typography>
+          <Stack spacing={2} mb={3} direction="row" alignItems="center" justifyContent="center" sx={{width:'100%'}}>
+              <TextField label="Search for debates" sx={{width:'90%'}}/>
+              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
+                Create Room
+              </Button>
+          </Stack>
+          <Grid container spacing={3} justifyContent="center">
+            {Array.from(roomsData).map(([roomId, data]) => (
+              <BlogPostCard key={roomId} room={data} roomId={roomId} />
+              ))}
+          </Grid>
         </Stack>
-        {/* <Stack mb={5} direction="row" alignItems="center" justifyContent="space-between"> */}
-        <Stack mb={3} direction="row" alignItems="center" justifyContent="space-between">
-            <BlogPostsSearch posts={roomsData} placeholder="Search for debates"/>
-        </Stack>
-
-        <Grid container spacing={3}>
-          {roomsData.map((room, index) => (
-            <BlogPostCard key={index} index={index} room={room} />
-          ))}
-        </Grid>
       </Container>
     </>
   );

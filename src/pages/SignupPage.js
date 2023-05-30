@@ -23,8 +23,6 @@ import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
 import { collection, addDoc, setDoc, doc, getFirestore } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-// import firestore from "../firebase";
-// import firebase from "src/firebase.js";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import axios from 'axios';
 
@@ -33,8 +31,8 @@ import axios from 'axios';
 export default function SignUpPage() {
 
   const navigate = useNavigate();
-  //const { firestore, auth } = firebase;
-  const [name, setName] = useState('');
+  const [first_name, setFirstName] = useState('');
+  const [last_name, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
