@@ -31,8 +31,7 @@ import axios from 'axios';
 export default function SignUpPage() {
 
   const navigate = useNavigate();
-  const [first_name, setFirstName] = useState('');
-  const [last_name, setLastName] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
