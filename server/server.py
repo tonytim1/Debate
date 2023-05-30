@@ -25,6 +25,20 @@ def handle_connect():
     print('Client connected. id=', request.sid)
 
 
+# ---------- HOME PAGE ---------- #
+@socketio.on("fetch_all_rooms")
+def get_all_rooms():
+    rooms_ref = db_firestore.collection('rooms')
+
+    rooms = {}
+    for room in rooms_ref.stream():
+        room_data = room.to_dict()
+        room_id = room.id
+        rooms[room_id] = room_data
+
+    socketio.emit("all_rooms", rooms, room=request.sid)    
+
+
 # ---------- CREATE ROOM PAGE ---------- #
 @app.route('/api/create_room', methods=['POST'])
 def create_room():
@@ -102,12 +116,12 @@ def join_debate_room(data):
     emit('join', {"roomData": room_data, "userId": user_id} ,room=request.sid) # temporary solution to get user_id to the frontend
 
 
-@socketio.on('leave_room')
+@socketio.on('leave_click')
 def leave_debate_room(data):
     # Get the request data
     rec_data = data
     room_id = rec_data.get('roomId')
-    user_id = rec_data.get('userId')
+    user_id = f"{request.remote_addr}"  # change to user_id when ready
 
     # Fetch the room data from Firestore
     room_ref = db_firestore.collection('rooms').document(room_id)
@@ -119,17 +133,25 @@ def leave_debate_room(data):
         return
 
     room_data = room_doc.to_dict()
-    users_list = room_data.get('users_list', [])
-    room_size = room_data.get('room_size', 0)
+    users_dict = room_data.get('users_list', [])
 
-    if user_id not in users_list:
+    if user_id not in users_dict:
         emit('leave_room_error', {'error': 'User is not in the room'})
         return
 
-    users_list.remove(user_id)
-    room_ref.update({'users_list': users_list})
+    users_dict.pop(user_id)
+    room_ref.update({'users_list': users_dict})
 
-    # Join the SocketIO broadcast room
+    if not users_dict:
+        # Delete the room if no users are left
+        room_ref.delete()
+        return
+
+    # If the moderator left, assign a new moderator
+    if user_id == room_data['moderator']:
+        room_ref.update({'moderator': list(users_dict.keys())[0]})
+
+    # leave the SocketIO broadcast room
     leave_room(room_id)
 
     updated_room_doc = room_ref.get()
@@ -246,15 +268,13 @@ def handle_returning_signal(payload):
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    room_id = None
-    for room, clients in socketio.server.rooms.items():
-        if request.sid in clients:
-            room_id = room
-            clients.remove(request.sid)
-            break
-    if room_id is not None:
-        leave_room(room_id)
-        emit('userLeft', request.sid, room=room_id)
+# Get the request data
+    print('Client disconnected')
+    # Join the SocketIO broadcast room
+    leave_room(request.sid)
+
+
+# ---------- CHAT ---------- #        
 
 @socketio.on('sendMessage')
 def handle_send_message(payload):
@@ -263,19 +283,6 @@ def handle_send_message(payload):
     room_id = payload['roomId']
     user_id = f"{request.remote_addr}"  # change to user_id when ready
     emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
-
-
-@socketio.on("fetch_all_rooms")
-def get_all_rooms():
-    rooms_ref = db_firestore.collection('rooms')
-
-    rooms = {}
-    for room in rooms_ref.stream():
-        room_data = room.to_dict()
-        room_id = room.id
-        rooms[room_id] = room_data
-
-    socketio.emit("all_rooms", rooms, room=request.sid)
 
 
 if __name__ == '__main__':

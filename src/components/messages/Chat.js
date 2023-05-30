@@ -8,21 +8,10 @@ import {
   Button,
 } from '@mui/material';
 
-const Chat = ({ roomId, socket }) => {
-    const [ messageRef, setMessageRef ] = useState(''); //message input
-    const [ messages, setMessages ] = useState([]); //all messages state after joining the room
-
-    //receiving message of an user and adding this at message state
-    socket.on('receiveMessage', payload => {
-        console.log(payload)
-        setMessages(messages => [...messages, payload]);
-    });
+const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
 
     const sendMessage = (e) => {
         e.preventDefault();
-        console.log(messageRef);
-        console.log(setMessageRef);
-        //sending message text with roomId to sever it will send message along other data to all connected user of current room
         socket.emit('sendMessage', {
             roomId: roomId,
             message: messageRef,
