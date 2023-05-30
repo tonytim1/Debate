@@ -14,14 +14,12 @@ const Chat = ({ roomId, socket }) => {
 
     //receiving message of an user and adding this at message state
     socket.on('receiveMessage', payload => {
-        console.log(payload)
+        console.log("recieved message");
         setMessages(messages => [...messages, payload]);
     });
 
     const sendMessage = (e) => {
         e.preventDefault();
-        console.log(messageRef);
-        console.log(setMessageRef);
         //sending message text with roomId to sever it will send message along other data to all connected user of current room
         socket.emit('sendMessage', {
             roomId: roomId,
