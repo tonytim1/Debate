@@ -51,7 +51,7 @@ export default function CreateRoomPage() {
           spectators: allowSpectators,
           ready_list: [],
           spectators_list: [],
-          moderator: "moderator",
+          moderator: "moderator",  // change to currUser
         };
 
         // Send the new room data to the backend server

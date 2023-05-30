@@ -10,9 +10,7 @@ import Divider from '@mui/material/Divider';
 import { Container, Stack, Box, Button, Card} from '@mui/material';
 import { io } from 'socket.io-client';
 
-const socket = io('ws://' + window.location.hostname + ':5000');
-
-const UsersShow = ({ teams, usersList, roomId, currUserId}) => {
+const UsersShow = ({ teams, usersList, roomId, currUserId, socket}) => {
     const handle_switch = async () => {
         socket.emit('switch_team', { 
             'roomId': roomId, 
