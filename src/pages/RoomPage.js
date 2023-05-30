@@ -23,6 +23,8 @@ export default function RoomPage() {
   const [currUserData, setCurrUserData] = useState(null);
   const [isModerator, setIsModerator] = useState(false);
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
+  const [ messageRef, setMessageRef ] = useState(''); 
+  const [ messages, setMessages ] = useState([]); 
 
   const socket = io('ws://' + window.location.hostname + ':5000');
   //const currUserId = 'moderator'  // change to real user id
@@ -46,6 +48,10 @@ export default function RoomPage() {
       console.log('conversation_start')
       const conversationURL = `/conversation/${roomId}`;
       navigate(conversationURL);
+    });
+    socket.on('receiveMessage', payload => {
+      console.log("recieved message");
+      setMessages(messages => [...messages, payload]);
     });
   };
   
@@ -120,11 +126,7 @@ export default function RoomPage() {
     );
   }
 
-  console.log(roomData);
-  console.log(Object.keys(roomData.users_list).length);
-  console.log(currUserId);
   const { name, teams, room_size, users_list, moderator} = roomData;
-
 
   return (
     <>
@@ -154,7 +156,7 @@ export default function RoomPage() {
       </Container>
       <Grid container spacing={3}>
         </Grid>
-      <Chat roomId={roomId} socket={socket} />
+      <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
         {/* chat */}
         {/* <Grid item xs={8}>
           <Typography variant="h5">Chat</Typography>

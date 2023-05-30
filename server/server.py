@@ -25,6 +25,20 @@ def handle_connect():
     print('Client connected. id=', request.sid)
 
 
+# ---------- HOME PAGE ---------- #
+@socketio.on("fetch_all_rooms")
+def get_all_rooms():
+    rooms_ref = db_firestore.collection('rooms')
+
+    rooms = {}
+    for room in rooms_ref.stream():
+        room_data = room.to_dict()
+        room_id = room.id
+        rooms[room_id] = room_data
+
+    socketio.emit("all_rooms", rooms, room=request.sid)    
+
+
 # ---------- CREATE ROOM PAGE ---------- #
 @app.route('/api/create_room', methods=['POST'])
 def create_room():
@@ -246,15 +260,13 @@ def handle_returning_signal(payload):
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    room_id = None
-    for room, clients in socketio.server.rooms.items():
-        if request.sid in clients:
-            room_id = room
-            clients.remove(request.sid)
-            break
-    if room_id is not None:
-        leave_room(room_id)
-        emit('userLeft', request.sid, room=room_id)
+# Get the request data
+    print('Client disconnected')
+    # Join the SocketIO broadcast room
+    leave_room(request.sid)
+
+
+# ---------- CHAT ---------- #        
 
 @socketio.on('sendMessage')
 def handle_send_message(payload):
@@ -263,19 +275,6 @@ def handle_send_message(payload):
     room_id = payload['roomId']
     user_id = f"{request.remote_addr}"  # change to user_id when ready
     emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
-
-
-@socketio.on("fetch_all_rooms")
-def get_all_rooms():
-    rooms_ref = db_firestore.collection('rooms')
-
-    rooms = {}
-    for room in rooms_ref.stream():
-        room_data = room.to_dict()
-        room_id = room.id
-        rooms[room_id] = room_data
-
-    socketio.emit("all_rooms", rooms, room=request.sid)
 
 
 if __name__ == '__main__':
