@@ -49,7 +49,7 @@ export default function LoginForm() {
         password: user.password,
       };
       // Send the new user data to the backend server
-      const response = await fetch('http://10.100.102.6:5000/api/signin', {
+      const response = await fetch('http://' + window.location.hostname + ':5000/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +60,9 @@ export default function LoginForm() {
       if (response.ok) {
         clearLoginErrorMes();
         const responseData = await response.json();
-        setUserUid(responseData.uid);
+        setUserUid(responseData.userId);
+        localStorage.setItem('token', responseData.token);
+        console.log(localStorage.getItem("token"));
         setIsSubmit(true);
         setFormErrors(validateForm(user));
       } else {
@@ -98,7 +100,7 @@ export default function LoginForm() {
   useEffect(() => {
     if (Object.keys(formErrors).length == 0 && Object.keys(loginError).length == 0 && isSubmit) {
       const userURL = `/user/${user_uid}`;
-      navigate(userURL);
+      navigate('/');
     }
   }, [formErrors], [loginError]);
 

@@ -63,7 +63,7 @@ export default function SignUpPage() {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://10.100.102.6:5000/api/signup', {
+      const response = await fetch('http://' + window.location.hostname + ':5000/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,10 +73,12 @@ export default function SignUpPage() {
 
       if (response.ok) {
         const responseData = await response.json();
-        const userURL = `/user/${responseData.uid}`;
-        navigate(userURL);
+        const userURL = `/user/${responseData.userId}`;
+        localStorage.setItem('token', responseData.token);
+        console.log(localStorage.getItem("token"));
+        navigate('/');
       } else {
-        console.error('Failed to create room');
+        console.error('Failed to sign up');
       }
     } catch (error) {
       console.error(error);
