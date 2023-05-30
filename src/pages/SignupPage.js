@@ -23,8 +23,8 @@ import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
 import { collection, addDoc, setDoc, doc, getFirestore } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import firestore from "../firebase";
-import firebase from "src/firebase.js";
+// import firestore from "../firebase";
+// import firebase from "src/firebase.js";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 
@@ -32,7 +32,7 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 export default function SignUpPage() {
 
   const navigate = useNavigate();
-  const { firestore, auth } = firebase;
+  // const { firestore, auth } = firebase;
   const [first_name, setFirstName] = useState('');
   const [last_name, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -86,17 +86,17 @@ export default function SignUpPage() {
       //   newUser.image = imageUrl;
       // }
 
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // const user = userCredential.user;
 
 
       // Add the user to Firebase Firestore
-      const docRef = await addDoc(collection(firestore, 'users'), newUser);
+      // const docRef = await addDoc(collection(firestore, 'users'), newUser);
       //const usersRef = await setDoc(doc(firestore, 'users', docRef.id));
-      console.log("User added with ID: ", docRef.id);
+      // console.log("User added with ID: ", docRef.id);
 
-      const userURL = `/user/${docRef.id}`;
-      navigate(userURL);
+      // const userURL = `/user/${docRef.id}`;
+      // navigate(userURL);
 
     } catch (error) {
       console.error(error);
