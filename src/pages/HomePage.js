@@ -42,8 +42,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const isAuthenticated = useAuthentication();
-  console.log("isAuthenticated: " + isAuthenticated)
-
+  
   const socket = io('ws://' + window.location.hostname + ':5000');
 
   const fetchRooms = async () => {

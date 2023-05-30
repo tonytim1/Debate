@@ -28,7 +28,6 @@ export default function RoomPage() {
   const [ messages, setMessages ] = useState([]);
 
   const isAuthenticated = useAuthentication();
-  console.log("isAuthenticated: " + isAuthenticated)
 
   useEffect(() => {
     if(!isAuthenticated) {
@@ -38,14 +37,13 @@ export default function RoomPage() {
 
   const socket = io('ws://' + window.location.hostname + ':5000');
   //const currUserId = 'moderator'  // change to real user id
-  const [currUserId, setCurrUserId] = useState(0);
+  const currUserId = localStorage.getItem("userId")
 
   const join_room = () => {
-    socket.emit('join_room', { roomId });
+    socket.emit('join_room', { roomId: roomId, userId: currUserId });
   
-    socket.once('join', ( { roomData, userId } ) => {
+    socket.once('user_join', ( roomData ) => {
       setRoomData(roomData);
-      setCurrUserId(userId);
       setRoomState(1);
     });
     socket.once('room not found', () => {
@@ -161,7 +159,7 @@ export default function RoomPage() {
           <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} />
           <SpectatorsList/>
         </Stack>
-        <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+        <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
         <Stack direction="row" spacing={8}>
           <Button variant="contained" onClick={handle_leave_click} color="error">
             Leave

@@ -8,13 +8,14 @@ import {
   Button,
 } from '@mui/material';
 
-const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
+const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages, currUserId }) => {
 
     const sendMessage = (e) => {
         e.preventDefault();
         socket.emit('sendMessage', {
             roomId: roomId,
             message: messageRef,
+            userId: currUserId
         })
         setMessageRef("");
     }

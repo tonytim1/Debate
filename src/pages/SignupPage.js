@@ -75,7 +75,7 @@ export default function SignUpPage() {
         const responseData = await response.json();
         const userURL = `/user/${responseData.userId}`;
         localStorage.setItem('token', responseData.token);
-        localStorage.setItem('userId', responseData.token);
+        localStorage.setItem('userId', responseData.userId);
         console.log(localStorage.getItem("token"));
         navigate('/');
       } else {
