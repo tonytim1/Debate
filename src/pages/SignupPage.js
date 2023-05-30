@@ -66,7 +66,7 @@ export default function SignUpPage() {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://10.90.184.194:5000/signup', {
+      const response = await fetch('http://10.100.102.6:5000/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,30 +75,17 @@ export default function SignUpPage() {
       });
 
       if (response.ok) {
-        const userURL = `/user/${response.data.uid}`;
+        const responseData = await response.json();
+        const userURL = `/user/${responseData.uid}`;
         navigate(userURL);
       } else {
-        console.error('Failed to create user');
+        console.error('Failed to create room');
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-
-  const handleSignUp1 = () => {
-    axios
-      .post('/signup', { email, password, name, username, tags })
-      .then((response) => {
-        // Sign-up successful, do something with the response
-        console.log(response.data);
-      })
-      .catch((error) => {
-        // Handle sign-up errors
-        console.error("gggggggggggggggg");
-        console.error(error.response.data);
-      });
-  };
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
