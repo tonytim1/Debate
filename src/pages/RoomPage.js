@@ -87,7 +87,7 @@ export default function RoomPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh', // Adjust the height to fit your requirements
+        height: '100vh', 
       }}
     >
       <Stack style={{alignItems: 'center'}}>

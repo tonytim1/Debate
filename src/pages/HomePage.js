@@ -22,24 +22,24 @@ export default function HomePage() {
   
   const socket = io('ws://' + window.location.hostname + ':5000');
 
-  // const fetchRooms = async () => {
-    
-
-  // };
+  const fetchRooms = async () => {
+    socket.emit('fetch_all_rooms');
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      socket.emit('fetch_all_rooms');
-      socket.on('all_rooms', (rooms) => {
-        console.log(rooms);
-        const roomsMap = new Map(Object.entries(rooms));
-        setRoomsData(roomsMap);
-        console.log(roomsData);
+      fetchRooms();
+      socket.once('all_rooms', (rooms) => {
+        setRoomsData(new Map(Object.entries(rooms)));
       });
     };
-  
+    
     fetchData();
   }, []);
+
+  useEffect(() => {
+    console.log(typeof(roomsData));
+  }, [roomsData]);
 
   return (
     <>
@@ -56,16 +56,16 @@ export default function HomePage() {
             Discover diverse perspectives, ignite meaningful discussions
           </Typography>
           <Stack spacing={2} mb={3} direction="row" alignItems="center" justifyContent="center" sx={{width:'100%'}}>
-              <TextField label="Search for debates"/>
+              <TextField label="Search for debates" sx={{width:'90%'}}/>
               <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />}>
                 Create Room
               </Button>
           </Stack>
-          {/* <Grid container spacing={3}>
-            {roomsData.map((roomId, data) => (
-              <BlogPostCard key={roomId} index={0} room={data} />
+          <Grid container spacing={3} justifyContent="center">
+            {Array.from(roomsData).map(([roomId, data]) => (
+              <BlogPostCard key={roomId} room={data} roomId={roomId} />
               ))}
-          </Grid> */}
+          </Grid>
         </Stack>
       </Container>
     </>
