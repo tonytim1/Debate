@@ -157,7 +157,7 @@ def fetch_room_data(data):
         emit('fetch_room_data_error', {'error': 'Room not found'})
 # -------------------------------------- #
 
-# ---------- USERS SHOW ---------- #
+# ------------- USERS SHOW ------------- #
 @socketio.on('switch_team')
 def switch_team(details):
     print(details)
@@ -176,7 +176,7 @@ def switch_team(details):
         return
     
     user = users_list[details['userId']]
-    users_list.update({details['userId']: {'ready': user['ready'], 'team': not user['team']}})
+    users_list.update({details['userId']: {'ready': False, 'team': not user['team']}})
     room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
 
     updated_room_doc = room_ref.get()
@@ -265,15 +265,17 @@ def handle_send_message(payload):
     emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
 
 
+@socketio.on("fetch_all_rooms")
+def get_all_rooms():
+    rooms_ref = db_firestore.collection('rooms')
 
+    rooms = {}
+    for room in rooms_ref.stream():
+        room_data = room.to_dict()
+        room_id = room.id
+        rooms[room_id] = room_data
 
-
-
-
-
-
-
-
+    socketio.emit("all_rooms", rooms, room=request.sid)
 
 
 if __name__ == '__main__':

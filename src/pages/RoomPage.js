@@ -7,6 +7,7 @@ import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import CircularProgress from '@mui/material/CircularProgress';
 import UsersShow from 'src/components/roomPage/UsersShow';
 import AdminControl from 'src/components/roomPage/AdminControl';
+import SpectatorsList from 'src/components/roomPage/SpectatorsList';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
 import ConversationRoomPage from './ConversationRoomPage';
@@ -130,8 +131,14 @@ export default function RoomPage() {
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Stack direction="column" alignItems="center" spacing={3}>
+      <Container style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        height: '100vh',
+      }}>
+        <Stack direction="row" sx={{ width: '100%' }}>
+        <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
           <Typography variant="h2">{name}</Typography>
           <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} />
           <Card>
@@ -141,6 +148,8 @@ export default function RoomPage() {
             Ready
           </Button>
           <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
+        </Stack>
+          <SpectatorsList/>
         </Stack>
       </Container>
       <Grid container spacing={3}>
