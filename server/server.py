@@ -10,7 +10,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 # Initialize Firebase Admin SDK for Firestore
-cred_firestore = credentials.Certificate("D:\VSC\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-07be2008cd.json")
+cred_firestore = credentials.Certificate("./debate-center-dd720-firebase-adminsdk-pepv1-07be2008cd.json")
 app_firestore = firebase_admin.initialize_app(cred_firestore, name='Firestore')
 db_firestore = firestore.client(app_firestore)
 
@@ -208,4 +208,4 @@ def handle_ready_click(details):
     emit('room_data_updated', updated_room_data, room=details['roomId'])
 
 if __name__ == '__main__':
-    socketio.run(app, host='10.0.0.20', port=5000, debug=True)
+    socketio.run(app, host='127.0.0.1', port=5000, debug=True)
