@@ -102,7 +102,10 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
         }>
             {Object.entries(usersList).map(([userId, user]) => {
                 return (
-                    <ListItem alignItems="flex-start" >
+                    <ListItem alignItems="flex-start" 
+                        sx={{
+                            backgroundColor: user.ready ? 'lightgreen' : 'inherit',
+                        }}>
                         <ListItemAvatar>
                             <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
                         </ListItemAvatar>

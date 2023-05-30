@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 // @mui
+import { random, clamp } from 'lodash';
 import { alpha, styled } from '@mui/material/styles';
 import { Box, Link, Card, Grid, Avatar, Typography, Stack, CardContent } from '@mui/material';
 // utils
@@ -8,7 +9,6 @@ import { fShortenNumber } from '../../../utils/formatNumber';
 //
 import SvgColor from '../../../components/svg-color';
 import Iconify from '../../../components/iconify';
-import { random, clamp } from 'lodash';
 import { useNavigate } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
@@ -59,47 +59,29 @@ BlogPostCard.propTypes = {
   index: PropTypes.number,
 };
 
-export default function BlogPostCard({ room, roomId }) {
+export default function BlogPostCard({ room, roomId, color }) {
   const { name, tags, time_to_start, spectators, teams, room_size, users_list} = room;
   const index = 1;
   const latestPostLarge = index === 0;
   const latestPost = index === 1 || index === 2;
-  const colors = [
-    '#263238', // Dark Blue Grey
-    '#9C27B0', // Deep Purple
-    '#6A1B9A', // Dark Purple
-    '#303F9F', // Indigo
-    '#1A237E', // Midnight Blue
-    '#004D40', // Dark Teal
-    '#006064', // Dark Cyan
-    '#01579B', // Dark Blue
-    '#FF6F00', // Dark Orange
-    '#E65100', // Dark Amber
-  ];
   
 
   const navigate = useNavigate();
-
-  const handleTitleClick = (roomId) => {
-    navigate(`/rooms/${roomId}`); // Navigate to the specified URL when the title is clicked
-  };
 
   return (
     <Grid item xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 2.7 }>
       <Card sx={{ position: 'relative' }}>
         <StyledCardMedia
           sx={{
-            ...((latestPostLarge || latestPost) && {
-              pt: 'calc(100% * 4 / 3)',
-              '&:after': {
-                top: 0,
-                content: "''",
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                bgcolor: alpha(colors[random(0, colors.length - 1)], 0.72),
-              },
-            }),
+            pt: 'calc(100% * 4 / 3)',
+            '&:after': {
+              top: 0,
+              content: "''",
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              bgcolor: color,
+            },
           }}
         >
           <SvgColor
@@ -112,11 +94,10 @@ export default function BlogPostCard({ room, roomId }) {
               bottom: -15,
               position: 'absolute',
               color: 'background.paper',
-              ...((latestPostLarge || latestPost) && { display: 'none' }),
             }}
           />
           {/* <StyledAvatar
-            alt={moderator}
+            // alt={moderator}
             // src={}
             sx={{
               ...((latestPostLarge || latestPost) && {
@@ -135,20 +116,22 @@ export default function BlogPostCard({ room, roomId }) {
         <CardContent
           sx={{
             pt: 4,
-            ...((latestPostLarge || latestPost) && {
-              bottom: 0,
-              width: '100%',
-              position: 'absolute',
-            }),
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
           }}
         > 
-            <Stack>
+        <Stack spacing={5}>
+          <Stack>
             <Typography gutterBottom variant="caption" sx={{
               color: 'white',
               display: 'block',
               justifyContent: 'flex-end',
             }}>
+
               { Object.keys(users_list).length } / {room_size}
+            
             </Typography>
             <StyledTitle
               color="inherit"
@@ -158,19 +141,37 @@ export default function BlogPostCard({ room, roomId }) {
                 navigate(`/room/${roomId}`)
               }}
               sx={{
-                ...(latestPostLarge && { typography: 'h5', height: 60 }),
                 ...((latestPostLarge || latestPost) && {
                   color: 'common.white',
-
+                  
                 }),
+                typography: 'h5', height: 1
               }}
               >
               {name}
             </StyledTitle>
-            <Typography gutterBottom variant="caption" sx={{ color: 'white', display: 'block' }}>
-              starts in {time_to_start} minutes
-            </Typography>
+          </Stack>
+          <Stack>
+            <StyledInfo>
+              <Stack spacing={5}>
+                <StyledInfo sx={{ justifyContent: 'flex-start' }}>
+                  {tags.map((tag, index) => (
+                    <Typography
+                      key={index}
+                      variant="caption"
+                      sx={{ color: 'white', display: 'inline-block', marginRight: '0.5rem' }}
+                    >
+                      #{tag}
+                    </Typography>
+                  ))}
+                </StyledInfo>
+                <Typography gutterBottom variant="caption" sx={{ color: 'white', display: 'block' }}>
+                  starts in {time_to_start} minutes
+                </Typography>
+              </Stack>
+            </StyledInfo>
             </Stack>
+          </Stack>
         </CardContent>
       </Card>
     </Grid>

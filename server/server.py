@@ -9,7 +9,7 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 import pyrebase
 import os
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\\Users\\t-idobanyan\Desktop\DebateApp\debate\server\debate-center-dd720-firebase-adminsdk-pepv1-103f2d1f33.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./server/debate-center-firebase-key.json"
 
 app = Flask(__name__)
 CORS(app)
@@ -39,11 +39,6 @@ def index():
     return render_template('index.html') 
 
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html') 
-
-
 @socketio.on('connect')
 def handle_connect():
     print('Client connected. id=', request.sid)
@@ -62,9 +57,12 @@ def signup():
     try:
         # create new user base on email and password
         new_user = auths.create_user_with_email_and_password(email=email, password=password)
-        user_uid = auths.get_account_info(new_user['idToken'])['users'][0]['localId']
+        login_user = auths.sign_in_with_email_and_password(email, password)
+        token = login_user['idToken']
+        user_info = auths.get_account_info(token)['users'][0]
+        user_id = user_info['localId']
         # Return success response
-        return jsonify({'message': 'Sign-up successful', 'uid': user_uid}), 200
+        return jsonify({'message': 'Signup successful', 'userId': user_id, 'token': token}), 200
     
     except auth.EmailAlreadyExistsError:
         # Handle case when the provided email already exists
@@ -72,6 +70,7 @@ def signup():
     
     except Exception as e:
         # Handle other errors
+        print(e)
         return jsonify({'error': str(e)}), 500
     
 @app.route('/api/signin', methods=['POST'])
@@ -81,12 +80,17 @@ def signin():
     password = user_data.get('password')
     try:
         login_user = auths.sign_in_with_email_and_password(email, password)
-        user_uid = auths.get_account_info(login_user['idToken'])['users'][0]['localId']
+        token = login_user['idToken']
+        user_info = auths.get_account_info(token)['users'][0]
+        user_id = user_info['localId']
+        # db_firestore.collection('users')
+        # user_name = user_info['displayName']
         # Return success response
-        return jsonify({'message': 'Sign-up successful', 'uid': user_uid}), 200
+        return jsonify({'message': 'Login successful', 'userId': user_id, 'token': token}), 200
     
     except Exception as e:
         # Handle other errors
+        print(e)
         return jsonify({'error': str(e)}), 500
 
 # ---------- HOME PAGE ---------- #
@@ -351,4 +355,5 @@ def handle_send_message(payload):
 
 
 if __name__ == '__main__':
+    # socketio.run(app, host='0.0.0.0', port=5000, debug=True, keyfile='./server/key.pem', certfile='./server/cert.pem')
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
