@@ -62,6 +62,7 @@ export default function LoginForm() {
         const responseData = await response.json();
         setUserUid(responseData.userId);
         localStorage.setItem('token', responseData.token);
+        localStorage.setItem('userId', responseData.token);
         console.log(localStorage.getItem("token"));
         setIsSubmit(true);
         setFormErrors(validateForm(user));

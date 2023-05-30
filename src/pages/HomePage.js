@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { random, clamp } from 'lodash';
 import { alpha, styled } from '@mui/material/styles';
+import useAuthentication from "../hooks/useAuthentication";
 
 // ----------------------------------------------------------------------
 
@@ -40,11 +41,20 @@ export default function HomePage() {
   const [filteredRooms, setFilteredRooms] = useState([]);
   const navigate = useNavigate();
 
+  const isAuthenticated = useAuthentication();
+  console.log("isAuthenticated: " + isAuthenticated)
+
   const socket = io('ws://' + window.location.hostname + ':5000');
 
   const fetchRooms = async () => {
     socket.emit('fetch_all_rooms');
   };
+
+  useEffect(() => {
+    if(!isAuthenticated) {
+      navigate('/dashboard/login');
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchData = async () => {

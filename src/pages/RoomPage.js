@@ -12,6 +12,7 @@ import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Av
 import { io } from 'socket.io-client';
 import ConversationRoomPage from './ConversationRoomPage';
 import Chat from 'src/components/messages/Chat';
+import useAuthentication from "../hooks/useAuthentication";
 
 
 export default function RoomPage() {
@@ -24,7 +25,16 @@ export default function RoomPage() {
   const [isModerator, setIsModerator] = useState(false);
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
   const [ messageRef, setMessageRef ] = useState(''); 
-  const [ messages, setMessages ] = useState([]); 
+  const [ messages, setMessages ] = useState([]);
+
+  const isAuthenticated = useAuthentication();
+  console.log("isAuthenticated: " + isAuthenticated)
+
+  useEffect(() => {
+    if(!isAuthenticated) {
+      navigate('/dashboard/login');
+    }
+  }, [isAuthenticated]);
 
   const socket = io('ws://' + window.location.hostname + ':5000');
   //const currUserId = 'moderator'  // change to real user id
