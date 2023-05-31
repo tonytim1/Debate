@@ -10,6 +10,7 @@ import { fShortenNumber } from '../../../utils/formatNumber';
 import SvgColor from '../../../components/svg-color';
 import Iconify from '../../../components/iconify';
 import { useNavigate } from 'react-router-dom';
+import { useTimer } from 'react-timer-hook';
 // ----------------------------------------------------------------------
 
 const StyledCardMedia = styled('div')({
@@ -60,16 +61,36 @@ BlogPostCard.propTypes = {
 };
 
 export default function BlogPostCard({ room, roomId, color }) {
-  const { name, tags, time_to_start, spectators, teams, room_size, users_list} = room;
+  const { name, tags, time_to_start, spectators, teams, room_size, users_list } = room;
   const index = 1;
   const latestPostLarge = index === 0;
   const latestPost = index === 1 || index === 2;
-  
+
 
   const navigate = useNavigate();
 
+  const time = new Date()
+  const diff = time - new Date(time_to_start * 1000)
+  const seconds = Math.abs(diff / 1000)
+  time.setSeconds(time.getSeconds() + seconds);
+  function MyTimer({ expiryTimestamp }) {
+    const {
+      seconds,
+      minutes,
+      isRunning,
+    } = useTimer({ expiryTimestamp, onExpire: () => console.warn('onExpire called') });
+
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '60', fontWeight: 'bold'}}>
+          {diff < 0 && isRunning ? (<div>Deabate start in {minutes}:{seconds}</div>) : 'Deabate started'}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Grid item xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 2.7 }>
+    <Grid item xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 2.7}>
       <Card sx={{ position: 'relative' }}>
         <StyledCardMedia
           sx={{
@@ -121,55 +142,55 @@ export default function BlogPostCard({ room, roomId, color }) {
             height: '100%',
             position: 'absolute',
           }}
-        > 
-        <Stack spacing={5}>
-          <Stack>
-            <Typography gutterBottom variant="caption" sx={{
-              color: 'white',
-              display: 'block',
-              justifyContent: 'flex-end',
-            }}>
+        >
+          <Stack spacing={5}>
+            <Stack>
+              <Typography gutterBottom variant="caption" sx={{
+                color: 'white',
+                display: 'block',
+                justifyContent: 'flex-end',
+              }}>
 
-              { Object.keys(users_list).length } / {room_size}
-            
-            </Typography>
-            <StyledTitle
-              color="inherit"
-              variant="subtitle2"
-              underline="hover"
-              onClick={() =>{
-                navigate(`/room/${roomId}`)
-              }}
-              sx={{
-                ...((latestPostLarge || latestPost) && {
-                  color: 'common.white',
-                  
-                }),
-                typography: 'h5', height: 1
-              }}
+                {Object.keys(users_list).length} / {room_size}
+
+              </Typography>
+              <StyledTitle
+                color="inherit"
+                variant="subtitle2"
+                underline="hover"
+                onClick={() => {
+                  navigate(`/room/${roomId}`)
+                }}
+                sx={{
+                  ...((latestPostLarge || latestPost) && {
+                    color: 'common.white',
+
+                  }),
+                  typography: 'h5', height: 1
+                }}
               >
-              {name}
-            </StyledTitle>
-          </Stack>
-          <Stack>
-            <StyledInfo>
-              <Stack spacing={5}>
-                <StyledInfo sx={{ justifyContent: 'flex-start' }}>
-                  {tags.map((tag, index) => (
-                    <Typography
-                      key={index}
-                      variant="caption"
-                      sx={{ color: 'white', display: 'inline-block', marginRight: '0.5rem' }}
-                    >
-                      #{tag}
-                    </Typography>
-                  ))}
-                </StyledInfo>
-                <Typography gutterBottom variant="caption" sx={{ color: 'white', display: 'block' }}>
-                  starts in {time_to_start} minutes
-                </Typography>
-              </Stack>
-            </StyledInfo>
+                {name}
+              </StyledTitle>
+            </Stack>
+            <Stack>
+              <StyledInfo>
+                <Stack spacing={3}>
+                  <StyledInfo sx={{ justifyContent: 'flex-start' }}>
+                    {tags.map((tag, index) => (
+                      <Typography
+                        key={index}
+                        variant="caption"
+                        sx={{ color: 'white', display: 'inline-block', marginRight: '0.5rem' }}
+                      >
+                        #{tag}
+                      </Typography>
+                    ))}
+                  </StyledInfo>
+                  <Typography gutterBottom variant="caption" sx={{ color: 'white', display: 'block' }}>
+                    <MyTimer expiryTimestamp={time} />
+                  </Typography>
+                </Stack>
+              </StyledInfo>
             </Stack>
           </Stack>
         </CardContent>

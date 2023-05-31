@@ -8651,6 +8651,11 @@ react-switch@^7.0.0:
   dependencies:
     prop-types "^15.7.2"
 
+react-timer-hook@^3.0.6:
+  version "3.0.6"
+  resolved "https://registry.npmjs.org/react-timer-hook/-/react-timer-hook-3.0.6.tgz"
+  integrity sha512-6O1gcBT7R5gm2W14mGAu35KfX0tdJ9s817UDJTL7/IQUXqK6wkYgZzy1mSLa6N+AQGEhgoVCtTsP7tIhBmSD6A==
+
 react-transition-group@^4.4.5:
   version "4.4.5"
   resolved "https://registry.npmjs.org/react-transition-group/-/react-transition-group-4.4.5.tgz"

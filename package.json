@@ -59,6 +59,7 @@
     "react-router-dom": "^6.11.2",
     "react-scripts": "^5.0.1",
     "react-switch": "^7.0.0",
+    "react-timer-hook": "^3.0.6",
     "simple-peer": "^9.6.2",
     "simplebar-react": "^3.2.1",
     "socket.io": "^4.6.1",
