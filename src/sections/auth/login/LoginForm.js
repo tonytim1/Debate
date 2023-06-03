@@ -57,7 +57,7 @@ export default function LoginForm() {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://' + window.location.hostname + ':5000/api/signin', {
+      const response = await fetch('http://' + window.location.hostname + ':8000/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

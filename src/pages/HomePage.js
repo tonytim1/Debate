@@ -51,7 +51,7 @@ export default function HomePage() {
 
   const isAuthenticated = useAuthentication();
 
-  const socket = io('ws://' + window.location.hostname + ':5000');
+  const socket = io('ws://' + window.location.hostname + ':8000');
 
   const fetchRooms = async () => {
     socket.emit('fetch_all_rooms');
