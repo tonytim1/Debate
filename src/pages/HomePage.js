@@ -1,9 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import React from 'react';
-import { Grid, Button,Box,Paper, Container, Grow, TextField, Stack, Typography, Autocomplete } from '@mui/material';
+import { Grid, Button, Box, Skeleton, Paper, Container, Grow, TextField, Stack, Typography, Autocomplete } from '@mui/material';
 import Iconify from '../components/iconify';
 import BlogPostCard from '../sections/@dashboard/blog/BlogPostCard';
-import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import { io } from 'socket.io-client';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,8 +10,8 @@ import { random, clamp } from 'lodash';
 import { alpha, styled } from '@mui/system';
 import useAuthentication from "../hooks/useAuthentication";
 import './HomePage.css'
-import ShowRooms from 'src/components/homepage/ShowRooms';
 import LandingPage from 'src/components/LandingPage/LandingPage'
+import CreateRoomCard from 'src/components/CreateRoomCard/CreateRoomCard';
 // ----------------------------------------------------------------------
 
 
@@ -44,9 +43,10 @@ export default function HomePage() {
   ];
   const getRandomColor = () => alpha(colors[random(0, colors.length - 1)], 0.72);  
 
-  const [roomsData, setRoomsData] = useState(new Map());
+  const [roomsData, setRoomsData] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState(false);
+  const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
   const navigate = useNavigate();
 
   const isAuthenticated = useAuthentication();
@@ -62,6 +62,12 @@ export default function HomePage() {
   //     navigate('/dashboard/login');
   //   }
   // }, [isAuthenticated]);
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Escape') {
+      setShowCreateRoomCard(false)
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,7 +86,12 @@ export default function HomePage() {
       });
     };
 
+    window.addEventListener('keydown', handleKeyPress);
     fetchData();
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
   }, []);
 
   useEffect(() => {
@@ -122,27 +133,50 @@ export default function HomePage() {
                   filterRooms(query);
                 }}
                 />
-              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
+              {/* <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}> */}
+              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {setShowCreateRoomCard(true)}}>
                 Create Room
               </Button>
               
             </Stack>
-            <CardContainer>
-            <Grid container spacing={3} justifyContent="center">
-              {filteredRooms.map(([roomId, data], index) => (
-                <BlogPostCard
-                  key={`${roomId}-${searchQuery}`} // Add unique key that includes searchQuery
-                  room={data}
-                  roomId={roomId}
-                  color={data.color}
-                  timeout={(index + 1) * 250} // Calculate timeout based on index
-                />
-              ))}
-            </Grid>
-            </CardContainer>
+            {roomsData ? 
+            (
+              <CardContainer>
+                <Grid container spacing={3} justifyContent="center">
+                  {filteredRooms.map(([roomId, data], index) => (
+                    <BlogPostCard
+                      key={`${roomId}-${searchQuery}`} // Add unique key that includes searchQuery
+                      room={data}
+                      roomId={roomId}
+                      color={data.color}
+                      timeout={(index + 1) * 250} // Calculate timeout based on index
+                    />
+                  ))}
+                </Grid>
+              </CardContainer>
+            ) :
+            (
+              <>
+              <Stack spacing={4}>
+                <Stack direction={'row'} spacing={4}>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                </Stack>
+                <Stack direction={'row'} spacing={4}>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                </Stack>
+              </Stack>
+              </>
+            )}
           </Stack>
       </Container> 
       <LandingPage showLoginReminder={!isAuthenticated} />
+      <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)}/>
     </>
   );
 }

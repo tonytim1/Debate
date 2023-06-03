@@ -7,10 +7,7 @@ import { bgBlur } from '../../../utils/cssStyles';
 // components
 import Iconify from '../../../components/iconify';
 //
-import Searchbar from './Searchbar';
 import AccountPopover from './AccountPopover';
-import LanguagePopover from './LanguagePopover';
-import NotificationsPopover from './NotificationsPopover';
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +15,7 @@ const NAV_WIDTH = 280;
 
 const HEADER_MOBILE = 64;
 
-const HEADER_DESKTOP = 92;
+const HEADER_DESKTOP = 64;
 
 const StyledRoot = styled(AppBar)(({ theme }) => ({
   ...bgBlur({ color: theme.palette.background.default }),

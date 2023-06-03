@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { TextField, Autocomplete, FormControlLabel, Box, Stack, Button, Container, Slider, Typography, Switch, Chip } from '@mui/material';
+import { TextField, Autocomplete, FormControlLabel, Box, Stack, Button, Container, Slider, Typography, Switch, Chip, Card, Portal } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import './CreateRoomPage.css'
+import styled from '@emotion/styled';
 
 export default function CreateRoomPage() {
   const navigate = useNavigate();
@@ -95,100 +96,109 @@ export default function CreateRoomPage() {
       <Helmet>
         <title>Debate Center | Create Room</title>
       </Helmet>
-      <Container>
-        <Stack spacing={4} className='content'>
-          <Typography variant="h4">
-            Create Room
-          </Typography>
-          <TextField
-            name="Name"
-            label="Room Name"
-            variant="outlined"
-            helperText={nameErr ? 'Name needs to have at least 3 words' : ''}
-            fullWidth
-            error={nameErr}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Autocomplete
-            multiple
-            id="tags-outlined"
-            options={tagOptions}
-            freeSolo
-            fullWidth
-            onChange={handleTagsChange}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="outlined"
-                label="Tags (topic)"
-                placeholder="Choose topics or write your own tags"
-                error={tagsErr}
-                helperText={tagsErr ? 'Choose or write at least 1' : ''}
-                style={{ width: '100%' }}
-              />
-            )}
-          />
-          <Typography id="input-slider" gutterBottom>
-            Max Participants:
-          </Typography>
-          <Box display="flex" alignItems="center" width="80%">
-            <Slider
-              aria-label=""
-              defaultValue={4}
-              valueLabelDisplay="auto"
-              step={1}
-              marks
-              min={2}
-              max={10}
-              onChange={handleSizeSliderChange}
-            />
-            <Typography variant="body1" style={{ marginLeft: '18px' }}>
-              {size}
+      <Card className='welcome-card' sx={{
+        minHeight: 'fit-content',
+        minWidth: 'fit-content',
+        width: '30%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <Container>
+          <Stack spacing={1.5} className='content'>
+            <Typography variant="h4">
+              Create Room
             </Typography>
-          </Box>
-          <Typography id="input-slider" gutterBottom>
-            Time To Start (mins):
-          </Typography>
-          <Box display="flex" alignItems="center" width="80%">
-            <Slider
-              aria-label="aa"
-              defaultValue={15}
-              valueLabelDisplay="auto"
-              step={5}
-              marks
-              min={5}
-              max={60}
-              onChange={handleTimeSliderChange}
+            <TextField
+              name="Name"
+              label="Room Name"
+              variant="outlined"
+              helperText={nameErr ? 'Name needs to have at least 3 words' : ''}
+              fullWidth
+              error={nameErr}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
-            <Typography variant="body1" style={{ marginLeft: '8px' }}>
-              {time_to_start}
+            <Autocomplete
+              multiple
+              id="tags-outlined"
+              options={tagOptions}
+              freeSolo
+              fullWidth
+              onChange={handleTagsChange}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Tags (topic)"
+                  placeholder="Choose topics or write your own tags"
+                  error={tagsErr}
+                  helperText={tagsErr ? 'Choose or write at least 1' : ''}
+                  style={{ width: '100%'}}
+                />
+              )}
+            />
+            <Typography id="input-slider" gutterBottom>
+              Max Participants:
             </Typography>
-          </Box>
-          <Box>
-            <Stack>
-              <FormControlLabel
-                control={<Switch checked={teams} onChange={() => setTeams(!teams)} name="gilad" />}
-                label="Teams"
+            <Box display="flex" alignItems="center" width="80%">
+              <Slider
+                aria-label=""
+                defaultValue={4}
+                valueLabelDisplay="auto"
+                step={1}
+                marks
+                min={2}
+                max={10}
+                onChange={handleSizeSliderChange}
               />
-              <FormControlLabel
-                control={
-                  <Switch checked={allowSpectators} onChange={() => setAllowSpectators(!allowSpectators)} name="gilad" />
-                }
-                label="Spectators"
+              <Typography variant="body1" style={{ marginLeft: '18px' }}>
+                {size}
+              </Typography>
+            </Box>
+            <Typography id="input-slider" gutterBottom>
+              Time To Start (mins):
+            </Typography>
+            <Box display="flex" alignItems="center" width="80%">
+              <Slider
+                aria-label="aa"
+                defaultValue={15}
+                valueLabelDisplay="auto"
+                step={5}
+                marks
+                min={5}
+                max={60}
+                onChange={handleTimeSliderChange}
               />
-            </Stack>
-          </Box>
-          <Button type="submit" variant="contained" onClick={handleSubmit}>
-            Create
-          </Button>
-        </Stack>
-      </Container>
+              <Typography variant="body1" style={{ marginLeft: '8px' }}>
+                {time_to_start}
+              </Typography>
+            </Box>
+            <Box>
+              <Stack>
+                <FormControlLabel
+                  control={<Switch checked={teams} onChange={() => setTeams(!teams)} name="gilad" />}
+                  label="Teams"
+                />
+                <FormControlLabel
+                  control={
+                    <Switch checked={allowSpectators} onChange={() => setAllowSpectators(!allowSpectators)} name="gilad" />
+                  }
+                  label="Spectators"
+                />
+              </Stack>
+            </Box>
+            <Button type="submit" variant="contained" onClick={handleSubmit}>
+              Create
+            </Button>
+          </Stack>
+        </Container>
+      </Card>
     </>
   );
 }

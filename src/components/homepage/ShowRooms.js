@@ -18,6 +18,8 @@ const CardContainer = styled('div')({
 
 export default function ShowRooms({filteredRooms, searchQuery}) {
     return (
+        <>
+        { filteredRooms ? (
         <Stack sx={{ width: '100%', height: '100%' }}>
             <Box sx={{
             filter: 'blur(5px)', // Apply the blur effect
@@ -40,5 +42,12 @@ export default function ShowRooms({filteredRooms, searchQuery}) {
                 </Grid>
             </CardContainer>
         </Stack>
+        )
+        :
+        (
+            <div>hello</div>
+        )
+    }
+    </>
     )
 }
