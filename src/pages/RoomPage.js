@@ -35,7 +35,7 @@ export default function RoomPage() {
     }
   }, [isAuthenticated]);
 
-  const socket = io('ws://' + window.location.hostname + ':5000');
+  const socket = io('ws://' + window.location.hostname + ':8000');
   //const currUserId = 'moderator'  // change to real user id
   const currUserId = localStorage.getItem("userId")
 

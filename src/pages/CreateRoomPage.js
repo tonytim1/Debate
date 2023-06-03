@@ -57,7 +57,7 @@ export default function CreateRoomPage() {
         };
 
         // Send the new room data to the backend server
-        const response = await fetch('http://' + window.location.hostname +':5000/api/create_room', {
+        const response = await fetch('http://' + window.location.hostname +':8000/api/create_room', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
