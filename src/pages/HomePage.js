@@ -1,23 +1,31 @@
 import { Helmet } from 'react-helmet-async';
-import { Grid, Button, Container, TextField, Stack, Typography, Autocomplete } from '@mui/material';
+import React from 'react';
+import { Grid, Button,Box,Paper, Container, Grow, TextField, Stack, Typography, Autocomplete } from '@mui/material';
 import Iconify from '../components/iconify';
-import { BlogPostCard, BlogPostsSort, BlogPostsSearch } from '../sections/@dashboard/blog';
+import BlogPostCard from '../sections/@dashboard/blog/BlogPostCard';
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import { io } from 'socket.io-client';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { random, clamp } from 'lodash';
-import { alpha, styled } from '@mui/material/styles';
+import { alpha, styled } from '@mui/system';
 import useAuthentication from "../hooks/useAuthentication";
-
+import './HomePage.css'
+import ShowRooms from 'src/components/homepage/ShowRooms';
+import LandingPage from 'src/components/LandingPage/LandingPage'
 // ----------------------------------------------------------------------
 
-const SORT_OPTIONS = [
-  { value: 'latest', label: 'Latest' },
-  { value: 'popular', label: 'Popular' },
-  { value: 'oldest', label: 'Oldest' },
-];
 
+const CardContainer = styled('div')({
+  width: '100%',
+  height: 'calc(80vh)', // Adjust the height value based on your header or other components
+  overflowY: 'scroll',
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'transparent transparent',
+  padding: '24px', // Adjust the padding value as needed
+  boxSizing: 'border-box',
+  
+});
 
 // ----------------------------------------------------------------------
 
@@ -49,11 +57,11 @@ export default function HomePage() {
     socket.emit('fetch_all_rooms');
   };
 
-  useEffect(() => {
-    if(!isAuthenticated) {
-      navigate('/dashboard/login');
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if(!isAuthenticated) {
+  //     navigate('/dashboard/login');
+  //   }
+  // }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,43 +98,51 @@ export default function HomePage() {
     setFilteredRooms(filtered);
   };
 
-
   return (
     <>
       <Helmet>
         <title> Debate Center | Home </title>
       </Helmet>
-
       <Container>
-        <Stack spacing={2} alignItems="center" justifyContent="center"  mb={1}>
-          <Typography variant="h2">
-            Debate Center
-          </Typography>
-          <Typography variant="h8">
-            Discover diverse perspectives, ignite meaningful discussions
-          </Typography>
-          <Stack spacing={2} mb={3} direction="row" alignItems="center" justifyContent="center" sx={{width:'100%'}}>
-            <TextField
-              label="Search for debates"
-              sx={{ width: '90%' }}
-              value={searchQuery}
-              onChange={(e) => {
-                const query = e.target.value;
-                setSearchQuery(query);
-                filterRooms(query);
-              }}
-            />
-            <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
-              Create Room
-            </Button>
+          <Stack spacing={2} alignItems="center" justifyContent="center"  mb={1}>
+            <Typography variant="h2">
+              Debate Center
+            </Typography>
+            <Typography variant="h8">
+              Discover diverse perspectives, ignite meaningful discussions
+            </Typography>
+            <Stack spacing={2} mb={3} direction="row" alignItems="center" justifyContent="center" sx={{width:'100%'}}>
+              <TextField
+                label="Search for debates"
+                sx={{ width: '90%' }}
+                value={searchQuery}
+                onChange={(e) => {
+                  const query = e.target.value;
+                  setSearchQuery(query);
+                  filterRooms(query);
+                }}
+                />
+              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}>
+                Create Room
+              </Button>
+              
+            </Stack>
+            <CardContainer>
+            <Grid container spacing={3} justifyContent="center">
+              {filteredRooms.map(([roomId, data], index) => (
+                <BlogPostCard
+                  key={`${roomId}-${searchQuery}`} // Add unique key that includes searchQuery
+                  room={data}
+                  roomId={roomId}
+                  color={data.color}
+                  timeout={(index + 1) * 250} // Calculate timeout based on index
+                />
+              ))}
+            </Grid>
+            </CardContainer>
           </Stack>
-          <Grid container spacing={3} justifyContent="center">
-            {filteredRooms.map(([roomId, data]) => (
-              <BlogPostCard key={roomId} room={data} roomId={roomId} color={data.color} />
-            ))}
-          </Grid>
-        </Stack>
-      </Container>
+      </Container> 
+      <LandingPage showLoginReminder={!isAuthenticated} />
     </>
   );
 }

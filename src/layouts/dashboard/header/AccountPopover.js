@@ -30,7 +30,7 @@ export default function AccountPopover() {
     console.log("logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    navigate('/dashboard/login');
+    navigate('/');
   };
 
   return (

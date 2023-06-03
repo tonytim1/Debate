@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types';
+import { useRef } from 'react';
+import React from 'react';
 // @mui
 import { random, clamp } from 'lodash';
 import { alpha, styled } from '@mui/material/styles';
-import { Box, Link, Card, Grid, Avatar, Typography, Stack, CardContent } from '@mui/material';
+import { Box, Link,  Card, CardActionArea, Grid, Avatar, Typography, Stack, CardContent, Grow } from '@mui/material';
 // utils
 import { fDate } from '../../../utils/formatTime';
 import { fShortenNumber } from '../../../utils/formatNumber';
@@ -11,6 +13,8 @@ import SvgColor from '../../../components/svg-color';
 import Iconify from '../../../components/iconify';
 import { useNavigate } from 'react-router-dom';
 import { useTimer } from 'react-timer-hook';
+// import { PeopleIcon } from '@mui/icons-material';
+import PeopleIcon from '@mui/icons-material/People';
 // ----------------------------------------------------------------------
 
 const StyledCardMedia = styled('div')({
@@ -52,20 +56,11 @@ const StyledCover = styled('img')({
 
 });
 
-
-// ----------------------------------------------------------------------
-
-BlogPostCard.propTypes = {
-  room: PropTypes.object.isRequired,
-  index: PropTypes.number,
-};
-
-export default function BlogPostCard({ room, roomId, color }) {
+const BlogPostCard = React.forwardRef(({ room, roomId, color, timeout }, ref) => {
   const { name, tags, time_to_start, spectators, teams, room_size, users_list } = room;
   const index = 1;
   const latestPostLarge = index === 0;
   const latestPost = index === 1 || index === 2;
-
 
   const navigate = useNavigate();
 
@@ -90,8 +85,12 @@ export default function BlogPostCard({ room, roomId, color }) {
   }
 
   return (
+    <Grow in={true} timeout={timeout}>
     <Grid item xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 2.7}>
-      <Card sx={{ position: 'relative' }}>
+      <Card sx={{ position: 'relative' }} ref={ref}>
+      <CardActionArea onClick={() => {
+                  navigate(`/room/${roomId}`)
+                }}>
         <StyledCardMedia
           sx={{
             pt: 'calc(100% * 4 / 3)',
@@ -144,23 +143,23 @@ export default function BlogPostCard({ room, roomId, color }) {
           }}
         >
           <Stack spacing={5}>
-            <Stack>
-              <Typography gutterBottom variant="caption" sx={{
-                color: 'white',
-                display: 'block',
-                justifyContent: 'flex-end',
-              }}>
+            <Stack spacing={1}>
+              <Stack direction='row' spacing={1}>
+                <PeopleIcon sx={{ color: 'white' }}/>
+                <Typography gutterBottom variant="caption" sx={{
+                  color: 'white',
+                  display: 'block',
+                  justifyContent: 'flex-end',
+                }}>
 
-                {Object.keys(users_list).length} / {room_size}
+                  {Object.keys(users_list).length} / {room_size}
 
               </Typography>
-              <StyledTitle
+              </Stack>
+              <Typography
                 color="inherit"
                 variant="subtitle2"
                 underline="hover"
-                onClick={() => {
-                  navigate(`/room/${roomId}`)
-                }}
                 sx={{
                   ...((latestPostLarge || latestPost) && {
                     color: 'common.white',
@@ -170,7 +169,7 @@ export default function BlogPostCard({ room, roomId, color }) {
                 }}
               >
                 {name}
-              </StyledTitle>
+              </Typography>
             </Stack>
             <Stack>
               <StyledInfo>
@@ -194,7 +193,16 @@ export default function BlogPostCard({ room, roomId, color }) {
             </Stack>
           </Stack>
         </CardContent>
+        </CardActionArea>
       </Card>
     </Grid>
+     </Grow>
   );
-}
+});
+
+BlogPostCard.propTypes = {
+  room: PropTypes.object.isRequired,
+  index: PropTypes.number,
+};
+
+export default BlogPostCard;

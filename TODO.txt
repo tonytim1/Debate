@@ -26,7 +26,7 @@ ToDOs:
 
 # ASAF:
 - home page: when scrolling for more rooms it should move only the room cards and not the whole page
-- Create a landing page for explaining about the website and making 
-- make the whole room card (in home page) clickable rather then just the text
+V Create a landing page for explaining about the website and log in
 - Make the room page prettier
 - Make the room cards (in the home page) more informative (add pics, users icon, fix text alignment)
+V make the whole room card (in home page) clickable rather then just the text

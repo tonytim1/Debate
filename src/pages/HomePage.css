@@ -1,0 +1,3 @@
+.blurry-box:not(.non-blurry-component) {
+    filter: blur(5px); /* Apply the blur effect */
+  }
