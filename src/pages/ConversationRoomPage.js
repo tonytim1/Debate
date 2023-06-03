@@ -111,7 +111,7 @@ const ConversationRoomPage = (props) => {
 
   const connectToSocketAndWebcamStream = async() => {
     //connecting to server using socket
-    socketRef.current = io('ws://' + window.location.hostname + ':5000');
+    socketRef.current = io('ws://' + window.location.hostname + ':8000');
     webcamStream.current = await getWebcamStream();
     console.log(webcamStream.current);
     console.log(myVideo.current);

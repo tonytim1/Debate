@@ -65,7 +65,7 @@ export default function SignUpPage() {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://' + window.location.hostname + ':5000/api/signup', {
+      const response = await fetch('http://' + window.location.hostname + ':8000/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
