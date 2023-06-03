@@ -49,34 +49,41 @@ export default function LoginPage() {
         <title> Debate Center | Login </title>
       </Helmet>
 
-        <Container maxWidth="sm">
-            <Typography variant="h4" gutterBottom>
-              Sign In
-            </Typography>
+      <div style={{ textAlign: 'center'}}>
+        <h1>Welcome to Debate Center</h1>
+        <p style={{ maxWidth: '600px', margin: '0 auto' }}>
+          Our platform tackles the lack of ability to discuss sensitive and complicated issues. We provide a space for civil and respectful discussions on important topics, fostering mutual understanding and knowledge-sharing among diverse individuals.
+        </p>
+      </div>
 
-            <Typography variant="body2" sx={{ mb: 5 }}>
-              Don’t have an account? {''}
-              <Link variant="subtitle2" href="/dashboard/register">Get started</Link>
-            </Typography>
+      <Container maxWidth="sm">
+        <Typography variant="h4" gutterBottom>
+          Sign In
+        </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
-              </Button>
+        <Typography variant="body2" sx={{ mb: 5 }}>
+          Don’t have an account? {''}
+          <Link variant="subtitle2" href="/dashboard/register">Get started</Link>
+        </Typography>
 
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
-              </Button>
-            </Stack>
+        <Stack direction="row" spacing={2}>
+          <Button fullWidth size="large" color="inherit" variant="outlined">
+            <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
+          </Button>
 
-            <Divider sx={{ my: 3 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                OR
-              </Typography>
-            </Divider>
+          <Button fullWidth size="large" color="inherit" variant="outlined">
+            <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
+          </Button>
+        </Stack>
 
-            <LoginForm />
-        </Container>
+        <Divider sx={{ my: 3 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            OR
+          </Typography>
+        </Divider>
+
+        <LoginForm />
+      </Container>
     </>
   );
 }

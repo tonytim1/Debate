@@ -13,6 +13,8 @@ export default function LoginForm() {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
   const [loginError, setLoginError] = useState({});
+  const [emailErr, setEmailErr] = useState(false);
+  const [passErr, setPassErr] = useState(false);
   const [isSubmit, setIsSubmit] = useState(false);
   const [user, setUserDetails] = useState({
     email: "",
@@ -37,7 +39,7 @@ export default function LoginForm() {
     e.preventDefault();
     setFormErrors(validateForm(user));
     validateUser(user);
-   
+
   };
 
   const validateUser = async (user) => {
@@ -73,13 +75,13 @@ export default function LoginForm() {
     }
   }
 
-  const setLoginErrorMes = () =>{
+  const setLoginErrorMes = () => {
     const errors = {};
     errors.login = "User not found";
     setLoginError(errors);
   }
 
-  const clearLoginErrorMes = () =>{
+  const clearLoginErrorMes = () => {
     const errors = {};
     setLoginError(errors);
   }
@@ -88,11 +90,19 @@ export default function LoginForm() {
     const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
     if (!values.email) {
       errors.email = "Email is required";
+      setEmailErr(true);
     } else if (!regex.test(values.email)) {
       errors.email = "Please enter a valid email address";
+      setEmailErr(true);
     }
+    else{
+      setEmailErr(false);
+    }
+
     if (!values.password) {
-      errors.password = "Password is required";
+      setPassErr(true);
+    } else {
+      setPassErr(false);
     }
     return errors;
   };
@@ -107,14 +117,19 @@ export default function LoginForm() {
   return (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" onChange={changeHandler} value={user.email} />
-        <span className={basestyle.error}>{formErrors.email}</span>
-
+        <TextField name="email" 
+        label="Email address" 
+        onChange={changeHandler} 
+        value={user.email} 
+        error={emailErr}
+        helperText={emailErr ? formErrors.email : ''}/>
         <TextField
           name="password"
           label="Password"
           onChange={changeHandler}
           value={user.password}
+          error={passErr}
+          helperText={passErr ? 'Password is required' : ''}
           type={showPassword ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -126,13 +141,14 @@ export default function LoginForm() {
             ),
           }}
         />
-        <p className={basestyle.error}>{formErrors.password}</p>
       </Stack>
       <Divider sx={{ my: 3 }} />
       <span className={basestyle.error}>{loginError.login}</span>
-      <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleClick}>
-        Login
-      </LoadingButton>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleClick}>
+          Login
+        </LoadingButton>
+      </div>
     </>
   );
 }
