@@ -3,6 +3,7 @@ import { alpha, styled } from '@mui/system';
 import { BlogPostCard } from 'src/sections/@dashboard/blog';
 import { useState } from 'react';
 import React from 'react'
+import RoomCard from './RoomCard';
 
 
 const CardContainer = styled('div')({
@@ -31,7 +32,7 @@ export default function ShowRooms({filteredRooms, searchQuery}) {
             <CardContainer sx={{ overflow: 'auto'}}>
                 <Grid container spacing={3} justifyContent="center">
                 {filteredRooms.map(([roomId, data], index) => (
-                    <BlogPostCard
+                    <RoomCard
                     key={`${roomId}-${searchQuery}`} // Add unique key that includes searchQuery
                     room={data}
                     roomId={roomId}

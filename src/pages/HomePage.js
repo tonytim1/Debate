@@ -13,17 +13,17 @@ import './HomePage.css'
 import CreateRoomCard from 'src/components/Cards/CreateRoomCard';
 import SignupCard from 'src/components/Cards/SignupCard';
 import LoginCard from 'src/components/Cards/LoginCard';
+import RoomCard from 'src/components/homepage/RoomCard';
 // ----------------------------------------------------------------------
 
 
 const CardContainer = styled('div')({
   width: '100%',
-  height: 'calc(80vh)', // Adjust the height value based on your header or other components
-  overflowY: 'scroll',
-  scrollbarWidth: 'thin',
-  scrollbarColor: 'transparent transparent',
-  padding: '24px', // Adjust the padding value as needed
-  boxSizing: 'border-box',
+  // overflowY: 'scroll',
+  // scrollbarWidth: 'thin',
+  // scrollbarColor: 'transparent transparent',
+  padding: '0px', // Adjust the padding value as needed
+  // boxSizing: 'border-box',
   
 });
 
@@ -143,7 +143,9 @@ export default function HomePage() {
                 }}
                 />
               {/* <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {navigate("/dashboard/createRoom")}}> */}
-              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => {setShowCreateRoomCard(true)}}>
+              <Button size="small" variant="outlined" startIcon={<Iconify icon="eva:plus-fill" />} 
+                onClick={() => {
+                  setShowCreateRoomCard(true);}}>
                 Create Room
               </Button>
               
@@ -151,14 +153,15 @@ export default function HomePage() {
             {roomsData ? 
             (
               <CardContainer>
-                <Grid container spacing={3} justifyContent="center">
+                <Grid container justifyContent="center">
                   {filteredRooms.map(([roomId, data], index) => (
-                    <BlogPostCard
+                    <RoomCard
                       key={`${roomId}-${searchQuery}`} // Add unique key that includes searchQuery
                       room={data}
                       roomId={roomId}
                       color={data.color}
                       timeout={(index + 1) * 250} // Calculate timeout based on index
+                      pictureId={data.pictureId}
                     />
                   ))}
                 </Grid>

@@ -159,6 +159,7 @@ def create_room():
     time_to_start = time.time() + time_to_start_in_minutes * 60 
     spectators = room_data.get('spectators')
     moderator = room_data.get('moderator') # change to username when ready
+    pictureId = room_data.get('pictureId', -1)
 
     # Create a new room document
     new_room = {
@@ -172,6 +173,7 @@ def create_room():
         'spectators_list': [],
         'moderator': moderator,
         'is_conversation': False,
+        'pictureId': pictureId,
     }
 
     # Add the room to Firestore (assuming you have initialized the Firestore client)
