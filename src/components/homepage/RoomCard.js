@@ -127,7 +127,7 @@ const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId }, 
                   width: 80,
                   height: 36,
                   zIndex: 9,
-                  bottom: -15,
+                  bottom: -16,
                   position: 'absolute',
                   color: 'background.paper',
                 }}

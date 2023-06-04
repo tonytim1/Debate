@@ -150,40 +150,43 @@ export default function HomePage() {
               </Button>
               
             </Stack>
-            {roomsData ? 
-            (
+            {roomsData ? (
               <CardContainer>
                 <Grid container justifyContent="center">
-                  {filteredRooms.map(([roomId, data], index) => (
-                    <RoomCard
-                      key={`${roomId}-${searchQuery}`} // Add unique key that includes searchQuery
-                      room={data}
-                      roomId={roomId}
-                      color={data.color}
-                      timeout={(index + 1) * 250} // Calculate timeout based on index
-                      pictureId={data.pictureId}
-                    />
-                  ))}
+                  {filteredRooms.length > 0 ? (
+                    filteredRooms.map(([roomId, data], index) => (
+                      <RoomCard
+                        key={`${roomId}-${searchQuery}`}
+                        room={data}
+                        roomId={roomId}
+                        color={data.color}
+                        timeout={(index + 1) * 250}
+                        pictureId={data.pictureId}
+                      />
+                    ))
+                  ) : (
+                    <Typography variant="body1" sx={{ fontSize: '1rem', color: 'gray', marginTop: '100px' }}>
+                      There are no rooms, maybe you should make one?
+                    </Typography>
+                  
+                  )}
                 </Grid>
               </CardContainer>
-            ) :
-            (
-              <>
+            ) : (
               <Stack spacing={4}>
-                <Stack direction={'row'} spacing={4}>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                <Stack direction="row" spacing={4}>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
                 </Stack>
-                <Stack direction={'row'} spacing={4}>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
-                  <Skeleton variant="rounded" width={200} height={270} animation="wave"/>
+                <Stack direction="row" spacing={4}>
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
+                  <Skeleton variant="rounded" width={200} height={270} animation="wave" />
                 </Stack>
               </Stack>
-              </>
             )}
           </Stack>
       </Container> 
