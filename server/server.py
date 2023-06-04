@@ -212,7 +212,7 @@ def join_debate_room(data):
         emit('room is full', room=request.sid)
         return
 
-    if user_id not in users_list:
+    if user_id not in users_list and user_id is not None:
         users_list.update({user_id: {'ready': False, 'team': False}})
         room_ref.update({'users_list': users_list})  # Add user to the users_list in Firestore
 

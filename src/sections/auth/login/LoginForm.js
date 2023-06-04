@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 // @mui
 import { Stack, Link, Card, IconButton, Fade, Button, InputAdornment, Alert, AlertTitle, TextField, Typography, Divider, Collapse } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-// components
-import Iconify from '../../../components/iconify';
-import basestyle from "../../../BaseStyle.module.css";
+import Iconify from 'src/components/iconify/Iconify';
 
 // ----------------------------------------------------------------------
 

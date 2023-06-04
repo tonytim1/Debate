@@ -13,6 +13,8 @@ import { io } from 'socket.io-client';
 import ConversationRoomPage from './ConversationRoomPage';
 import Chat from 'src/components/messages/Chat';
 import useAuthentication from "../hooks/useAuthentication";
+import SignupCard from 'src/components/Cards/SignupCard';
+import LoginCard from 'src/components/Cards/LoginCard';
 
 
 export default function RoomPage() {
@@ -26,13 +28,13 @@ export default function RoomPage() {
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
   const [ messageRef, setMessageRef ] = useState(''); 
   const [ messages, setMessages ] = useState([]);
+  const [showSignupCard, setShowSignupCard] = useState(false);
+  const [showLoginCard, setShowLoginCard] = useState(false);
 
   const isAuthenticated = useAuthentication();
 
   useEffect(() => {
-    if(!isAuthenticated) {
-      navigate('/dashboard/login');
-    }
+    setShowLoginCard(!isAuthenticated);
   }, [isAuthenticated]);
 
   const socket = io('ws://' + window.location.hostname + ':8000');
@@ -171,9 +173,9 @@ export default function RoomPage() {
         </Stack>
         </Stack>
       </Container>
-      
-      
-        
+
+    <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
+    <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
     </>
   );
 }

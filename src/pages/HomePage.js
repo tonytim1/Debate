@@ -10,8 +10,9 @@ import { random, clamp } from 'lodash';
 import { alpha, styled } from '@mui/system';
 import useAuthentication from "../hooks/useAuthentication";
 import './HomePage.css'
-import LandingPage from 'src/components/LandingPage/LandingPage'
-import CreateRoomCard from 'src/components/CreateRoomCard/CreateRoomCard';
+import CreateRoomCard from 'src/components/Cards/CreateRoomCard';
+import SignupCard from 'src/components/Cards/SignupCard';
+import LoginCard from 'src/components/Cards/LoginCard';
 // ----------------------------------------------------------------------
 
 
@@ -47,6 +48,8 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRooms, setFilteredRooms] = useState(false);
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
+  const [showSignupCard, setShowSignupCard] = useState(false);
+  const [showLoginCard, setShowLoginCard] = useState(false);
   const navigate = useNavigate();
 
   const isAuthenticated = useAuthentication();
@@ -99,6 +102,10 @@ export default function HomePage() {
     filterRooms('');
   }, [roomsData]);
 
+  useEffect(() => {
+    setShowLoginCard(!isAuthenticated);
+  }, [isAuthenticated]);
+
   const filterRooms = (query) => {
     const filtered = Array.from(roomsData).filter(([roomId, data]) => {
       const tags = data.tags || [];
@@ -108,6 +115,8 @@ export default function HomePage() {
     });
     setFilteredRooms(filtered);
   };
+
+
 
   return (
     <>
@@ -175,8 +184,9 @@ export default function HomePage() {
             )}
           </Stack>
       </Container> 
-      <LandingPage showLoginReminder={!isAuthenticated} />
-      <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)}/>
+      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
+      <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
+      <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
     </>
   );
 }

@@ -1,11 +1,7 @@
 import { Routes, Route, Navigate, useRoutes, BrowserRouter } from 'react-router-dom';
 import DashboardLayout from './layouts/dashboard';
 import SimpleLayout from './layouts/simple';
-import LoginPage from './pages/LoginPage';
-import Signup from './pages/SignupPage';
 import Page404 from './pages/Page404';
-import ExplorePage from './pages/ExplorePage';
-import CreateRoomPage from './pages/CreateRoomPage';
 import ConversationRoomPage from './pages/ConversationRoomPage';
 import RoomPage from './pages/RoomPage';
 import HomePage from './pages/HomePage';
@@ -33,14 +29,6 @@ export default function Router() {
             element={<HomePage />}
           />
           <Route
-            path="explore"
-            element={<ExplorePage />}
-          />
-          <Route
-            path="createRoom"
-            element={<CreateRoomPage />}
-          />
-          <Route
             path="conversation"
             element={<ConversationRoomPage />}
           />
@@ -48,15 +36,8 @@ export default function Router() {
             path="profile"
             element={<ProfilePage />}
           />
-          <Route
-            path="login"
-            element={<LoginPage />}
-          />
-          <Route
-            path="register"
-            element={<Signup />}
-          />
         </Route>
+        
         <Route
           path="room/:roomId"
           element={<RoomPage />}

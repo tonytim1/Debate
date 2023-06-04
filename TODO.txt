@@ -1,17 +1,13 @@
 ToDOs:
-
 - Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
 - Move the rooms managment to the server and not on the firebase
 - Have a functioning video chat
-
-- Remove nav bar and add somthing else (we need to decide)
-
 - BUG: if a user is in a room and get in the website it takes him to the home page again. we need it to navigate him to the room page. maybe add a "room" field to a user so we know the user's state at every moment
 - Add a feature that if a room is full but spectators are allowed then add to the spec list
 - Add a feature to chat that if you press 'enter' it sends the msg
 - FOR MISLTONE 3 PRESENTATION : maybe 'make' a survey to see demand on the platform
 - Add team names feature to the moderator
-
+- Add reporting system
 
 # TONY:
 
@@ -28,7 +24,8 @@ ToDOs:
 
 
 # ASAF:
-- home page: when scrolling for more rooms it should move only the room cards and not the whole page
+V Remove nav bar and add somthing else (we need to decide)
+V home page: when scrolling for more rooms it should move only the room cards and not the whole page
 V Create a landing page for explaining about the website and log in
 - Make the room page prettier
 - Make the room cards (in the home page) more informative (add pics, users icon, fix text alignment)
