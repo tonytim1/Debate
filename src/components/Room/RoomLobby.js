@@ -7,8 +7,8 @@ import Chat from 'src/components/messages/Chat';
 import { useNavigate } from 'react-router-dom';
 
 
-const RoomLobby = ({ name, teams, users_list, moderator, currUserId, roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
-
+const RoomLobby = ({ roomData, currUserId, roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
+  const { name, teams, users_list, moderator } = roomData;
   const navigate = useNavigate();
   const handle_ready_click = () => {
     socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead

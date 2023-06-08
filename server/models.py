@@ -4,6 +4,7 @@ from typing import Optional
 
 @dataclass
 class User:
+    sid: str
     ready: bool
     team: bool
 

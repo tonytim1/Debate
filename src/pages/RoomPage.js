@@ -10,7 +10,6 @@ import AdminControl from 'src/components/roomPage/AdminControl';
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
-import ConversationRoomPage from './ConversationRoomPage';
 import Chat from 'src/components/messages/Chat';
 import useAuthentication from "../hooks/useAuthentication";
 import SignupCard from 'src/components/Cards/SignupCard';
@@ -18,7 +17,7 @@ import LoginCard from 'src/components/Cards/LoginCard';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
 import RoomFull from 'src/components/Room/RoomFull';
 import RoomLobby from 'src/components/Room/RoomLobby';
-
+import Conversation from 'src/components/Room/Conversation';
 
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
@@ -41,7 +40,6 @@ export default function RoomPage() {
   }, [isAuthenticated]);
 
   const socket = io('ws://' + window.location.hostname + ':8000');
-  //const currUserId = 'moderator'  // change to real user id
   const currUserId = localStorage.getItem("userId")
 
   const join_room = () => {
@@ -49,7 +47,10 @@ export default function RoomPage() {
   
     socket.once('user_join', ( roomData ) => {
       setRoomData(roomData);
-      setRoomState(1);
+      setRoomState(1); // TODO: set state according to room data (lobby or conversation)
+      if (roomData.is_conversation) {
+        setRoomState(2);
+      }
     });
     socket.once('room not found', () => {
       navigate('/404');
@@ -59,11 +60,11 @@ export default function RoomPage() {
     });
     socket.once('conversation_start', () => {
       console.log('conversation_start')
-      const conversationURL = `/conversation/${roomId}`;
-      navigate(conversationURL);
+      // const conversationURL = `/conversation/${roomId}`;
+      // navigate(conversationURL);
+      setRoomState(2);
     });
     socket.on('receiveMessage', payload => {
-      console.log("recieved message");
       setMessages(messages => [...messages, payload]);
     });
   };
@@ -97,15 +98,20 @@ export default function RoomPage() {
     );
   }
 
-  const { name, teams, room_size, users_list, moderator} = roomData;
-  console.log(users_list);
+  // Room conversation screen
+  if (roomState === 2){
+    return (
+      <Conversation roomData={roomData} currUserId={currUserId} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+    );
+  }
 
+  // Room lobby screen
   return (
     <>
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <RoomLobby name={name} teams={teams} users_list={users_list} moderator={moderator} currUserId={currUserId} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+      <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
     <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
     <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />

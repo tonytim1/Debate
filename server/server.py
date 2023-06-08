@@ -164,12 +164,12 @@ def create_room():
         tags=room_data.get('tags'),
         teams=room_data.get('teams'),
         room_size=room_data.get('room_size'),
-        time_to_start=room_data.get('time_to_start'),
-        spectators=time.time() + room_data.get('time_to_start') * 60,
+        time_to_start=time.time() + room_data.get('time_to_start') * 60,
+        spectators=room_data.get('spectators'),
         users_list={},
         spectators_list=[],
-        moderator=room_data.get('spectators'),
-        is_conversation=room_data.get('moderator'),
+        moderator=room_data.get('moderator'),
+        is_conversation=False,
         pictureId=room_data.get('pictureId', -1),
     )
     rooms[room_id] = room
@@ -200,10 +200,10 @@ def join_debate_room(data):
         return
 
     if user_id not in room.users_list and user_id is not None:
-        room.users_list.update({user_id: User(ready=False, team=False)})
+        room.users_list.update({user_id: User(sid=sid, ready=False, team=False)})
 
         # Notify all users in the room about the change
-        emit('room_data_updated', dataclasses.asdict(room), room=room_id)
+        emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
     # Join the SocketIO broadcast room
     join_room(room_id)
@@ -246,7 +246,7 @@ def leave_debate_room(data):
     leave_room(room_id)
 
     # Notify all users in the room about the change
-    emit('room_data_updated', dataclasses.asdict(room), room=room_id)
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
 
 @socketio.on('fetch_room_data')
@@ -283,7 +283,7 @@ def switch_team(data):
     user.team = not user.team
 
     # Notify all users in the room about the change
-    emit('room_data_updated', dataclasses.asdict(room), room=data['roomId'])
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
 @socketio.on('ready_click')
 def handle_ready_click(data):
@@ -303,28 +303,32 @@ def handle_ready_click(data):
     user.ready = not user.ready
 
     # Notify all users in the room about the change
-    emit('room_data_updated', dataclasses.asdict(room), room=data['roomId'])
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
 # -------------------------------------- #
 
 # -------------- CONVERSATION PAGE ------------- #
 
-@socketio.on('start_conversation_click')  # TODO: add a thread that will start the conversation after the needed time
-def handle_conversation_start(details):
-    print(details)
-    # Notify all users in the room about the change
-    emit('conversation_start', room=details['roomId'])
+@socketio.on('start_conversation_click')  # TODO: add a thread that checks the timer for each room and starts conversation when it reaches 0
+def handle_conversation_start(data):
+    room_id = data.get('roomId')
 
-@socketio.on('joinConversationRoom')
-def handle_join_room(payload):
-    room_id = payload['roomId']
-    username = payload['username']
-    join_room(room_id)
-    # query user from database
+    if room_id not in rooms:
+        return
+    
+    rooms[room_id].is_conversation = True
+    
+    # Notify all users in the room about the change
+    emit('conversation_start', to=room_id)
+
+@socketio.on('WebcamReady')
+def handle_join_room(data):
+    room_id = data['roomId']
+    user_id = data['userId']
+    print("WebcamReady", room_id, user_id)
     users_in_this_room = [socket_to_user[sid] for sid in room_to_sockets[room_id]]
-    socket_to_user[request.sid] = username
     room_to_sockets[room_id].append(request.sid)
-    emit('usersInRoom', users_in_this_room, room=room_id)
+    emit('usersInRoom', users_in_this_room, to=room_id)
     
 @socketio.on('sendingSignal')
 def handle_sending_signal(payload):
@@ -352,7 +356,7 @@ def handle_send_message(payload):
     message = payload['message']
     room_id = payload['roomId']
     user_id = payload.get('userId') # f"{request.remote_addr}"  # change to user_id when ready
-    emit('receiveMessage', {'message': message, 'userId': user_id}, room=room_id)
+    emit('receiveMessage', {'message': message, 'userId': user_id}, to=room_id)
 
 
 if __name__ == '__main__':

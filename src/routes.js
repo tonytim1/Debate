@@ -2,7 +2,6 @@ import { Routes, Route, Navigate, useRoutes, BrowserRouter } from 'react-router-
 import DashboardLayout from './layouts/dashboard';
 import SimpleLayout from './layouts/simple';
 import Page404 from './pages/Page404';
-import ConversationRoomPage from './pages/ConversationRoomPage';
 import RoomPage from './pages/RoomPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
@@ -29,10 +28,6 @@ export default function Router() {
             element={<HomePage />}
           />
           <Route
-            path="conversation"
-            element={<ConversationRoomPage />}
-          />
-          <Route
             path="profile"
             element={<ProfilePage />}
           />
@@ -41,10 +36,6 @@ export default function Router() {
         <Route
           path="room/:roomId"
           element={<RoomPage />}
-        />
-        <Route
-          path="conversation/:roomId"
-          element={<ConversationRoomPage />}
         />
         <Route
           path="user/:userId"
