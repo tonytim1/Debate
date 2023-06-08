@@ -12,7 +12,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
 
 from models import Room, User
-from default_rooms import ROOMS
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./server/debate-center-firebase-key.json"
 
@@ -133,12 +132,12 @@ def signin():
         print(e)
         return jsonify({'error': str(e)}), 500
 
-user_to_socket = {}  # user_id to socket_id
-socket_to_user = {}
-room_to_users = {}  # room_id to list of user_ids
-room_to_sockets = {}  # room_id to list of socket_ids
-socket_to_room = {}  # socket_id to room_id
-rooms = ROOMS  # list of rooms
+# user_to_socket = {}
+# socket_to_user = {}
+# room_to_users = {}
+# room_to_sockets = {}
+# socket_to_room = {}
+rooms = {}
 
 # ---------- HOME PAGE ---------- #
 @socketio.on("fetch_all_rooms")
