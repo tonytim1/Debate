@@ -15,6 +15,9 @@ import Chat from 'src/components/messages/Chat';
 import useAuthentication from "../hooks/useAuthentication";
 import SignupCard from 'src/components/Cards/SignupCard';
 import LoginCard from 'src/components/Cards/LoginCard';
+import LoadingScreen from 'src/components/Room/LoadingScreen';
+import RoomFull from 'src/components/Room/RoomFull';
+import RoomLobby from 'src/components/Room/RoomLobby';
 
 
 export default function RoomPage() {
@@ -80,64 +83,17 @@ export default function RoomPage() {
     fetchData();
   }, []);
 
-  const handle_ready_click = () => {
-    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
-  }
-
-  const handle_leave_click = () => {
-    socket.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
-    navigate('/');
-  }
-
   // loading screen
   if (roomState === 0) {
     return (
-      <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh', 
-      }}
-    >
-      <Stack style={{alignItems: 'center'}}>
-        <div style={{ fontSize: '24px', color: 'blue' }}>
-          Loading...
-        </div>
-        <CircularProgress />
-      </Stack>
-    </div>
+      <LoadingScreen />
     );
   }
   
   // room full screen
   if (roomState === 3){
     return (
-      <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh', // Adjust the height to fit your requirements
-      }}
-    >
-      <Stack>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '24px',
-            color: 'blue',
-          }}
-        >
-          Sorry, The Room Is Full
-        </div>
-        <Button variant="contained" href='/'>
-          Go Back to Home
-        </Button>
-      </Stack>
-      </div>
+      <RoomFull />
     );
   }
 
@@ -149,30 +105,7 @@ export default function RoomPage() {
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <Container style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        height: '60vh',
-      }}>
-        <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
-          <Typography variant="h2">{name}</Typography>
-        <Stack direction="row" sx={{ width: '100%' }}>
-          <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} />
-          <SpectatorsList/>
-        </Stack>
-        <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
-        <Stack direction="row" spacing={8}>
-          <Button variant="contained" onClick={handle_leave_click} color="error">
-            Leave
-          </Button>
-          <Button type="submit" variant="contained" onClick={handle_ready_click} color="success">
-            Ready
-          </Button>
-          <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
-        </Stack>
-        </Stack>
-      </Container>
+      <RoomLobby name={name} teams={teams} users_list={users_list} moderator={moderator} currUserId={currUserId} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
     <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
     <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
