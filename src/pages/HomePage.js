@@ -4,7 +4,7 @@ import { Grid, Button, Box, Skeleton, Paper, Container, Grow, TextField, Stack, 
 import Iconify from '../components/iconify';
 import BlogPostCard from '../sections/@dashboard/blog/BlogPostCard';
 import { io } from 'socket.io-client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { random, clamp } from 'lodash';
 import { alpha, styled } from '@mui/system';
@@ -50,14 +50,17 @@ export default function HomePage() {
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
+  const socket = useRef();
   const navigate = useNavigate();
 
   const isAuthenticated = useAuthentication();
 
-  const socket = io('ws://' + window.location.hostname + ':8000');
+  useEffect(() => {
+    socket.current = io('ws://' + window.location.hostname + ':8000')
+  }, []);
 
   const fetchRooms = async () => {
-    socket.emit('fetch_all_rooms');
+    socket.current.emit('fetch_all_rooms');
   };
 
   // useEffect(() => {
@@ -75,14 +78,14 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       fetchRooms();
-      socket.on('all_rooms', (rooms) => {
+      socket.current.on('all_rooms', (rooms) => {
         const mappedRooms = new Map(Object.entries(rooms));
         mappedRooms.forEach((data) => {
           data.color = getRandomColor(); // Add random color to each room
         });
         setRoomsData(mappedRooms);
       });
-      socket.on('rooms_updated', () => {
+      socket.current.on('rooms_updated', () => {
         console.log('rooms updated');
         fetchRooms();
         // set roomsData to new data

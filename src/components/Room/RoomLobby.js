@@ -11,11 +11,11 @@ const RoomLobby = ({ roomData, currUserId, roomId, socket, messageRef, setMessag
   const { name, teams, users_list, moderator } = roomData;
   const navigate = useNavigate();
   const handle_ready_click = () => {
-    socket.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
+    socket.current.emit('ready_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
   }
 
   const handle_leave_click = () => {
-    socket.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
+    socket.current.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
     navigate('/');
   } 
 

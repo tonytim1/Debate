@@ -7,7 +7,6 @@ import Chat from 'src/components/messages/Chat';
 import { useNavigate, useParams } from 'react-router-dom';
 import Scrollbar from 'src/components/scrollbar';
 import { Helmet } from 'react-helmet-async';
-import io from "socket.io-client";
 import Peer from "simple-peer";
 import Video from 'src/components/conversation_room/Video';
 import Spectator from 'src/components/conversation_room/Spectator';
@@ -31,23 +30,23 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
     const navigate = useNavigate();
   
     useEffect(() => {
-      const x = navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      console.log("x", x);
       connectToSocketAndWebcamStream().then(() => {
-        socket.emit("WebcamReady", roomId); //sending to the server that a user joined to a room
-        console.log("WebcamReady emitted");
+        //socket.current.emit("WebcamReady", roomId); //sending to the server that a user joined to a room
+        console.log("WebcamReady");
 
         Object.entries(roomData.users_list).forEach(([userId, user]) => {
           if (userId !== currUserId) {    
             console.log("other user", userId);
             //creating connection between two user via simple-peer for video
-            const peer = createPeer(user.sid, socket.id, webcamStream.current);
+            const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
             peersRef.current.push({
               peerId: user.sid,
+              userId: userId,
               peer
             });
             peers.push({
               peerId: user.sid,
+              userId: userId,
               peer
             });
           }
@@ -57,11 +56,11 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
   
         //server send array of socket id's of other user of same room so that new user can connect with other user via
         //simple-peer for video transmission and message will be served using socket io
-        socket.on("usersInConversation", users => { //triggered in server and here receiving it
+        socket.current.on("usersInConversation", users => { //triggered in server and here receiving it
           const peers = [];
           users.forEach(otherUserSocketId => {
             //creating connection between two user via simple-peer for video
-            const peer = createPeer(otherUserSocketId, socket.id, webcamStream.current);
+            const peer = createPeer(otherUserSocketId, socket.current.id, webcamStream.current);
             peersRef.current.push({
               peerId: otherUserSocketId,
               peer
@@ -76,30 +75,37 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
   
         //a new user joined at same room send signal,callerId(simple-peer) and stream to server and server give it to
         //us to create peer between two peer and connect
-        socket.on("userJoinedConversation", payload => {
-          let peer;
-          if(screenCaptureStream.current) peer = addPeer(payload.signal, payload.callerId, screenCaptureStream.current);
-          else peer = addPeer(payload.signal, payload.callerId, webcamStream.current);
+        socket.current.on("sendingSignalAck", payload => {
+          console.log("sendingSignalAck", payload);
+
+          let item = peersRef.current.find(p => p.peerId === payload.callerId);
+          if (item) {
+            console.log("peer already exists!!!! this will duplicate the peer!", item);
+          }
+
+          let peer = addPeer(payload.signal, payload.callerId, webcamStream.current);
           peersRef.current.push({
+            peer,
             peerId: payload.callerId,
-            peer
+            userId: payload.userId,
           });
           const peerObj = {
             peer,
-            peerId: payload.callerId
-          };
-  
+            peerId: payload.callerId,
+            userId: payload.userId,
+          };  
           setPeers(users => [...users, peerObj]);
         });
   
         //receiving signal of other peer who is trying to connect and adding its signal at peersRef
-        socket.on("returningSignalAck", payload => {
-          const item = peersRef.current.find(p => p.peerId === payload.id);
+        socket.current.on("returningSignalAck", payload => {
+          const item = peersRef.current.find(p => p.peerId === payload.calleeId);
+          console.log("got returningSignalAck! will signal item ", item);
           item.peer.signal(payload.signal);
         });
   
         //user left and server send its peerId to disconnect from that peer
-        socket.on('userLeft', id => {
+        socket.current.on('userLeft', id => {
           const peerObj = peersRef.current.find(p => p.peerId === id);
           if(peerObj) peerObj.peer.destroy(); //cancel connection with disconnected peer
           const peers = peersRef.current.filter(p => p.peerId !== id);
@@ -129,7 +135,7 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
       return await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     }
   
-    function createPeer(userToSendSignal, callerId, stream) {
+    function createPeer(userSidToSendSignal, mySid, stream) {
       //if initiator is true then newly created peer will send a signal to other peer it those two peers accept signal
       // then connection will be established between those two peers
       //trickle for enable/disable trickle ICE candidates
@@ -142,7 +148,7 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
   
       //sending signal to second peer and if that receive than other(second) peer also will send an signal to this peer
       peer.on("signal", signal => {
-        socket.emit("sendingSignal", { userToSendSignal: userToSendSignal, callerId: callerId, signal });
+        socket.current.emit("sendingSignal", { userId: currUserId, userSidToSendSignal: userSidToSendSignal, callerId: mySid, signal });
       })
       return peer;
     }
@@ -157,7 +163,7 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
   
       //other peer give its signal in signal object and this peer returning its own signal
       peer.on("signal", signal => {
-        socket.emit("returningSignal", { signal, callerId: callerId });
+        socket.current.emit("returningSignal", { signal, callerId: callerId, userId: currUserId });
       });
       peer.signal(incomingSignal);
       return peer;
@@ -244,7 +250,7 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
       e.preventDefault();
       //sending message text with roomId to sever it will send message along other data to all connected user of current room
       if(socket) {
-        socket.emit('sendMessage', {
+        socket.current.emit('sendMessage', {
           roomId: roomId,
           message: setMessageRef.current.value
         })
@@ -293,12 +299,12 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
           </Grid>
           {/*My own video stream, muted*/}
           <Grid item xs={12} md={6}>  
-            <Typography variant="h5" gutterBottom>{'Me'}</Typography>
+            <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
             <video muted autoPlay playsInline ref={myVideo} />
           </Grid>
           {/*Peers video and audio stream*/}
           {peers.map((peer) => (
-            <Video controls key={peer.peerId} peer={peer} />
+            <Video controls peer={peer} />
           ))}
           {/*Video controls - possibly to be added*/}
           {/*Chat container*/}

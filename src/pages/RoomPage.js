@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Await, useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, getDocs, collection} from 'firebase/firestore';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -22,6 +22,7 @@ import Conversation from 'src/components/Room/Conversation';
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
   const { roomId } = useParams();
+  const socket = useRef();
   const navigate = useNavigate(); // Use useNavigate for navigation
   const [roomData, setRoomData] = useState(new Map());
   const [usersData, setUsersData] = useState(new Map());
@@ -39,32 +40,35 @@ export default function RoomPage() {
     setShowLoginCard(!isAuthenticated);
   }, [isAuthenticated]);
 
-  const socket = io('ws://' + window.location.hostname + ':8000');
-  const currUserId = localStorage.getItem("userId")
+  useEffect(() => {
+    socket.current = io('ws://' + window.location.hostname + ':8000')
+  }, []);
+
+  const currUserId = localStorage.getItem("userId");
 
   const join_room = () => {
-    socket.emit('join_room', { roomId: roomId, userId: currUserId });
+    socket.current.emit('join_room', { roomId: roomId, userId: currUserId });
   
-    socket.once('user_join', ( roomData ) => {
+    socket.current.once('user_join', ( roomData ) => {
       setRoomData(roomData);
       setRoomState(1); // TODO: set state according to room data (lobby or conversation)
       if (roomData.is_conversation) {
         setRoomState(2);
       }
     });
-    socket.once('room not found', () => {
+    socket.current.once('room not found', () => {
       navigate('/404');
     });
-    socket.once('room is full', () => {
+    socket.current.once('room is full', () => {
       setRoomState(3);
     });
-    socket.once('conversation_start', () => {
+    socket.current.once('conversation_start', () => {
       console.log('conversation_start')
       // const conversationURL = `/conversation/${roomId}`;
       // navigate(conversationURL);
       setRoomState(2);
     });
-    socket.on('receiveMessage', payload => {
+    socket.current.on('receiveMessage', payload => {
       setMessages(messages => [...messages, payload]);
     });
   };
@@ -72,12 +76,12 @@ export default function RoomPage() {
   useEffect(() => {
     const fetchData = async () => {
       join_room();
-      socket.on('room_data_updated', (roomData) => {
+      socket.current.on('room_data_updated', (roomData) => {
         setRoomData(roomData);
       });
 
       return () => {
-        socket.off('room_data_updated');
+        socket.current.off('room_data_updated');
       };
     };
   

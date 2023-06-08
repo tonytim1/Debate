@@ -186,6 +186,7 @@ def join_debate_room(data):
     sid = request.sid
     room_id = data.get('roomId')
     user_id = data.get('userId')
+    print(f"join_room room_id: {room_id}, sid: {sid}, user_id: {user_id}")
 
     if room_id not in rooms:
         # Room not found, send a specific response
@@ -267,7 +268,6 @@ def fetch_room_data(data):
 # ------------- USERS SHOW ------------- #
 @socketio.on('switch_team')
 def switch_team(data):
-    print(data)
     room_id = data.get('roomId')
     user_id = data.get('userId')
 
@@ -287,9 +287,9 @@ def switch_team(data):
 
 @socketio.on('ready_click')
 def handle_ready_click(data):
-    print(data)
     room_id = data.get('roomId')
     user_id = data.get('userId')
+    print(f"ready_click room_id: {room_id}, sid: {request.sid}, user_id: {user_id}")
 
     if room_id not in rooms:
         return
@@ -321,30 +321,28 @@ def handle_conversation_start(data):
     # Notify all users in the room about the change
     emit('conversation_start', to=room_id)
 
-@socketio.on('WebcamReady')
-def handle_join_room(data):
-    room_id = data['roomId']
-    user_id = data['userId']
-    print("WebcamReady", room_id, user_id)
-    users_in_this_room = [socket_to_user[sid] for sid in room_to_sockets[room_id]]
-    room_to_sockets[room_id].append(request.sid)
-    emit('usersInRoom', users_in_this_room, to=room_id)
+# -------------- SIGNALING ------------- #
     
 @socketio.on('sendingSignal')
 def handle_sending_signal(payload):
-    user_id_to_send_signal = payload['userIdToSendSignal']
-    emit('userJoined', {'signal': payload['signal'], 'callerId': payload['callerId']}, to=user_id_to_send_signal)
+    user_sid_to_send_signal = payload['userSidToSendSignal']
+    user_id = payload['userId']
+    # caller_id should be request.sid
+    print(f"got sendingSignal from user: {user_id}, sid: {request.sid}, caller_id: {payload['callerId']}, to: {user_sid_to_send_signal}")
+    emit('sendingSignalAck', {'signal': payload['signal'], 'callerId': payload['callerId'], 'userId': user_id}, to=user_sid_to_send_signal)
 
 @socketio.on('returningSignal')
 def handle_returning_signal(payload):
     caller_id = payload['callerId']
-    emit('returningSignalAck', {'signal': payload['signal'], 'id': request.sid}, to=caller_id)
+    user_id = payload['userId']
+    print(f"got returningSignal from user: {user_id}, sid: {request.sid}, caller_id: {caller_id}")
+    emit('returningSignalAck', {'signal': payload['signal'], 'calleeId': request.sid, 'userId': user_id}, to=caller_id)
 
 @socketio.on('disconnect')
 def handle_disconnect():
 # Get the request data
     print('Client disconnected')
-    # Join the SocketIO broadcast room
+    # TODO: update room data and notify users
     leave_room(request.sid)
 
 

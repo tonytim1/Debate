@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const useAuthenticated = () => {
+const useAuthentication = () => {
   const [ isAuthenticated, setIsAuthenticated ] = useState(true);
   const location = useLocation();
 
@@ -15,4 +15,4 @@ const useAuthenticated = () => {
   return isAuthenticated ;
 }
 
-export default useAuthenticated;
+export default useAuthentication;

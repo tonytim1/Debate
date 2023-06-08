@@ -1,18 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 import { Grid, Typography } from '@mui/material';
 
-const Video = ({ peer, name }) => {
+const Video = ({ peer }) => {
   const refVideo = useRef();
 
   useEffect(() => {
-    peer.on('stream', (stream) => {
-        refVideo.current.srcObject = stream;
+    console.log("the other video is", peer, peer.userId)
+    peer.peer.on('stream', (stream) => {
+      console.log("other video sent stream!");
+      refVideo.current.srcObject = stream;
     });
-  }, [peer]);
+  }, []);
 
   return (
     <Grid item xs={12} md={6}>
-        <Typography variant="h5" gutterBottom>{name || 'Name'}</Typography>
+        <Typography variant="h5" gutterBottom>{peer.userId || 'Uknown'}</Typography>
         <video autoPlay playsInline ref={refVideo} />
      </Grid>
   );

@@ -55,7 +55,7 @@ const StyledCover = styled('img')({
 });
 
 const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId }, ref) => {
-  const { name, tags, time_to_start, spectators, teams, room_size, users_list } = room;
+  const { name, tags, time_to_start, spectators, teams, room_size, users_list, is_conversation } = room;
   const index = 1;
   const latestPostLarge = index === 0;
   const latestPost = index === 1 || index === 2;
@@ -92,7 +92,7 @@ const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId }, 
     return (
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '60', fontWeight: 'bold' }}>
-          {diff < 0 && isRunning ? <div>Debate start in {minutes}:{seconds}</div> : 'Debate started'}
+          {diff < 0 && isRunning && !is_conversation ? <div>Debate start in {minutes}:{seconds}</div> : 'Debate started'}
         </div>
       </div>
     );

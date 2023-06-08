@@ -8,11 +8,10 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import { Container, Stack, Box, Button, Card} from '@mui/material';
-import { io } from 'socket.io-client';
 
 const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) => {
     const handle_switch = async () => {
-        socket.emit('switch_team', { 
+        socket.current.emit('switch_team', { 
             'roomId': roomId, 
             'userId': currUserId,
         });
