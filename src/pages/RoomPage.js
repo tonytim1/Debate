@@ -51,9 +51,11 @@ export default function RoomPage() {
   
     socket.current.once('user_join', ( roomData ) => {
       setRoomData(roomData);
-      setRoomState(1); // TODO: set state according to room data (lobby or conversation)
       if (roomData.is_conversation) {
         setRoomState(2);
+      }
+      else{
+        setRoomState(1);
       }
     });
     socket.current.once('room not found', () => {
@@ -64,8 +66,6 @@ export default function RoomPage() {
     });
     socket.current.once('conversation_start', () => {
       console.log('conversation_start')
-      // const conversationURL = `/conversation/${roomId}`;
-      // navigate(conversationURL);
       setRoomState(2);
     });
     socket.current.on('receiveMessage', payload => {
@@ -81,7 +81,7 @@ export default function RoomPage() {
       });
 
       return () => {
-        socket.current.off('room_data_updated');
+        socket.current.off('room_data_updated'); // why do we remove the event listener for this component?
       };
     };
   

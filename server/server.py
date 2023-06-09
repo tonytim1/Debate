@@ -133,10 +133,10 @@ def signin():
         return jsonify({'error': str(e)}), 500
 
 # user_to_socket = {}
-# socket_to_user = {}
 # room_to_users = {}
 # room_to_sockets = {}
-# socket_to_room = {}
+socket_to_user = {}
+socket_to_room = {}
 rooms = {}
 
 # ---------- HOME PAGE ---------- #
@@ -144,11 +144,9 @@ rooms = {}
 def get_all_rooms():
     sid = request.sid
     print(f"fetch_all_rooms sid: {sid}")
-
     # sort by current users in room
-    _rooms = {k: dataclasses.asdict(v) for k, v in sorted(rooms.items(), key=lambda item: -len(item[1].users_list))}
-
-    socketio.emit("all_rooms", _rooms, room=sid)
+    sorted_rooms = {k: dataclasses.asdict(v) for k, v in sorted(rooms.items(), key=lambda item: -len(item[1].users_list))}
+    socketio.emit("all_rooms", sorted_rooms, room=sid)
 
 
 # ---------- CREATE ROOM PAGE ---------- #
@@ -198,6 +196,15 @@ def join_debate_room(data):
         # Room is full, send a specific response
         emit('room is full', room=sid)
         return
+    
+    if room.is_conversation:
+        if not room.specators:
+            print("uesr tried to join conversation room that doesnt have spectators")
+            emit('room is full', room=sid)
+            return
+        # TODO: add user to spectators list
+        emit('user_join', dataclasses.asdict(room) ,room=sid)
+
 
     if user_id not in room.users_list and user_id is not None:
         room.users_list.update({user_id: User(sid=sid, ready=False, team=False)})
@@ -206,6 +213,8 @@ def join_debate_room(data):
         emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
     # Join the SocketIO broadcast room
+    socket_to_room[request.sid] = room_id
+    socket_to_user[request.sid] = user_id
     join_room(room_id)
     emit('user_join', dataclasses.asdict(room) ,room=sid)
 
@@ -216,6 +225,11 @@ def leave_debate_room(data):
     sid = request.sid
     room_id = data.get('roomId')
     user_id = data.get('userId')
+
+    if sid in socket_to_room:
+        socket_to_room.pop(sid)
+    if sid in socket_to_user:
+        socket_to_user.pop(sid)
 
     if room_id not in rooms:
         # Room not found, send a specific response
@@ -339,10 +353,29 @@ def handle_returning_signal(payload):
 
 @socketio.on('disconnect')
 def handle_disconnect():
-# Get the request data
-    print('Client disconnected')
-    # TODO: update room data and notify users
-    leave_room(request.sid)
+    # Get the request data
+    sid = request
+    print('Client disconnected with sid: ', sid)
+    room_id = socket_to_room.get(sid)
+    user_id = socket_to_user.get(sid)
+
+    if sid in socket_to_room:
+        socket_to_room.pop(sid)
+    if sid in socket_to_user:
+        socket_to_user.pop(sid)
+
+    if room_id is None or room_id not in rooms:
+        return
+    room = rooms[room_id]
+    if user_id is None:
+        return
+    if user_id in room.users_list:
+        room.users_list.pop(user_id)
+
+    leave_room(room=room_id)
+    # update room data and notify users
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+    emit('userLeft', { id: sid }, to=room_id)  # for conversations only
 
 
 # ---------- CHAT ---------- #        
