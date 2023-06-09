@@ -35,7 +35,7 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
         console.log("WebcamReady");
 
         Object.entries(roomData.users_list).forEach(([userId, user]) => {
-          if (userId !== currUserId) {    
+          if (userId < currUserId) {   // only send to users with lower id so that we don't send the same message twice
             console.log("other user", userId);
             //creating connection between two user via simple-peer for video
             const peer = createPeer(user.sid, socket.current.id, webcamStream.current);

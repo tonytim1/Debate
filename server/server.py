@@ -203,6 +203,7 @@ def join_debate_room(data):
             emit('room is full', room=sid)
             return
         # TODO: add user to spectators list
+        room.spectators_list.append(user_id)
         emit('user_join', dataclasses.asdict(room) ,room=sid)
 
 
@@ -216,7 +217,7 @@ def join_debate_room(data):
     socket_to_room[request.sid] = room_id
     socket_to_user[request.sid] = user_id
     join_room(room_id)
-    emit('user_join', dataclasses.asdict(room) ,room=sid)
+    emit('user_join', dataclasses.asdict(room), room=sid)
 
 
 @socketio.on('leave_click')
