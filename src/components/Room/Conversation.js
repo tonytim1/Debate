@@ -339,10 +339,10 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
                 <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
                 <video muted autoPlay playsInline ref={myVideo} width="320" height="240"/>
               </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
+                  {/*Peers video and audio stream*/}
+              {peers.map((peer) => (
+                <Video controls peer={peer} />
+              ))}
               <Grid item>
                 <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
                 <Skeleton variant="rectangular" width={320} height={240} />
@@ -374,10 +374,6 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
               </IconButton>
             </CardActions>
             </Card>
-          {/*Peers video and audio stream*/}
-          {peers.map((peer) => (
-            <Video controls peer={peer} />
-          ))}
           {/*Video controls - possibly to be added*/}
           {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%'}}>
             {/*Chat container*/}

@@ -54,6 +54,7 @@ def handle_connect():
 @app.route('/api/signup', methods=['POST'])
 def signup():
     user_data = request.get_json()
+    
     email = user_data.get('email')
     password = user_data.get('password')
     
@@ -61,10 +62,6 @@ def signup():
     username = user_data.get('username')
     tags = user_data.get('tags')
     image = user_data.get('image')
-
-    print(f"File name: {image.name}")
-    print(f"File mode: {image.mode}")
-    print(f"File encoding: {image.encoding}")    
 
     try:
         # create new user base on email and password
@@ -376,10 +373,10 @@ def handle_returning_signal(payload):
 @socketio.on('disconnect')
 def handle_disconnect():
     # Get the request data
-    sid = request
-    print('Client disconnected with sid: ', sid)
+    sid = request.sid
     room_id = socket_to_room.get(sid)
     user_id = socket_to_user.get(sid)
+    print(f'Client disconnected with sid: {sid}, room_id: {room_id}, user_id: {user_id}',)
 
     if sid in socket_to_room:
         socket_to_room.pop(sid)
@@ -397,7 +394,7 @@ def handle_disconnect():
     leave_room(room=room_id)
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
-    emit('userLeft', { id: sid }, to=room_id)  # for conversations only
+    emit('userLeft', { "id": sid }, to=room_id)  # for conversations only
 
 
 # ---------- CHAT ---------- #        
