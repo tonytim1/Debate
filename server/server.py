@@ -178,6 +178,7 @@ def create_room():
         name=room_data.get('name'),
         tags=room_data.get('tags'),
         teams=room_data.get('teams'),
+        team_names=room_data.get('teamNames'),
         room_size=room_data.get('room_size'),
         time_to_start=time.time() + room_data.get('time_to_start') * 60,
         spectators=room_data.get('spectators'),

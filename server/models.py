@@ -15,6 +15,7 @@ class Room:
     name: str
     tags: list[str]
     teams: bool
+    team_names: list[str]
     room_size: int
     time_to_start: float
     spectators: bool
