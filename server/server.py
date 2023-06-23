@@ -349,6 +349,38 @@ def switch_team(data):
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
+@socketio.on('spectator_click')
+def handle_spectator_click(data):
+    room_id = data.get('roomId')
+    user_id = data.get('userId')
+    print(f"spectator_click room_id: {room_id}, sid: {request.sid}, user_id: {user_id}")
+    if room_id not in rooms:
+        return
+    
+    room = rooms[room_id]
+    
+    if user_id not in room.users_list:
+        return
+    user = room.users_list.pop(user_id)
+    room.spectators_list[user_id] = user
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+
+@socketio.on('debater_click')
+def handle_debater_click(data):
+    room_id = data.get('roomId')
+    user_id = data.get('userId')
+    print(f"debater_click room_id: {room_id}, sid: {request.sid}, user_id: {user_id}")
+    if room_id not in rooms:
+        return
+    
+    room = rooms[room_id]
+    
+    if user_id not in room.spectators_list:
+        return
+    user = room.spectators_list.pop(user_id)
+    room.users_list[user_id] = user
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+
 @socketio.on('ready_click')
 def handle_ready_click(data):
     room_id = data.get('roomId')

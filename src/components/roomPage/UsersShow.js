@@ -11,7 +11,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Container, Stack, Box, Tooltip, Button, Card, IconButton} from '@mui/material';
 import { useState } from 'react';
 
-const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator}) => {
+const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize}) => {
     const [isDesabled, setIsDisabled] = useState(false);
     const handle_switch = async () => {
         setIsDisabled(true);
@@ -40,7 +40,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
         }}>
             {allowSpectators ? (
             <Tooltip style={{alignSelf:'center'}} placement="top" arrow title="Be a Debator">
-            <IconButton disabled={!isSpectator} onClick={onSpecClick} style={{right: '4px', top: '4px', position: 'absolute', zIndex: '3'}}>
+            <IconButton disabled={!isSpectator || Object.keys(usersList).length >= roomSize} onClick={onSpecClick} style={{right: '4px', top: '4px', position: 'absolute', zIndex: '3'}}>
                 <PersonAddIcon/>
             </IconButton>
             </Tooltip>
