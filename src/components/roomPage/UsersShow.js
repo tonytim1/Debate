@@ -7,14 +7,21 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
-import { Container, Stack, Box, Button, Card} from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { Container, Stack, Box, Tooltip, Button, Card, IconButton} from '@mui/material';
+import { useState } from 'react';
 
-const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator}) => {
+const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator}) => {
+    const [isDesabled, setIsDisabled] = useState(false);
     const handle_switch = async () => {
+        setIsDisabled(true);
         socket.current.emit('switch_team', { 
             'roomId': roomId, 
             'userId': currUserId,
         });
+        setTimeout(() => {
+            setIsDisabled(false);
+        }, 3000);
     };
 
     return (
@@ -31,11 +38,19 @@ const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, mo
             width: '100%',
             overflow: 'auto',
         }}>
+            {allowSpectators ? (
+            <Tooltip style={{alignSelf:'center'}} placement="top" arrow title="Be a Debator">
+            <IconButton disabled={!isSpectator} onClick={onSpecClick} style={{right: '4px', top: '4px', position: 'absolute', zIndex: '3'}}>
+                <PersonAddIcon/>
+            </IconButton>
+            </Tooltip>
+            ) : null}
       {teams ? (
         <Stack direction="row" spacing={2} 
         style={{
             display: 'flex',
             justifyContent: 'center',
+            height: '100%',
           }}>
             <Box sx={{width:'50%'}}>
                 <List subheader={
@@ -69,9 +84,9 @@ const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, mo
                     
                 </List>
             </Box>
-            {isSpectator ? (<></>) : (<Button onClick={handle_switch} sx={{width:'0%'}}>
+            <Button style={{backgroundColor: '#e6ebf9ab'}} disabled={isDesabled} onClick={handle_switch} sx={{width:'0%'}}>
                 change team
-            </Button>)}            
+            </Button>
             <Box sx={{width:'50%'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
