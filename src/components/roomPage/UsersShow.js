@@ -9,7 +9,7 @@ import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import { Container, Stack, Box, Button, Card} from '@mui/material';
 
-const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, moderator}) => {
+const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator}) => {
     const handle_switch = async () => {
         socket.current.emit('switch_team', { 
             'roomId': roomId, 
@@ -69,9 +69,9 @@ const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, mo
                     
                 </List>
             </Box>
-            <Button onClick={handle_switch} sx={{width:'0%'}}>
+            {isSpectator ? (<></>) : (<Button onClick={handle_switch} sx={{width:'0%'}}>
                 change team
-            </Button>
+            </Button>)}            
             <Box sx={{width:'50%'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>

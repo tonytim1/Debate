@@ -44,7 +44,7 @@ export default function HomePage() {
   ];
   const getRandomColor = () => alpha(colors[random(0, colors.length - 1)], 0.72);  
 
-  const [roomsData, setRoomsData] = useState(false);
+  const [roomsData, setRoomsData] = useState(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRooms, setFilteredRooms] = useState(false);
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
@@ -81,17 +81,36 @@ export default function HomePage() {
       fetchRooms();
       socket.current.on('all_rooms', (rooms) => {
         const mappedRooms = new Map(Object.entries(rooms));
+        console.log(mappedRooms);
         mappedRooms.forEach((data) => {
           data.color = getRandomColor(); // Add random color to each room
         });
         setRoomsData(mappedRooms);
       });
-      socket.current.on('rooms_updated', () => {
-        console.log('rooms updated');
-        fetchRooms();
-        // set roomsData to new data
-      });
     };
+
+    // TODO: dont fetch all rooms again
+    socket.current.on('rooms_updated', (room) => {
+      fetchRooms();
+      // console.log('rooms updated');
+      // const rooms = roomsData;
+      // rooms.set(room.id, room);
+      // setRoomsData(rooms);
+    });
+    socket.current.on('rooms_new', (room) => {
+      fetchRooms();
+      // console.log('rooms new');
+      // const rooms = roomsData;
+      // rooms.set(room.id, room);
+      // setRoomsData(rooms);
+    });
+    socket.current.on('rooms_deleted', (room) => {
+      fetchRooms();
+      // const rooms = roomsData;
+      // rooms.delete(room.id);
+      // setRoomsData(rooms);
+      // console.log("delete 2", roomsData);
+    });
 
     window.addEventListener('keydown', handleKeyPress);
     fetchData();

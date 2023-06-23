@@ -44,5 +44,6 @@ V make the whole room card (in home page) clickable rather then just the text
 V Add a feature to chat that if you press 'enter' it sends the msg
 V Make the room page prettier
 - add a "be a spectator" button & add a "be a debator"
+    - "be debator" should show only if number of current debators is smaller than room size, maybe we should show "2/4" also inside the room
 V Add team names feature to the moderator (in the create room page)
 - MISLTONE 3 PRESENTATION 

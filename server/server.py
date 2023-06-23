@@ -11,7 +11,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit, close_room
 
-from models import Room, User, Spectator
+from models import Room, User
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./server/debate-center-firebase-key.json"
 
@@ -162,9 +162,8 @@ def get_user():
 def get_all_rooms():
     sid = request.sid
     print(f"fetch_all_rooms sid: {sid}")
-    # sort by current users in room
-    sorted_rooms = {k: dataclasses.asdict(v) for k, v in sorted(rooms.items(), key=lambda item: -len(item[1].users_list))}
-    socketio.emit("all_rooms", sorted_rooms, room=sid)
+    rooms_to_send = {room_id: dataclasses.asdict(room_data) for room_id, room_data in rooms.items()}
+    socketio.emit("all_rooms", rooms_to_send, room=sid)
 
 
 # ---------- CREATE ROOM PAGE ---------- #
@@ -189,7 +188,7 @@ def create_room():
         pictureId=room_data.get('pictureId', -1),
     )
     rooms[room_id] = room
-    socketio.emit("rooms_updated") # TODO: send only the new room
+    socketio.emit('rooms_new', dataclasses.asdict(room))
 
     # Return the room ID as a response
     return jsonify({'roomId': room_id})
@@ -218,14 +217,18 @@ def join_debate_room(data):
         print("user tried to join room he is already in")
         # update the user's socket id
         old_sid = room.users_list[user_id].sid if user_id in room.users_list else room.spectators_list[user_id].sid
-        socket_to_room.pop(old_sid)
-        socket_to_user.pop(old_sid)
+        socket_to_room.pop(old_sid, None)
+        socket_to_user.pop(old_sid, None)
         leave_room(room_id, sid=old_sid)
         socket_to_room[sid] = room_id
         socket_to_user[sid] = user_id
-        room.users_list[user_id].sid = sid
+        if user_id in room.users_list:
+            room.users_list[user_id].sid = sid 
+        else:
+            room.spectators_list[user_id].sid = sid
         emit('user_join', dataclasses.asdict(room), room=sid)
         emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+        emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
         join_room(room_id)
         return
     
@@ -235,7 +238,7 @@ def join_debate_room(data):
             emit('conversation already started', room=sid)
             return
         
-        room.spectators_list[user_id] = Spectator(sid=sid)
+        room.spectators_list[user_id] = User(sid=sid)
         emit('spectator_join', dataclasses.asdict(room), room=sid)
 
     elif len(room.users_list) >= room.room_size:
@@ -244,15 +247,16 @@ def join_debate_room(data):
             emit('room is full', room=sid)
             return
         
-        room.spectators_list[user_id] = Spectator(sid=sid)
+        room.spectators_list[user_id] = User(sid=sid)
         emit('spectator_join', dataclasses.asdict(room), room=sid)
         
     else:  # room is not full, add user to room
-        room.users_list.update({user_id: User(sid=sid, ready=False, team=False)})
+        room.users_list.update({user_id: User(sid=sid)})
         emit('user_join', dataclasses.asdict(room), room=sid)
         
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+    emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
     
     # Join the SocketIO broadcast room
     socket_to_room[sid] = room_id
@@ -291,9 +295,9 @@ def leave_debate_room(data):
 
     if not room.users_list and not room.spectators_list:
         # Delete the room if no users are left
-        emit("rooms_updated", broadcast=True)  # TODO: send only the deleted room
         rooms.pop(room_id)
         close_room(room_id)
+        emit('rooms_deleted', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
         return
 
     # If the moderator left, assign a new moderator
@@ -307,6 +311,7 @@ def leave_debate_room(data):
     leave_room(room_id)
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+    emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
 
 
 @socketio.on('fetch_room_data')
@@ -421,6 +426,7 @@ def handle_disconnect():
     leave_room(room=room_id)
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+    emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
     emit('userLeft', { "id": sid }, to=room_id)  # for conversations only
 
 
