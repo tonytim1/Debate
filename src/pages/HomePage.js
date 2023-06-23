@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import React from 'react';
-import { Grid, Button, Box, Skeleton, Paper, Container, Grow, TextField, Stack, Typography, Autocomplete } from '@mui/material';
+import { Grid, Button, Box, Skeleton, Paper, Container, Grow, TextField, Stack, Typography, Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import Iconify from '../components/iconify';
 import BlogPostCard from '../sections/@dashboard/blog/BlogPostCard';
 import { io } from 'socket.io-client';
@@ -50,6 +50,7 @@ export default function HomePage() {
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
+  const [sortType, setSortType] = useState('recommended'); // ['soon', 'recommended', 'popular']
   const socket = useRef();
   const navigate = useNavigate();
 
@@ -151,8 +152,23 @@ export default function HomePage() {
                   setShowCreateRoomCard(true);}}>
                 Create Room
               </Button>
-              
             </Stack>
+            <ToggleButtonGroup
+              value={sortType}
+              exclusive
+              onChange={(event, val) => {setSortType(val);}}
+              color="primary"
+              >
+                <ToggleButton value="recommended" sx={{ color: 'text.secondary' }}>
+                  Recommended
+                </ToggleButton>
+                <ToggleButton value="popular" sx={{ color: 'text.secondary' }}>
+                  Popular
+                </ToggleButton>
+                <ToggleButton value="soon" sx={{ color: 'text.secondary' }}>
+                  Starting Soon
+                </ToggleButton>
+            </ToggleButtonGroup>
             {roomsData ? (
               <CardContainer>
                 <Grid container justifyContent="center">

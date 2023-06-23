@@ -9,7 +9,7 @@ import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import { Container, Stack, Box, Button, Card} from '@mui/material';
 
-const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) => {
+const UsersShow = ({ teamNames, teams, usersList, roomId, currUserId, socket, moderator}) => {
     const handle_switch = async () => {
         socket.current.emit('switch_team', { 
             'roomId': roomId, 
@@ -40,7 +40,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
             <Box sx={{width:'50%'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                    Team 1
+                    {teamNames[0]}
                     </ListSubheader>
                 }
                 >
@@ -75,7 +75,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
             <Box sx={{width:'50%'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                    Team 2
+                    {teamNames[1]}
                     </ListSubheader>
                 }>
                     {Object.entries(usersList).map(([userId, user]) => {
