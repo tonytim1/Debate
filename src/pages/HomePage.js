@@ -1,12 +1,11 @@
 import { Helmet } from 'react-helmet-async';
 import React from 'react';
-import { Grid, Button, Box, Skeleton, Paper, Container, Grow, TextField, Stack, Typography, Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Grid, Button, Skeleton, Container, TextField, Stack, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import Iconify from '../components/iconify';
-import BlogPostCard from '../sections/@dashboard/blog/BlogPostCard';
 import { io } from 'socket.io-client';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { random, clamp } from 'lodash';
+import { random } from 'lodash';
 import { alpha, styled } from '@mui/system';
 import useAuthentication from "../hooks/useAuthentication";
 import './HomePage.css'
@@ -81,7 +80,6 @@ export default function HomePage() {
       fetchRooms();
       socket.current.on('all_rooms', (rooms) => {
         const mappedRooms = new Map(Object.entries(rooms));
-        console.log(mappedRooms);
         mappedRooms.forEach((data) => {
           data.color = getRandomColor(); // Add random color to each room
         });
@@ -121,7 +119,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    console.log(roomsData);
     filterRooms('');
   }, [roomsData]);
 
