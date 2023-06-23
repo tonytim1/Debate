@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { map } from 'lodash';
 
 
-const RoomLobby = ({ roomData, currUserId, roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
+const RoomLobby = ({ roomData, currUserId, roomId, isSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
   const { name, teams, users_list, moderator } = roomData;
   const navigate = useNavigate();
   const handle_ready_click = () => {
@@ -20,8 +20,6 @@ const RoomLobby = ({ roomData, currUserId, roomId, socket, messageRef, setMessag
     socket.current.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });  // currently currUserId is ignored by the server and the ip is used instead
     navigate('/');
   } 
-
-  const names = ['John', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack','Jane', 'Sarah', 'Jack'];
 
   return (
     <>
@@ -44,16 +42,16 @@ const RoomLobby = ({ roomData, currUserId, roomId, socket, messageRef, setMessag
           <Typography variant="h2">{name}</Typography>
         <Stack direction="row" sx={{ width: '95%' }} spacing={2} style={{flexGrow: '1', overflow: 'auto', marginTop: '11px', maxHeight:'40%', minHeight:'40%'}}>
           <UsersShow teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} />
-          <SpectatorsList spectsList={names}/>
+          <SpectatorsList spectsList={roomData.spectators_list}/>
         </Stack>
         <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
         <Stack direction="row" spacing={8}>
           <Button variant="contained" onClick={handle_leave_click} color="error">
             Leave
           </Button>
-          <Button type="submit" variant="contained" onClick={handle_ready_click} color="success">
+          {isSpectator ? (<> </>) : (<Button type="submit" variant="contained" onClick={handle_ready_click} color="success">
             Ready
-          </Button>
+          </Button>)}
           <AdminControl moderatorId={moderator} currUserId={currUserId} roomId={roomId} socket={socket}/>
         </Stack>
         </Stack>

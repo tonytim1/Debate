@@ -91,9 +91,7 @@ const CreateRoomCard = ({ showCard, onCloseClick }) => {
             teams: teams,
             room_size: size,
             time_to_start: time_to_start,
-            spectators: allowSpectators,
-            ready_list: [],
-            spectators_list: [],
+            allow_spectators: allowSpectators,
             moderator: currUserId,
             pictureId: selectedPicture ? selectedPicture.id : -1,
           };

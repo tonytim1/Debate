@@ -304,8 +304,6 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
       setIsVideoMuted(!isVideoMuted);
     }
 
-    const names = ['John', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack','Jane', 'Sarah', 'Jack', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack'];
-
     return (
       <>
       <Helmet>
@@ -379,7 +377,7 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
             {/*Chat container*/}
             <Chat style={{}} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
             {/*Spectators*/}
-            <SpectatorsList spectsList={names}/>
+            <SpectatorsList spectsList={roomData.spectators_list}/>
           </Stack>) : null}
           
         </Stack>

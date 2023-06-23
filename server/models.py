@@ -10,6 +10,10 @@ class User:
 
 
 @dataclass
+class Spectator:
+    sid: str
+
+@dataclass
 class Room:
     id: str
     name: str
@@ -17,9 +21,9 @@ class Room:
     teams: bool
     room_size: int
     time_to_start: float
-    spectators: bool
+    allow_spectators: bool
     users_list: dict[str, User]
-    spectators_list: list[str]
+    spectators_list: dict[str, Spectator]
     moderator: str
     is_conversation: bool
     pictureId: Optional[int]
