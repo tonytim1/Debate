@@ -1,58 +1,65 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react';
 import Scrollbar from '../scrollbar';
-import {
-  Card,
-  Grid,
-  TextField,
-  Typography,
-  Button,
-} from '@mui/material';
+import { Card, Grid, TextField, Typography, Button, Stack } from '@mui/material';
 
 const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages, currUserId }) => {
-
-    const sendMessage = (e) => {
-        e.preventDefault();
-        socket.current.emit('sendMessage', {
-            roomId: roomId,
-            message: messageRef,
-            userId: currUserId
-        })
-        setMessageRef("");
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('sendButton').click();
     }
+  };
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    // check if message is empty:
+    if (messageRef === '') {
+      return;
+    }
+    socket.current.emit('sendMessage', {
+      roomId: roomId,
+      message: messageRef,
+      userId: currUserId,
+    });
+    setMessageRef('');
+  };
 
   return (
-    <Grid item xs={12} md={6} sx={{ width: '100%' }}>
-    <Card sx={{ p: 2 }}>
-      <Typography variant="h5">Chat</Typography>
-      <Scrollbar style={{ height: 200 }}>
-      {messages.map((message, i) => {
-        const user = message.userId;
-        return (
-        <div key={i}>
-          <Typography variant="subtitle1">
-          <strong>{user}</strong>
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-          {message.message}
-          </Typography>
-        </div>
-        );
-      })}
-      </Scrollbar>
-      {/*Send message container*/}
-      <Grid container alignItems="center" justifyContent="space-between" marginTop={2}>
-      <Grid item xs={9}>
-        <TextField label="Type a message" value={messageRef} onChange={(e) => setMessageRef(e.target.value)} fullWidth />
-      </Grid>
-      <Grid item xs={3}>
-        <Button variant="contained" onClick={sendMessage} >
-        Send
-        </Button>
-      </Grid>
-      </Grid>
+    <Card sx={{ p: 2, width: '95%' }} style={{height: '100%', flexGrow: '1'}}>
+      <Stack style={{height: '100%'}}>
+        <Typography variant="h5" style={{marginBottom: '10px'}}>Chat</Typography>
+        <Scrollbar style={{}}>
+          {messages.map((message, i) => {
+            const user = message.userId;
+            return (
+              <div key={i}>
+                <Typography>
+                  <strong>{user}: </strong>
+                  {message.message}
+                </Typography>
+                {/* <Typography variant="body1" gutterBottom>
+                  
+                </Typography> */}
+              </div>
+            );
+          })}
+        </Scrollbar>
+        {/* Send message container */}
+        <Stack direction="row" spacing={2} alignItems="center">
+          <TextField
+            label="Type a message"
+            value={messageRef}
+            onChange={(e) => setMessageRef(e.target.value)}
+            fullWidth
+            onKeyDown={handleKeyDown}
+          />
+          <Button variant="outlined" onClick={sendMessage} size="large" id="sendButton">
+            Send
+          </Button>
+        </Stack>
+      </Stack>
     </Card>
-    </Grid>
   );
 };
 
-export default Chat
+export default Chat;
