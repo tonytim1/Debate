@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 // @mui
 import { Box } from '@mui/material';
 //
@@ -14,20 +14,28 @@ Scrollbar.propTypes = {
 
 function Scrollbar({ children, sx, ...other }) {
   const userAgent = typeof navigator === 'undefined' ? 'SSR' : navigator.userAgent;
-
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (!isMobile && scrollRef.current) {
+      scrollRef.current.recalculate(); // Recalculate the scrollbar position
+      scrollRef.current.getScrollElement().scrollTop = scrollRef.current.getScrollElement().scrollHeight; // Scroll to the bottom
+    }
+  }, [children]);
 
   if (isMobile) {
     return (
-      <Box sx={{ overflowX: 'auto', ...sx }} {...other}>
-        {children}
+      <Box sx={{ overflowX: 'auto', wordWrap: 'break-all', ...sx }} {...other}>
+        <Box sx={{ whiteSpace: 'pre-wrap' }}>{children}</Box>
       </Box>
     );
   }
 
   return (
     <StyledRootScrollbar>
-      <StyledScrollbar timeout={500} clickOnTrack={false} sx={sx} {...other}>
+      <StyledScrollbar ref={scrollRef} timeout={500} clickOnTrack={false} sx={sx} {...other}>
         {children}
       </StyledScrollbar>
     </StyledRootScrollbar>

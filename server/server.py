@@ -50,7 +50,7 @@ def index():
 def handle_connect():
     print('Client connected. id=', request.sid)
 
-
+# ---------- SIGN UP ---------- #
 @app.route('/api/signup', methods=['POST'])
 def signup():
     user_data = request.get_json()
@@ -62,8 +62,10 @@ def signup():
     tags = user_data.get('tags')
     image = user_data.get('image')
 
-    print(image)
-    
+    print(f"File name: {image.name}")
+    print(f"File mode: {image.mode}")
+    print(f"File encoding: {image.encoding}")    
+
     try:
         # create new user base on email and password
         new_user = auths.create_user_with_email_and_password(email=email, password=password)
@@ -108,7 +110,9 @@ def signup():
         # Handle other errors
         print(e)
         return jsonify({'error': str(e)}), 500
-    
+
+
+# ---------- SIGN IN ---------- #
 @app.route('/api/signin', methods=['POST'])
 def signin():
     user_data = request.get_json()
@@ -117,6 +121,7 @@ def signin():
     try:
         login_user = auths.sign_in_with_email_and_password(email, password)
         token = login_user['idToken']
+        print(token)
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
 
@@ -138,6 +143,22 @@ def signin():
 socket_to_user = {}
 socket_to_room = {}
 rooms = {}
+
+# ---------- USER INFO ---------- #
+@app.route('/api/user', methods=['GET'])
+def get_user():
+    id_token = request.headers.get('Authorization')
+    print(id_token)
+    try:
+        decoded_token = auths.get_account_info(id_token)['users'][0]
+        user_uid = decoded_token['localId']
+        user_ref = db_firestore.collection('users').document(user_uid)
+        user_doc = user_ref.get().to_dict()
+        user_doc["email"] = decoded_token['email']
+        return jsonify(user_doc)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 # ---------- HOME PAGE ---------- #
 @socketio.on("fetch_all_rooms")
@@ -174,7 +195,7 @@ def create_room():
 
     # Return the room ID as a response
     return jsonify({'roomId': room_id})
-# -------------------------------------- #
+
 
 # -------------- ROOM PAGE ------------- #
 @socketio.on('join_room')
@@ -198,11 +219,11 @@ def join_debate_room(data):
         return
     
     if room.is_conversation:
-        if not room.specators:
-            print("uesr tried to join conversation room that doesnt have spectators")
-            emit('room is full', room=sid)
-            return
-        # TODO: add user to spectators list
+        # if not room.specators:
+        #     print("uesr tried to join conversation room that doesnt have spectators")
+        #     emit('room is full', room=sid)
+        #     return
+        # # TODO: add user to spectators list
         room.spectators_list.append(user_id)
         emit('user_join', dataclasses.asdict(room) ,room=sid)
 

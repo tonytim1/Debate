@@ -18,8 +18,19 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
     };
 
     return (
-    <Container>
-    <Card>
+    <Container
+        style={{
+            paddingLeft: '0px',
+            paddingRight: '0px',
+            // height: '100%',
+            
+        }}>
+    <Card
+        style={{
+            height: '100%',
+            width: '100%',
+            overflow: 'auto',
+        }}>
       {teams ? (
         <Stack direction="row" spacing={2} 
         style={{
@@ -102,6 +113,7 @@ const UsersShow = ({ teams, usersList, roomId, currUserId, socket, moderator}) =
             {Object.entries(usersList).map(([userId, user]) => {
                 return (
                     <ListItem alignItems="flex-start" 
+                        key={userId}
                         sx={{
                             backgroundColor: user.ready ? '#D1FFBD' : 'inherit',
                         }}>

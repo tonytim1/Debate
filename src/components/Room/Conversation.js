@@ -2,14 +2,19 @@ import React, { useEffect, useRef, useState, createRef } from "react";
 import UsersShow from 'src/components/roomPage/UsersShow';
 import AdminControl from 'src/components/roomPage/AdminControl';
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
-import { Typography, Stack, Button, Container, Grid, Card } from '@mui/material';
+import { Typography, Stack, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
 import Chat from 'src/components/messages/Chat';
 import { useNavigate, useParams } from 'react-router-dom';
 import Scrollbar from 'src/components/scrollbar';
 import { Helmet } from 'react-helmet-async';
 import Peer from "simple-peer";
 import Video from 'src/components/conversation_room/Video';
-import Spectator from 'src/components/conversation_room/Spectator';
+import ChatIcon from '@mui/icons-material/Chat';
+import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 
 const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
     const config = {
@@ -27,6 +32,9 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
+    const [ showChat, setShowChat ] = useState(true);
+    const [ isMuted, setIsMuted ] = useState(false);
+    const [ isVideoOff, setIsVideoOff ] = useState(false);
     const navigate = useNavigate();
   
     useEffect(() => {
@@ -284,45 +292,102 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
       navigate.push('/');
     };
   
+    const handleChatToggle = () => {
+      setShowChat(!showChat);
+    }
+
+    const handleMuteToggle = () => {
+      setIsMuted(!isMuted);
+    }
+
+    const handleVideoToggle = () => {
+      setIsVideoMuted(!isVideoMuted);
+    }
+
+    const names = ['John', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack','Jane', 'Sarah', 'Jack', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack'];
+
     return (
       <>
       <Helmet>
         <title> Debate Center | Debate </title>
       </Helmet>
-      <Container>
-        {/*Room title*/} 
-        <Grid container alignItems="stretch" spacing={2}>
-          <Grid item xs={12}>
-          <Typography variant="h3" align="center" gutterBottom>
+      <Container style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        // maxWidth: '95vw',
+      }}>
+      <Card sx={{width: "100%", height: "fit-content"}}
+          style={{
+            display: 'flex',
+            paddingBottom: '20px',
+            paddingTop: '20px',
+            backgroundColor: '#dbe4f3',
+            maxHeight: '97%',
+            minHeight: '97%',
+            justifyContent: 'center',
+        }}>
+        <Stack style={{width: '97%',}} spacing={3}>
+          <Typography variant="h3" align="center" gutterBottom style={{marginBottom: '0px'}}>
             {roomData.name}
           </Typography>
-          </Grid>
           {/*My own video stream, muted*/}
-          <Grid item xs={12} md={6}>  
-            <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
-            <video muted autoPlay playsInline ref={myVideo} />
-          </Grid>
+            <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
+            <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>  
+              <Grid item>
+                <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
+                <video muted autoPlay playsInline ref={myVideo} width="320" height="240"/>
+              </Grid>
+              <Grid item>
+                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+                <Skeleton variant="rectangular" width={320} height={240} />
+              </Grid>
+              <Grid item>
+                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+                <Skeleton variant="rectangular" width={320} height={240} />
+              </Grid>
+              <Grid item>
+                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+                <Skeleton variant="rectangular" width={320} height={240} />
+              </Grid>
+              <Grid item>
+                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+                <Skeleton variant="rectangular" width={320} height={240} />
+              </Grid>
+              <Grid item>
+                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+                <Skeleton variant="rectangular" width={320} height={240} />
+              </Grid>
+              
+
+            </Grid>
+            <CardActions style={{justifyContent: 'center'}}>
+              <IconButton onClick={handleChatToggle}>
+                {showChat ? (<SpeakerNotesOffIcon/>) : (<ChatIcon/>)}
+              </IconButton>
+              <IconButton onClick={handleMuteToggle}>
+                {isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
+              </IconButton>
+              <IconButton onClick={handleVideoToggle}>
+                {isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
+              </IconButton>
+            </CardActions>
+            </Card>
           {/*Peers video and audio stream*/}
           {peers.map((peer) => (
             <Video controls peer={peer} />
           ))}
           {/*Video controls - possibly to be added*/}
-          {/*Chat container*/}
-          <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
-          {/*Spectators*/}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ p: 2 }}>
-                <Typography variant="h5">Spectators</Typography>
-                <Scrollbar style={{ height: 473 }}>
-                <ul>
-                {spectators.map((user, i) => (
-                    <Spectator user={user} i={i}/>
-                ))}
-                </ul>
-                </Scrollbar>
-            </Card>
-          </Grid>
-        </Grid>
+          {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%'}}>
+            {/*Chat container*/}
+            <Chat style={{}} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
+            {/*Spectators*/}
+            <SpectatorsList spectsList={names}/>
+          </Stack>) : null}
+          
+        </Stack>
+        </Card>
       </Container>
       </>
     );

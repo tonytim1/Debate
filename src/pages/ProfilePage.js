@@ -1,5 +1,5 @@
-import { Box, TextField, CardHeader,  Avatar, Button, Card, CardActions, CardContent, Divider, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { Box, TextField, CardHeader, Avatar, Button, Card, CardActions, CardContent, Divider, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
+import { useCallback, useState, useEffect } from 'react';
 import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -8,15 +8,10 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
+import axios from 'axios';
+import useAuthentication from "../hooks/useAuthentication";
 
-const user = {
-  avatar: '/assets/avatars/avatar-anika-visser.png',
-  city: 'Los Angeles',
-  country: 'USA',
-  jobTitle: 'Senior Developer',
-  name: 'Anika Visser',
-  timezone: 'GTM-7'
-};
+
 
 const states = [
   {
@@ -37,32 +32,12 @@ const states = [
   }
 ];
 
-export const AccountProfileDetails = () => {
-  const [values, setValues] = useState({
-    firstName: 'Anika',
-    lastName: 'Visser',
-    email: 'demo@devias.io',
-    phone: '',
-    state: 'los-angeles',
-    country: 'USA'
-  });
+export const AccountProfileDetails = ({ user }) => {
 
-  const handleChange = useCallback(
-    (event) => {
-      setValues((prevState) => ({
-        ...prevState,
-        [event.target.name]: event.target.value
-      }));
-    },
-    []
-  );
 
-  const handleSubmit = useCallback(
-    (event) => {
-      event.preventDefault();
-    },
-    []
-  );
+  const handleChange = async () => { };
+
+  const handleSubmit = async () => { };
 
   return (
     <form
@@ -70,6 +45,7 @@ export const AccountProfileDetails = () => {
       noValidate
       onSubmit={handleSubmit}
     >
+
       <Card>
         <CardHeader
           subheader="The information can be edited"
@@ -88,11 +64,11 @@ export const AccountProfileDetails = () => {
                 <TextField
                   fullWidth
                   helperText="Please specify the first name"
-                  label="First name"
-                  name="firstName"
+                  label="Name"
+                  name="Name"
                   onChange={handleChange}
                   required
-                  value={values.firstName}
+                  value={user.name}
                 />
               </Grid>
               <Grid
@@ -101,11 +77,11 @@ export const AccountProfileDetails = () => {
               >
                 <TextField
                   fullWidth
-                  label="Last name"
-                  name="lastName"
+                  label="Email"
+                  name="Email"
                   onChange={handleChange}
                   required
-                  value={values.lastName}
+                  value={user.email}
                 />
               </Grid>
               <Grid
@@ -114,11 +90,11 @@ export const AccountProfileDetails = () => {
               >
                 <TextField
                   fullWidth
-                  label="Email Address"
-                  name="email"
+                  label="Password"
+                  name="Password"
                   onChange={handleChange}
                   required
-                  value={values.email}
+
                 />
               </Grid>
               <Grid
@@ -131,7 +107,6 @@ export const AccountProfileDetails = () => {
                   name="phone"
                   onChange={handleChange}
                   type="number"
-                  value={values.phone}
                 />
               </Grid>
               <Grid
@@ -140,11 +115,11 @@ export const AccountProfileDetails = () => {
               >
                 <TextField
                   fullWidth
-                  label="Country"
-                  name="country"
+                  label="Username"
+                  name="Username"
                   onChange={handleChange}
                   required
-                  value={values.country}
+                  value={user.username}
                 />
               </Grid>
               <Grid
@@ -158,31 +133,21 @@ export const AccountProfileDetails = () => {
                   onChange={handleChange}
                   required
                   select
-                  SelectProps={{ native: true }}
-                  value={values.state}
-                >           
-                  {states.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
-                    >
-                      {option.label}
-                    </option>
-                  ))}
+                  SelectProps={{ native: true }}>
                 </TextField>
               </Grid>
               <Grid
                 xs={12}
                 md={6}
               >
-                <MultipleSelectTopic/>
+                <MultipleSelectTopic />
               </Grid>
             </Grid>
           </Box>
         </CardContent>
 
         <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end' , m:1.5}}>
+        <CardActions sx={{ justifyContent: 'flex-end', m: 1.5 }}>
           <Button variant="contained">
             Save details
           </Button>
@@ -192,7 +157,8 @@ export const AccountProfileDetails = () => {
   );
 };
 
-export const AccountProfile = () => (
+
+export const AccountProfile = ({ user }) => (
   <Card>
     <CardContent>
       <Box
@@ -203,30 +169,25 @@ export const AccountProfile = () => (
         }}
       >
         <Avatar
-          src={user.avatar}
+
           sx={{
             height: 80,
             mb: 2,
             width: 80
           }}
         />
-        <Typography
-          gutterBottom
-          variant="h5"
-        >
-          {user.name}
+        <Typography variant="body2">
+          {user.name !== null ? user.name : "No Name"}
         </Typography>
         <Typography
           color="text.secondary"
           variant="body2"
         >
-          {user.city} {user.country}
         </Typography>
         <Typography
           color="text.secondary"
           variant="body2"
         >
-          {user.timezone}
         </Typography>
       </Box>
     </CardContent>
@@ -241,50 +202,84 @@ export const AccountProfile = () => (
     </CardActions>
   </Card>
 );
-const Page = () => (
-  <>
-    <Box
-      component="main"
-      sx={{
-        flexGrow: 1,
-        py: 8
-      }}
-    >
-      <Container maxWidth="lg">
-        <Stack spacing={3}>
-          <div>
-            <Typography variant="h4">
-              Account
-            </Typography>
-          </div>
-          <div>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                xs={12}
-                md={6}
-                lg={4}
-              >
-                <AccountProfile />
-              </Grid>
-              <Grid
-                xs={12}
-                md={6}
-                lg={8}
-              >
-                <AccountProfileDetails />
-              </Grid>
-            </Grid>
-          </div>
-        </Stack>
+const Page = () => {
+  const isAuthenticated = useAuthentication();
+  const token = localStorage.getItem('token');
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
-      </Container>
-    </Box>
-  </>
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        // Send the new user data to the backend server
+        const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+        });
+        setUser(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
+    };
 
-);
+    getUserData();
+  }, []);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+
+  return (
+    <>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 8
+        }}
+      >
+        <Container maxWidth="lg">
+          <Stack spacing={3}>
+            <div>
+              <Typography variant="h4">
+                Account
+              </Typography>
+            </div>
+            <div>
+              <Grid
+                container
+                spacing={3}
+              >
+                <Grid
+                  xs={12}
+                  md={6}
+                  lg={4}
+                >
+                  <AccountProfile user={user} />
+                </Grid>
+                <Grid
+                  xs={12}
+                  md={6}
+                  lg={8}
+                >
+                  <AccountProfileDetails user={user} />
+                </Grid>
+              </Grid>
+            </div>
+          </Stack>
+
+        </Container>
+      </Box>
+    </>
+  );
+};
 export default Page;
 
 
@@ -336,7 +331,7 @@ function MultipleSelectTopic() {
 
   return (
     <div>
-      <FormControl sx={{ width: 550}}>
+      <FormControl sx={{ width: 550 }}>
         <InputLabel id="demo-multiple-chip-label">Relevant issues</InputLabel>
         <Select
           labelId="demo-multiple-chip-label"
@@ -367,4 +362,4 @@ function MultipleSelectTopic() {
       </FormControl>
     </div>
   );
-}
+};
