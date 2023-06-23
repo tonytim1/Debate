@@ -219,11 +219,11 @@ def join_debate_room(data):
         return
     
     if room.is_conversation:
-        if not room.specators:
-            print("uesr tried to join conversation room that doesnt have spectators")
-            emit('room is full', room=sid)
-            return
-        # TODO: add user to spectators list
+        # if not room.specators:
+        #     print("uesr tried to join conversation room that doesnt have spectators")
+        #     emit('room is full', room=sid)
+        #     return
+        # # TODO: add user to spectators list
         room.spectators_list.append(user_id)
         emit('user_join', dataclasses.asdict(room) ,room=sid)
 

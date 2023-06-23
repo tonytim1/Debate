@@ -1,19 +1,38 @@
 import * as React from 'react';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
-import { Container, Stack, Box, Button, Card} from '@mui/material';
+import { Card, Stack, List, ListItem, ListItemText, ListSubheader, ListItemAvatar, Avatar, Typography, IconButton } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-const SpectatorsList = ({ moderatorId, currUserId}) => {
-    return (
-        <Card sx={{width: '20%'}}>
-            Spectators
-        </Card>
-    );
+const SpectatorsList = ({ spectsList }) => {
+
+  return (
+    <Card sx={{ width: '25%' }} style={{padding:'0px', overflow: 'auto', height:'100%'}}>
+      <Stack style={{padding:'0px'}}>
+        <List dense style={{padding:'0px', overflow:'auto'}}>
+          <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
+                Scpectators
+          </ListSubheader>
+            {!Array.isArray(spectsList) ? 
+            null : (<>
+            
+            {spectsList.map((userName, i) => (
+                <ListItem key={i}
+                secondaryAction={
+                    <IconButton>
+                        <MoreVertIcon sx={{fontSize: '15px'}}/>
+                    </IconButton>
+                }>
+                  <ListItemAvatar>
+                    <Avatar />
+                  </ListItemAvatar>
+                  <ListItemText id={i} primary={userName} />
+                </ListItem>
+              ))}
+            </>)
+            }
+          </List>
+      </Stack>
+    </Card>
+  );
 };
 
 export default SpectatorsList;
