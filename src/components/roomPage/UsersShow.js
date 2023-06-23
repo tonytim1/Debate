@@ -122,7 +122,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
       ) : (
         <List subheader={
             <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                Users
+                Users {Object.keys(usersList).length} / {roomSize}
             </ListSubheader>
         }>
             {Object.entries(usersList).map(([userId, user]) => {
