@@ -373,10 +373,10 @@ def handle_returning_signal(payload):
 @socketio.on('disconnect')
 def handle_disconnect():
     # Get the request data
-    sid = request
-    print('Client disconnected with sid: ', sid)
+    sid = request.sid
     room_id = socket_to_room.get(sid)
     user_id = socket_to_user.get(sid)
+    print(f'Client disconnected with sid: {sid}, room_id: {room_id}, user_id: {user_id}',)
 
     if sid in socket_to_room:
         socket_to_room.pop(sid)
@@ -394,7 +394,7 @@ def handle_disconnect():
     leave_room(room=room_id)
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
-    emit('userLeft', { id: sid }, to=room_id)  # for conversations only
+    emit('userLeft', { "id": sid }, to=room_id)  # for conversations only
 
 
 # ---------- CHAT ---------- #        
