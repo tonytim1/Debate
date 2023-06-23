@@ -1,7 +1,7 @@
 import React from 'react';
 import 'src/components/Cards/Cards.css'
 import { LoginForm } from 'src/sections/auth/login';
-import { CardActionArea, Divider, Fade } from '@mui/material';
+import { CardActionArea, Collapse, Divider, Fade } from '@mui/material';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { TextField, Autocomplete, Tooltip, Tab, Grid, CardMedia, CardContent, CardActions, FormControlLabel, Box, Stack, Button, Container, Slider, Typography, Switch, Chip, Card, Portal } from '@mui/material';
@@ -14,6 +14,7 @@ import { TabPanel, TabContext, TabList } from '@mui/lab';
 import {CircularProgress} from '@mui/material';
 import { useEffect } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { check } from 'prettier';
 
 
 const CreateRoomCard = ({ showCard, onCloseClick }) => {
@@ -31,6 +32,12 @@ const CreateRoomCard = ({ showCard, onCloseClick }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedPicture, setSelectedPicture] = useState(null);
+    const [team1, setTeam1] = useState('');
+    const [team2, setTeam2] = useState('');
+    const [teamName1Err, setTeamName1Err] = useState(false);
+    const [teamName2Err, setTeamName2Err] = useState(false);
+    const [team1ErrMsg, setTeam1ErrMsg] = useState(0);
+    const [team2ErrMsg, setTeam2ErrMsg] = useState(0);
 
     const currUserId = localStorage.getItem("userId")
     const client = createClient('Y9u8WmqtGw5byBRfqAo3KXkYs9Lixx7K4gdI8eEYw7dpilWDWBUx4N0j');
@@ -46,6 +53,50 @@ const CreateRoomCard = ({ showCard, onCloseClick }) => {
       }
     };
     
+    const teamNameLabel = (msg) => {
+      if (msg === 0) {
+        return "Team Name";
+      }
+      if (msg === 1) {
+        return "Empty";
+      }
+      if (msg === 2) {
+        return "Duplicate";
+      }
+
+    };
+
+    const checkTeamName = () => {
+      check = true;
+      if (teams) {
+        if (team1.trim() === '') {
+          setTeamName1Err(true);
+          setTeam1ErrMsg(1);
+          check = false;
+        } else {
+          setTeamName1Err(false);
+          setTeam1ErrMsg(0);
+        }
+        if (team2.trim() === '') {
+          setTeamName2Err(true);
+          setTeam2ErrMsg(1);
+          check = false;
+        } else {
+          setTeamName2Err(false);
+          setTeam2ErrMsg(0);
+        }
+        if (check && team2.trim() === team1.trim()) {
+          setTeamName1Err(true);
+          setTeamName2Err(true);
+          setTeam1ErrMsg(2);
+          setTeam2ErrMsg(2);
+          check = false;
+        }
+
+      }
+      return check;
+    };
+
     const checkTags = () => {
       if (tags.length < 1) {
         setTagsErr(true);
@@ -82,18 +133,18 @@ const CreateRoomCard = ({ showCard, onCloseClick }) => {
     const handleSubmit = async () => {
       const name_ok = checkRoomName();
       const tags_ok = checkTags();
+      const teams_ok = checkTeamName();
     
-      if (name_ok && tags_ok) {
+      if (name_ok && tags_ok && teams_ok) {
         try {
           const newRoom = {
             name: name,
             tags: tags,
             teams: teams,
+            teamNames: [team1, team2],
             room_size: size,
             time_to_start: time_to_start,
-            spectators: allowSpectators,
-            ready_list: [],
-            spectators_list: [],
+            allow_spectators: allowSpectators,
             moderator: currUserId,
             pictureId: selectedPicture ? selectedPicture.id : -1,
           };
@@ -137,6 +188,20 @@ const CreateRoomCard = ({ showCard, onCloseClick }) => {
       setSearchResults([]);
       setSearchQuery("");
       setCurrentTab(true);
+      setTeams(false);
+      setAllowSpectators(false);
+      setTeam1('Pro');
+      setTeam2('Against');
+      setTeamName1Err(false);
+      setTeamName2Err(false);
+      setTeam1ErrMsg(0);
+      setTeam2ErrMsg(0);
+      setName('');
+      setTags([]);
+      setTagsErr(false);
+      setSize(4);
+      setTime_to_start(15);
+      setNameErr(false);
     }, [showCard]);
 
     if (!showCard) {
@@ -242,14 +307,37 @@ const CreateRoomCard = ({ showCard, onCloseClick }) => {
                   </Typography>
                   </Box>
                   <Box>
-                  <Stack>
-                    <Tooltip placement="left" arrow title="Toggle on to let users choose side on the topic">
+                  <Stack spacing={1}>
+                    <Tooltip style={{alignSelf:'center'}} placement="left" arrow title="Toggle on to let users choose side on the topic">
                       <FormControlLabel
                       control={<Switch checked={teams} onChange={() => setTeams(!teams)} name="gilad" />}
                       label="Teams"
                       />
                     </Tooltip>
-                    <Tooltip placement="left" arrow title="Toggle on to let users to watch the debate without being in the video chat">
+                    <Collapse in={teams}>
+                    {teams ? (
+                      <Stack direction={'row'} spacing={1}>
+                        <TextField
+                      variant="outlined"
+                      onChange={(e) => setTeam1(e.target.value)}
+                      label={teamNameLabel(team1ErrMsg)}
+                      size='small'
+                      value={team1}
+                      error={teamName1Err}
+                      />
+                      <TextField
+                      variant="outlined"
+                      onChange={(e) => setTeam2(e.target.value)}
+                      label={teamNameLabel(team2ErrMsg)}
+                      size='small'
+                      value={team2}
+                      error={teamName2Err}
+
+                      />
+                      </Stack>
+                    ) : null}
+                    </Collapse>
+                    <Tooltip style={{alignSelf:'center'}} placement="left" arrow title="Toggle on to let users to watch the debate without being in the video chat">
                       <FormControlLabel
                       control={
                           <Switch checked={allowSpectators} onChange={() => setAllowSpectators(!allowSpectators)} name="gilad" />

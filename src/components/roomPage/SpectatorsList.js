@@ -11,10 +11,7 @@ const SpectatorsList = ({ spectsList }) => {
           <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
                 Scpectators
           </ListSubheader>
-            {!Array.isArray(spectsList) ? 
-            null : (<>
-            
-            {spectsList.map((userName, i) => (
+          {Array.from( Object.keys(spectsList) ).map((userName, i) => (
                 <ListItem key={i}
                 secondaryAction={
                     <IconButton>
@@ -27,8 +24,6 @@ const SpectatorsList = ({ spectsList }) => {
                   <ListItemText id={i} primary={userName} />
                 </ListItem>
               ))}
-            </>)
-            }
           </List>
       </Stack>
     </Card>
