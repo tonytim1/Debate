@@ -54,6 +54,7 @@ def handle_connect():
 @app.route('/api/signup', methods=['POST'])
 def signup():
     user_data = request.get_json()
+    
     email = user_data.get('email')
     password = user_data.get('password')
     
@@ -61,10 +62,6 @@ def signup():
     username = user_data.get('username')
     tags = user_data.get('tags')
     image = user_data.get('image')
-
-    print(f"File name: {image.name}")
-    print(f"File mode: {image.mode}")
-    print(f"File encoding: {image.encoding}")    
 
     try:
         # create new user base on email and password
