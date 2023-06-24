@@ -4,7 +4,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
-const SpectatorsList = ({ isSpectator, spectsList, allowSpectators, onIconClick }) => {
+const SpectatorsList = ({ isConversation, isSpectator, spectsList, allowSpectators, onIconClick }) => {
   if (!allowSpectators) {
     return null
   }
@@ -14,11 +14,11 @@ const SpectatorsList = ({ isSpectator, spectsList, allowSpectators, onIconClick 
       <Stack style={{padding:'0px'}}>
         <List dense style={{padding:'0px', overflow:'auto'}}>
           <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-          <Tooltip style={{alignSelf:'center'}} placement="top" arrow title="Be a spectator">
+          {isConversation ? null : (<Tooltip style={{alignSelf:'center'}} placement="top" arrow title="Be a spectator">
             <IconButton disabled={isSpectator} onClick={onIconClick} style={{position:'absolute', top:'4px', left:'4px'}}>
               <VisibilityIcon/>
             </IconButton>
-          </Tooltip>
+          </Tooltip>)}
                 Scpectators
           </ListSubheader>
           {Array.from( Object.keys(spectsList) ).map((userName, i) => (
