@@ -2,7 +2,7 @@ import React from 'react'
 import { Stack, Button } from '@mui/material';
 
 
-const RoomFull = () => {
+const RoomFull = ({message}) => {
   return (
     <div
     style={{
@@ -22,7 +22,7 @@ const RoomFull = () => {
           color: 'blue',
         }}
       >
-        Sorry, The Room Is Full
+        Sorry, {message}
       </div>
       <Button variant="contained" href='/'>
         Go Back to Home

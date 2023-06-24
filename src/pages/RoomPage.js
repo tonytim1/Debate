@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
+import { filter, set } from 'lodash';
 import { sentenceCase } from 'change-case';
 import { useState, useEffect, useRef } from 'react';
 import { Await, useNavigate, useParams } from 'react-router-dom';
@@ -25,6 +25,7 @@ export default function RoomPage() {
   const socket = useRef();
   const navigate = useNavigate(); // Use useNavigate for navigation
   const [roomData, setRoomData] = useState(new Map());
+  const [isSpectator, setIsSpectator] = useState(false);
   const [usersData, setUsersData] = useState(new Map());
   const [currUserData, setCurrUserData] = useState(null);
   const [isModerator, setIsModerator] = useState(false);
@@ -58,11 +59,24 @@ export default function RoomPage() {
         setRoomState(1);
       }
     });
+    socket.current.once('spectator_join', ( roomData ) => {
+      setRoomData(roomData);
+      setIsSpectator(true);
+      if (roomData.is_conversation) {
+        setRoomState(2);
+      }
+      else{
+        setRoomState(1);
+      }
+    });
     socket.current.once('room not found', () => {
       navigate('/404');
     });
     socket.current.once('room is full', () => {
       setRoomState(3);
+    });
+    socket.current.once('conversation already started', () => {
+      setRoomState(4);
     });
     socket.current.once('conversation_start', () => {
       console.log('conversation_start')
@@ -98,14 +112,21 @@ export default function RoomPage() {
   // room full screen
   if (roomState === 3){
     return (
-      <RoomFull />
+      <RoomFull message='The Room Is Full'/>
     );
   }
+
+    // room full screen
+    if (roomState === 4){
+      return (
+        <RoomFull message='The Conversation Already Started'/>
+      );
+    }
 
   // Room conversation screen
   if (roomState === 2){
     return (
-      <Conversation roomData={roomData} currUserId={currUserId} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+      <Conversation roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
     );
   }
 
@@ -115,7 +136,7 @@ export default function RoomPage() {
       <Helmet>
         <title>Debate Center | Room Page</title>
       </Helmet>
-      <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+      <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} setIsSpectator={setIsSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
     <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
     <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />

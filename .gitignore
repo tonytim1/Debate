@@ -27,4 +27,4 @@ yarn-error.log*
 
 server/venv/
 venv/
-server/debate-center-firebase.json
+server/debate-center-firebase-key.json

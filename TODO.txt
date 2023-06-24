@@ -1,20 +1,14 @@
 ToDOs:
-- Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
-- BUG: if a user is in a room and get in the website it takes him to the home page again. we need it to navigate him to the room page. maybe add a "room" field to a user so we know the user's state at every moment
-    - another option (probably easier) is if a user is in a room and wants to leave the page, add a popup saying leaving the page will leave the room (With Leave, Cancel buttons or something)
 - Add a feature that if a room is full but spectators are allowed then add to the spec list
-- Add a feature to chat that if you press 'enter' it sends the msg
-- FOR MISLTONE 3 PRESENTATION : maybe 'make' a survey to see demand on the platform
-- Add team names feature to the moderator (in the create room page)
-- Make the room page prettier
-- Implement a custom sort to rooms in the home page based on user favorite topics (in the frontend side...)
-    - Maybe make buttons like "Top", "Recommended", "Starting Soon" that change rooms sort in home page
+- pop up window for spectators when conversation is closed
 - If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)
 - More Video chat stuff:
     - make video chat room prettier (change the layout...)
     - make website in https to allow joining from other devices
     - add a time checker that starts the conversation when time reaches 0
     - add an option for conversation length, and destroy conversation when time reaches 0
+- Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
+
 
 # TONY:
 V Fix clients make multiple socket connections to the server
@@ -32,10 +26,13 @@ V Move the rooms managment to the server and not on the firebase
 - Add a profile picture feature (see it on Home, Room, Conversation pages)
 - in login page remove this profile icon
 - add facebook/google login/signup options
+- BUG: if a user is in a room and get in the website it takes him to the home page again. we need it to navigate him to the room page. maybe add a "room" field to a user so we know the user's state at every moment
 
 
 # OMER:
 - Add reporting system
+- Implement a custom sort to rooms in the home page based on user favorite topics (in the frontend side...)
+    - Maybe make buttons like "Top", "Recommended", "Starting Soon" that change rooms sort in home page
 
 
 # ASAF:
@@ -44,3 +41,9 @@ V home page: when scrolling for more rooms it should move only the room cards an
 V Create a landing page for explaining about the website and log in
 V Make the room cards (in the home page) more informative (add pics, users icon, fix text alignment)
 V make the whole room card (in home page) clickable rather then just the text
+V Add a feature to chat that if you press 'enter' it sends the msg
+V Make the room page prettier
+- add a "be a spectator" button & add a "be a debator"
+    - "be debator" should show only if number of current debators is smaller than room size, maybe we should show "2/4" also inside the room
+V Add team names feature to the moderator (in the create room page)
+- MISLTONE 3 PRESENTATION 

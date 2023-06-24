@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, createRef } from "react";
 import UsersShow from 'src/components/roomPage/UsersShow';
 import AdminControl from 'src/components/roomPage/AdminControl';
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
-import { Typography, Stack, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
+import { Typography, Stack, Box, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
 import Chat from 'src/components/messages/Chat';
 import { useNavigate, useParams } from 'react-router-dom';
 import Scrollbar from 'src/components/scrollbar';
@@ -15,8 +15,9 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
+import VideoGrid from "./VideoGrid";
 
-const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMessageRef, messages, setMessages }) => {
+const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
     const config = {
       iceServers: [
         {
@@ -38,89 +39,94 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
     const navigate = useNavigate();
   
     useEffect(() => {
-      connectToSocketAndWebcamStream().then(() => {
-        //socket.current.emit("WebcamReady", roomId); //sending to the server that a user joined to a room
-        console.log("WebcamReady");
+      if (isSpectator) {
+        // if user is a spectator, then don't connect webcam stream
+      }
+      else {
+        connectToSocketAndWebcamStream().then(() => {
+          //socket.current.emit("WebcamReady", roomId); //sending to the server that a user joined to a room
+          console.log("WebcamReady");
 
-        Object.entries(roomData.users_list).forEach(([userId, user]) => {
-          if (userId < currUserId) {   // only send to users with lower id so that we don't send the same message twice
-            console.log("other user", userId);
-            //creating connection between two user via simple-peer for video
-            const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
-            peersRef.current.push({
-              peerId: user.sid,
-              userId: userId,
-              peer
-            });
-            peers.push({
-              peerId: user.sid,
-              userId: userId,
-              peer
-            });
-          }
-        })
-        setPeers(peers);
-        console.log("peers", peers);  
-  
-        //server send array of socket id's of other user of same room so that new user can connect with other user via
-        //simple-peer for video transmission and message will be served using socket io
-        socket.current.on("usersInConversation", users => { //triggered in server and here receiving it
-          const peers = [];
-          users.forEach(otherUserSocketId => {
-            //creating connection between two user via simple-peer for video
-            const peer = createPeer(otherUserSocketId, socket.current.id, webcamStream.current);
-            peersRef.current.push({
-              peerId: otherUserSocketId,
-              peer
-            });
-            peers.push({
-              peerId: otherUserSocketId,
-              peer
-            });
+          Object.entries(roomData.users_list).forEach(([userId, user]) => {
+            if (userId < currUserId) {   // only send to users with lower id so that we don't send the same message twice
+              console.log("other user", userId);
+              //creating connection between two user via simple-peer for video
+              const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
+              peersRef.current.push({
+                peerId: user.sid,
+                userId: userId,
+                peer
+              });
+              peers.push({
+                peerId: user.sid,
+                userId: userId,
+                peer
+              });
+            }
           })
           setPeers(peers);
-        })
-  
-        //a new user joined at same room send signal,callerId(simple-peer) and stream to server and server give it to
-        //us to create peer between two peer and connect
-        socket.current.on("sendingSignalAck", payload => {
-          console.log("sendingSignalAck", payload);
+          console.log("peers", peers);  
+    
+          //server send array of socket id's of other user of same room so that new user can connect with other user via
+          //simple-peer for video transmission and message will be served using socket io
+          socket.current.on("usersInConversation", users => { //triggered in server and here receiving it
+            const peers = [];
+            users.forEach(otherUserSocketId => {
+              //creating connection between two user via simple-peer for video
+              const peer = createPeer(otherUserSocketId, socket.current.id, webcamStream.current);
+              peersRef.current.push({
+                peerId: otherUserSocketId,
+                peer
+              });
+              peers.push({
+                peerId: otherUserSocketId,
+                peer
+              });
+            })
+            setPeers(peers);
+          })
+    
+          //a new user joined at same room send signal,callerId(simple-peer) and stream to server and server give it to
+          //us to create peer between two peer and connect
+          socket.current.on("sendingSignalAck", payload => {
+            console.log("sendingSignalAck", payload);
 
-          let item = peersRef.current.find(p => p.peerId === payload.callerId);
-          if (item) {
-            console.log("peer already exists!!!! this will duplicate the peer!", item);
-          }
+            let item = peersRef.current.find(p => p.peerId === payload.callerId);
+            if (item) {
+              console.log("peer already exists!!!! this will duplicate the peer!", item);
+            }
 
-          let peer = addPeer(payload.signal, payload.callerId, webcamStream.current);
-          peersRef.current.push({
-            peer,
-            peerId: payload.callerId,
-            userId: payload.userId,
+            let peer = addPeer(payload.signal, payload.callerId, webcamStream.current);
+            peersRef.current.push({
+              peer,
+              peerId: payload.callerId,
+              userId: payload.userId,
+            });
+            const peerObj = {
+              peer,
+              peerId: payload.callerId,
+              userId: payload.userId,
+            };  
+            setPeers(users => [...users, peerObj]);
           });
-          const peerObj = {
-            peer,
-            peerId: payload.callerId,
-            userId: payload.userId,
-          };  
-          setPeers(users => [...users, peerObj]);
+    
+          //receiving signal of other peer who is trying to connect and adding its signal at peersRef
+          socket.current.on("returningSignalAck", payload => {
+            const item = peersRef.current.find(p => p.peerId === payload.calleeId);
+            console.log("got returningSignalAck! will signal item ", item);
+            item.peer.signal(payload.signal);
+          });
+    
+          //user left and server send its peerId to disconnect from that peer
+          socket.current.on('userLeft', id => {
+            const peerObj = peersRef.current.find(p => p.peerId === id);
+            if(peerObj) peerObj.peer.destroy(); //cancel connection with disconnected peer
+            const peers = peersRef.current.filter(p => p.peerId !== id);
+            peersRef.current = peers;
+            setPeers(peers);
+          });
         });
-  
-        //receiving signal of other peer who is trying to connect and adding its signal at peersRef
-        socket.current.on("returningSignalAck", payload => {
-          const item = peersRef.current.find(p => p.peerId === payload.calleeId);
-          console.log("got returningSignalAck! will signal item ", item);
-          item.peer.signal(payload.signal);
-        });
-  
-        //user left and server send its peerId to disconnect from that peer
-        socket.current.on('userLeft', id => {
-          const peerObj = peersRef.current.find(p => p.peerId === id);
-          if(peerObj) peerObj.peer.destroy(); //cancel connection with disconnected peer
-          const peers = peersRef.current.filter(p => p.peerId !== id);
-          peersRef.current = peers;
-          setPeers(peers);
-        });
-      });
+      }
   
       return () => stopAllVideoAudioMedia();
       //eslint-disable-next-line
@@ -304,8 +310,6 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
       setIsVideoMuted(!isVideoMuted);
     }
 
-    const names = ['John', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack','Jane', 'Sarah', 'Jack', 'Emily', 'Michael', 'Jane', 'Sarah', 'Jack'];
-
     return (
       <>
       <Helmet>
@@ -335,55 +339,70 @@ const Conversation = ({ roomData, currUserId, roomId, socket, messageRef, setMes
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
             <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>  
+              {/* <Grid item>
+              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
+                <video muted autoPlay playsInline ref={myVideo} width="90%"/>
+              </Grid> */}
+                  {/* Peers video and audio stream */}
+              {/* {peers.map((peer) => (
+                <Video controls peer={peer} />
+              ))} */}
               <Grid item>
-                <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
-                <video muted autoPlay playsInline ref={myVideo} width="320" height="240"/>
+                <Box>
+                <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
+                <Skeleton variant="rectangular" height='200px' width='200px'/>
+                </Box>
               </Grid>
               <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+                <Box>
+              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
+              <Skeleton variant="rectangular" height='200px' width='200px'/>
+                </Box>
+              </Grid>
+              {/* <Grid item>
+              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
                 <Skeleton variant="rectangular" width={320} height={240} />
               </Grid>
               <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
+              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
                 <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              
-
+              </Grid> */}
             </Grid>
-            <CardActions style={{justifyContent: 'center'}}>
-              <IconButton onClick={handleChatToggle}>
-                {showChat ? (<SpeakerNotesOffIcon/>) : (<ChatIcon/>)}
-              </IconButton>
-              <IconButton onClick={handleMuteToggle}>
-                {isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
-              </IconButton>
-              <IconButton onClick={handleVideoToggle}>
-                {isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
-              </IconButton>
+            <CardActions style={{justifyContent: 'center', position:'absolute', bottom:'0px', left:'0px', width:'100%'}}>
+              <Stack direction={'row'} spacing={2} style={{width:'100%', justifyContent:'center'}}> 
+              <Stack style={{alignContent:'center'}}>
+                <IconButton onClick={handleChatToggle} style={{width:'fit-content', alignSelf:'center'}}>
+                  {!showChat ? (<SpeakerNotesOffIcon/>) : (<ChatIcon/>)}
+                </IconButton>
+                <Typography fontSize='small' alignSelf={'center'}>
+                  {!showChat ? ('Show Chat') : ('Hide Chat')} 
+                </Typography>
+              </Stack>
+              <Stack style={{alignContent:'center'}}>
+                <IconButton onClick={handleMuteToggle} style={{width:'fit-content', alignSelf:'center'}}>
+                  {!isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
+                </IconButton>
+                <Typography fontSize='small' alignSelf={'center'}>
+                  {!isMuted ? ('Mute') : ('Unmute')} 
+                </Typography>
+              </Stack>
+              <Stack style={{alignContent:'center'}}>
+                <IconButton onClick={handleVideoToggle} style={{width:'fit-content', alignSelf:'center'}}>
+                  {!isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
+                </IconButton>
+                <Typography fontSize='small' alignSelf={'center'}>
+                  {isVideoMuted ? ('Show') : ('Hide')} 
+                </Typography>
+              </Stack>
+              </Stack>
             </CardActions>
             </Card>
-          {/*Peers video and audio stream*/}
-          {peers.map((peer) => (
-            <Video controls peer={peer} />
-          ))}
           {/*Video controls - possibly to be added*/}
           {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%'}}>
             {/*Chat container*/}
             <Chat style={{}} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
             {/*Spectators*/}
-            <SpectatorsList spectsList={names}/>
+            <SpectatorsList allowSpectators={roomData.allow_spectators} isConversation={true} spectsList={roomData.spectators_list}/>
           </Stack>) : null}
           
         </Stack>

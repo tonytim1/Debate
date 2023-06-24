@@ -1,12 +1,11 @@
 import { Helmet } from 'react-helmet-async';
 import React from 'react';
-import { Grid, Button, Box, Skeleton, Paper, Container, Grow, TextField, Stack, Typography, Autocomplete } from '@mui/material';
+import { Grid, Button, Skeleton, Container, TextField, Stack, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import Iconify from '../components/iconify';
-import BlogPostCard from '../sections/@dashboard/blog/BlogPostCard';
 import { io } from 'socket.io-client';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { random, clamp } from 'lodash';
+import { random } from 'lodash';
 import { alpha, styled } from '@mui/system';
 import useAuthentication from "../hooks/useAuthentication";
 import './HomePage.css'
@@ -44,12 +43,13 @@ export default function HomePage() {
   ];
   const getRandomColor = () => alpha(colors[random(0, colors.length - 1)], 0.72);  
 
-  const [roomsData, setRoomsData] = useState(false);
+  const [roomsData, setRoomsData] = useState(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRooms, setFilteredRooms] = useState(false);
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
+  const [sortType, setSortType] = useState('recommended'); // ['soon', 'recommended', 'popular']
   const socket = useRef();
   const navigate = useNavigate();
 
@@ -85,12 +85,30 @@ export default function HomePage() {
         });
         setRoomsData(mappedRooms);
       });
-      socket.current.on('rooms_updated', () => {
-        console.log('rooms updated');
-        fetchRooms();
-        // set roomsData to new data
-      });
     };
+
+    // TODO: dont fetch all rooms again
+    socket.current.on('rooms_updated', (room) => {
+      fetchRooms();
+      // console.log('rooms updated');
+      // const rooms = roomsData;
+      // rooms.set(room.id, room);
+      // setRoomsData(rooms);
+    });
+    socket.current.on('rooms_new', (room) => {
+      fetchRooms();
+      // console.log('rooms new');
+      // const rooms = roomsData;
+      // rooms.set(room.id, room);
+      // setRoomsData(rooms);
+    });
+    socket.current.on('rooms_deleted', (room) => {
+      fetchRooms();
+      // const rooms = roomsData;
+      // rooms.delete(room.id);
+      // setRoomsData(rooms);
+      // console.log("delete 2", roomsData);
+    });
 
     window.addEventListener('keydown', handleKeyPress);
     fetchData();
@@ -101,7 +119,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    console.log(roomsData);
     filterRooms('');
   }, [roomsData]);
 
@@ -151,8 +168,23 @@ export default function HomePage() {
                   setShowCreateRoomCard(true);}}>
                 Create Room
               </Button>
-              
             </Stack>
+            <ToggleButtonGroup
+              value={sortType}
+              exclusive
+              onChange={(event, val) => {setSortType(val);}}
+              color="primary"
+              >
+                <ToggleButton value="recommended" sx={{ color: 'text.secondary' }}>
+                  Recommended
+                </ToggleButton>
+                <ToggleButton value="popular" sx={{ color: 'text.secondary' }}>
+                  Popular
+                </ToggleButton>
+                <ToggleButton value="soon" sx={{ color: 'text.secondary' }}>
+                  Starting Soon
+                </ToggleButton>
+            </ToggleButtonGroup>
             {roomsData ? (
               <CardContainer>
                 <Grid container justifyContent="center">
