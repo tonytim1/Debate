@@ -34,8 +34,21 @@ const states = [
 
 export const AccountProfileDetails = ({ user }) => {
 
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [tags, setTags] = useState([]);
 
-  const handleChange = async () => { };
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+      setUsername(user.username);
+      setPassword(user.password);
+      setTags(user.tags);
+    }
+  }, [user]);
 
   const handleSubmit = async () => { };
 
@@ -48,9 +61,9 @@ export const AccountProfileDetails = ({ user }) => {
 
       <Card>
         <CardHeader
-          subheader="The information can be edited"
           title="Profile"
         />
+        <br></br>
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
             <Grid
@@ -63,12 +76,11 @@ export const AccountProfileDetails = ({ user }) => {
               >
                 <TextField
                   fullWidth
-                  helperText="Please specify the first name"
                   label="Name"
                   name="Name"
-                  onChange={handleChange}
+                  onChange={(e) => setName(e.target.value)}
                   required
-                  value={user.name}
+                  value={name}
                 />
               </Grid>
               <Grid
@@ -79,9 +91,10 @@ export const AccountProfileDetails = ({ user }) => {
                   fullWidth
                   label="Email"
                   name="Email"
-                  onChange={handleChange}
+                  disabled
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  value={user.email}
+                  value={email}
                 />
               </Grid>
               <Grid
@@ -92,22 +105,14 @@ export const AccountProfileDetails = ({ user }) => {
                   fullWidth
                   label="Password"
                   name="Password"
-                  onChange={handleChange}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-
                 />
               </Grid>
               <Grid
                 xs={12}
                 md={6}
               >
-                <TextField
-                  fullWidth
-                  label="Phone Number"
-                  name="phone"
-                  onChange={handleChange}
-                  type="number"
-                />
               </Grid>
               <Grid
                 xs={12}
@@ -117,24 +122,15 @@ export const AccountProfileDetails = ({ user }) => {
                   fullWidth
                   label="Username"
                   name="Username"
-                  onChange={handleChange}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
-                  value={user.username}
+                  value={username}
                 />
               </Grid>
               <Grid
                 xs={12}
                 md={6}
               >
-                <TextField
-                  fullWidth
-                  label="Select State"
-                  name="state"
-                  onChange={handleChange}
-                  required
-                  select
-                  SelectProps={{ native: true }}>
-                </TextField>
               </Grid>
               <Grid
                 xs={12}

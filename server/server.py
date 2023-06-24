@@ -121,7 +121,7 @@ def signin():
     try:
         login_user = auths.sign_in_with_email_and_password(email, password)
         token = login_user['idToken']
-        print(token)
+        
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
 
@@ -148,13 +148,14 @@ rooms = {}
 @app.route('/api/user', methods=['GET'])
 def get_user():
     id_token = request.headers.get('Authorization')
-    print(id_token)
     try:
         decoded_token = auths.get_account_info(id_token)['users'][0]
+        print(decoded_token)
         user_uid = decoded_token['localId']
         user_ref = db_firestore.collection('users').document(user_uid)
         user_doc = user_ref.get().to_dict()
         user_doc["email"] = decoded_token['email']
+        print(user_doc)
         return jsonify(user_doc)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
