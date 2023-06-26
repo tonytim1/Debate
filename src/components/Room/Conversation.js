@@ -161,6 +161,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
   
       //sending signal to second peer and if that receive than other(second) peer also will send an signal to this peer
       peer.on("signal", signal => {
+        console.log("createPeer signal", signal);
         socket.current.emit("sendingSignal", { userId: currUserId, userSidToSendSignal: userSidToSendSignal, callerId: mySid, signal });
       })
       return peer;
@@ -176,6 +177,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
   
       //other peer give its signal in signal object and this peer returning its own signal
       peer.on("signal", signal => {
+        console.log("addPeer signal", signal);
         socket.current.emit("returningSignal", { signal, callerId: callerId, userId: currUserId });
       });
       peer.signal(incomingSignal);
