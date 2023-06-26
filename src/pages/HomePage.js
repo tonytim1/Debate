@@ -155,7 +155,7 @@ export default function HomePage() {
         <Snackbar open={loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
         anchorOrigin={{
           vertical: 'top',  // Set the vertical position of the Snackbar (top, bottom)
-          horizontal: 'center'  // Set the horizontal position of the Snackbar (left, center, right)
+          horizontal: 'right'  // Set the horizontal position of the Snackbar (left, center, right)
         }}>
           <Alert severity="success" onClose={handelClose}>
             <AlertTitle>Login successful!</AlertTitle>

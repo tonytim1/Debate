@@ -5,7 +5,7 @@ import { Stack, Link, Card, IconButton, Fade, Snackbar, Button, InputAdornment, 
 import { LoadingButton } from '@mui/lab';
 // components
 import Iconify from 'src/components/iconify/Iconify';
-import { getAuth, signInWithPopup, FacebookAuthProvider, getAdditionalUserInfo } from "firebase/auth";
+import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
 import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
@@ -29,6 +29,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
   const [config, setConfig] = useState();
 
   const [errorAlertOpen, setErrorAlertOpen] = useState(false); // State to control the visibility of the error alert
+
 
   const handleAlertClose = () => {
     setErrorAlertOpen(false);
@@ -55,6 +56,44 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
     getAuth();
   }, []);
 
+  const signInWithGoogle = () => {
+    const app = initializeApp(config, "secondary");
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        result.user.getIdToken().then(async (idToken) => {
+          const user = {
+            token: idToken,
+            userId: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL
+          };
+          setUserUid(user.userId);
+          localStorage.setItem('token', user.token);
+          localStorage.setItem('userId', user.displayName);
+
+          const cred = GoogleAuthProvider.credentialFromResult(result);
+          const token = cred.accessToken;
+          localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
+
+          sessionStorage.setItem('loggedIn', 'true');
+          setLoginFailed(false);
+          window.location.reload();
+        });
+      })
+      .catch((error) => {
+        if (error.code === "auth/account-exists-with-different-credential") {
+          setLoginFailed(true);
+          //setErrorAlertOpen(true);
+        } else {
+          // Other errors
+          console.log("Error:", error);
+        }
+      });
+  };
+
   const signInWithFacebook = () => {
     const app = initializeApp(config, "secondary");
     const auth = getAuth(app);
@@ -78,14 +117,14 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
 
           sessionStorage.setItem('loggedIn', 'true');
+          setLoginFailed(false);
           window.location.reload();
         });
       })
       .catch((error) => {
         if (error.code === "auth/account-exists-with-different-credential") {
-          // Email already exists error
-          // Show a window or display a message indicating the email is already in use
-          setErrorAlertOpen(true);
+          setLoginFailed(true);
+          //setErrorAlertOpen(true);
         } else {
           // Other errors
           console.log("Error:", error);
@@ -189,11 +228,11 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
 
         <Stack spacing={4} alignItems="center">
           <Stack spacing={1}>
-            <Snackbar open={errorAlertOpen ? true : false} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            {/* <Snackbar open={errorAlertOpen ? true : false} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
               <Alert onClose={handleAlertClose} severity="error">
                 The email is already registered with a different account.
               </Alert>
-            </Snackbar>
+            </Snackbar> */}
             <Typography variant="h2">
               Welcome
             </Typography>
@@ -254,7 +293,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
                 Login
               </LoadingButton>
 
-              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined">
+              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={signInWithGoogle}>
                 <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
               </Button>
 
