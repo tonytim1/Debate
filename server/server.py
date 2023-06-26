@@ -429,10 +429,11 @@ def handle_webcam_ready(payload):
         print("WebcamReady: user.sid is not equal to request.sid, quiting", user.sid, request.sid)
         return
     
-    user.is_webcam_ready = True
+    user.camera_ready = True
     # Notify all users in the room about the change
     emit('userInConversationReady', { "userId": user_id, "userSid": user.sid }, to=room_id, include_self=False)
-    # emit('usersInConversation', dataclasses.asdict(room))
+    # Notify user about other user in the room - not needed
+    emit('usersInConversation', dataclasses.asdict(room))
 
 # -------------- SIGNALING ------------- #
     
@@ -444,15 +445,6 @@ def handle_sending_signal(payload):
     print(f"got sendingSignal from user: {user_id}, sid: {request.sid}, caller_id: {payload['callerId']}, is_spectator: {payload['isSpectator']}, to: {user_sid_to_send_signal}")
     print(f"sending sendingSignalAck to sid: {user_sid_to_send_signal}")
     emit('sendingSignalAck', {'signal': payload['signal'], 'callerId': payload['callerId'], 'userId': user_id, 'isSpectator': payload['isSpectator']}, to=user_sid_to_send_signal)
-
-@socketio.on('spectatorSendingSignal')
-def handle_spectator_sending_signal(payload):
-    user_sid_to_send_signal = payload['userSidToSendSignal']
-    user_id = payload['userId']
-    # caller_id should be request.sid
-    print(f"got spectatorSendingSignal from user: {user_id}, sid: {request.sid}, caller_id: {payload['callerId']}, to: {user_sid_to_send_signal}")
-    print(f"sending spectatorSendingSignalAck to sid: {user_sid_to_send_signal}")
-    emit('spectatorSendingSignalAck', {'signal': payload['signal'], 'callerId': payload['callerId'], 'userId': user_id}, to=user_sid_to_send_signal)
 
 @socketio.on('returningSignal')
 def handle_returning_signal(payload):

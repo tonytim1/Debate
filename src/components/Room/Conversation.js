@@ -13,7 +13,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 
-const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
+const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
     const config = {
       iceServers: [
         {
@@ -37,6 +37,29 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
     useEffect(() => {
       if (isSpectator) {
         console.log("spectator joined");
+
+        Object.entries(roomData.users_list).forEach(([userId, user]) => {
+          if (user.camera_ready) {   // only send to users with lower id so that we don't send the same message twice
+            console.log("spectator adding other user", userId);
+            //creating connection between two user via simple-peer for video
+            const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
+            peersRef.current.push({
+              peerId: user.sid,
+              userId: userId,
+              peer,
+              from: "spectatorJoin",
+            });
+            peers.push({
+              peerId: user.sid,
+              userId: userId,
+              peer,
+              from: "spectatorJoin",
+            });
+          }
+        });
+        setPeers(peers);
+        console.log("peers", peers);
+
         // if user is a spectator, then don't connect webcam stream
         socket.current.on("userInConversationReady", payload => {
           console.log("userInConversationReady", payload);
@@ -44,12 +67,14 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
           peersRef.current.push({
             peerId: payload.userSid,
             userId: payload.userId,
-            peer
+            peer,
+            from: "spectatorUserReady",
           });
           peers.push({
             peerId: payload.userSid,
             userId: payload.userId,
-            peer
+            peer,
+            from: "spectatorUserReady",
           });
           setPeers(peers);
         });
@@ -69,19 +94,46 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
 
           socket.current.on("userInConversationReady", payload => {
             console.log("userInConversationReady", payload);
-            const peer = createPeer(payload.userSid, socket.current.id, null);
+            const peer = createPeer(payload.userSid, socket.current.id, webcamStream.current);
             peersRef.current.push({
               peerId: payload.userSid,
               userId: payload.userId,
-              peer
+              peer,
+              from: "userInConversationReady",
             });
             peers.push({
               peerId: payload.userSid,
               userId: payload.userId,
-              peer
+              peer,
+              from: "userInConversationReady",
             });
             setPeers(peers);
           });
+
+          socket.current.on("usersInConversation", (roomData) => {
+            setRoomData(roomData);
+            console.log("usersInConversation", roomData.users_list);
+            Object.entries(roomData.users_list).forEach(([userId, user]) => {
+              if (userId !== currUserId && user.camera_ready) {   // only send to users with lower id so that we don't send the same message twice
+                console.log("adding other user", userId);
+                //creating connection between two user via simple-peer for video
+                const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
+                peersRef.current.push({
+                  peerId: user.sid,
+                  userId: userId,
+                  peer,
+                  from: "usersInConversation",
+                });
+                peers.push({
+                  peerId: user.sid,
+                  userId: userId,
+                  peer,
+                  from: "usersInConversation",
+                });
+              }
+            });
+            setPeers(peers);
+          })
 
           // Object.entries(roomData.users_list).forEach(([userId, user]) => {
           //   if (userId !== currUserId) {   // only send to users with lower id so that we don't send the same message twice
@@ -147,11 +199,13 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
               peer,
               peerId: payload.callerId,
               userId: payload.userId,
+              from: "addPeer",
             });
             const peerObj = {
               peer,
               peerId: payload.callerId,
               userId: payload.userId,
+              from: "addPeer",
             };  
             setPeers(users => [...users, peerObj]);
           });
@@ -159,7 +213,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
           //receiving signal of other peer who is trying to connect and adding its signal at peersRef
           socket.current.on("returningSignalAck", payload => {
             const item = peersRef.current.find(p => p.peerId === payload.calleeId);
-            console.log("got returningSignalAck! will signal item ", item);
+            console.log("got returningSignalAck! will signal item ", item, "with payload", payload);
             item.peer.signal(payload.signal);
           });
     
@@ -395,10 +449,10 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
             <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>  
-              { isSpectator ? <>/</> : <Grid item>
+              { isSpectator ? (<></>) : (<Grid item>
                 <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
                 <video muted autoPlay playsInline ref={myVideo} width="160" height="120"/>
-              </Grid>}
+              </Grid>)}
                   {/*Peers video and audio stream*/}
               {peers.map((peer) => (
                 <Video controls peer={peer} />

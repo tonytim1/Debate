@@ -126,7 +126,7 @@ export default function RoomPage() {
   // Room conversation screen
   if (roomState === 2){
     return (
-      <Conversation roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
+      <Conversation roomData={roomData} setRoomData={setRoomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
     );
   }
 
