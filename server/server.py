@@ -50,6 +50,12 @@ def index():
 def handle_connect():
     print('Client connected. id=', request.sid)
 
+
+# ---------- GET CONFIG ---------- #
+@app.route('/api/get_auth', methods=['GET'])
+def get_auth():
+    return jsonify(config)
+
 # ---------- SIGN UP ---------- #
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -147,12 +153,10 @@ def get_user():
     id_token = request.headers.get('Authorization')
     try:
         decoded_token = auths.get_account_info(id_token)['users'][0]
-        print(decoded_token)
         user_uid = decoded_token['localId']
         user_ref = db_firestore.collection('users').document(user_uid)
         user_doc = user_ref.get().to_dict()
         user_doc["email"] = decoded_token['email']
-        print(user_doc)
         return jsonify(user_doc)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

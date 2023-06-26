@@ -10,7 +10,8 @@ import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import axios from 'axios';
 import useAuthentication from "../hooks/useAuthentication";
-
+import LoadingScreen from 'src/components/Room/LoadingScreen';
+import { Autocomplete } from '@mui/material';
 
 
 const states = [
@@ -40,6 +41,19 @@ export const AccountProfileDetails = ({ user }) => {
   const [password, setPassword] = useState('');
   const [tags, setTags] = useState([]);
 
+  const tagOptions = [
+    "Music",
+    "Climate change",
+    "Health",
+    "Religion And Spirituality",
+    "Science",
+    "Education",
+    "Technology",
+    "Sports",
+    "Culture",
+    "Politics",
+  ];
+
   useEffect(() => {
     if (user) {
       setName(user.name);
@@ -49,6 +63,10 @@ export const AccountProfileDetails = ({ user }) => {
       setTags(user.tags);
     }
   }, [user]);
+
+  const handleTagsChange = (event, value) => {
+    setTags(value);
+  }
 
   const handleSubmit = async () => { };
 
@@ -65,24 +83,11 @@ export const AccountProfileDetails = ({ user }) => {
         />
         <br></br>
         <CardContent sx={{ pt: 0 }}>
-          <Box sx={{ m: -1.5 }}>
+          <Box sx={{ m: -1.5}}>
             <Grid
               container
               spacing={3}
             >
-              <Grid
-                xs={12}
-                md={6}
-              >
-                <TextField
-                  fullWidth
-                  label="Name"
-                  name="Name"
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  value={name}
-                />
-              </Grid>
               <Grid
                 xs={12}
                 md={6}
@@ -109,6 +114,22 @@ export const AccountProfileDetails = ({ user }) => {
                   required
                 />
               </Grid>
+
+              <Grid
+                xs={12}
+                md={6}
+              >
+                <TextField
+                  fullWidth
+                  label="Name"
+                  name="Name"
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  value={name}
+                />
+              </Grid>
+
+
               <Grid
                 xs={12}
                 md={6}
@@ -136,14 +157,40 @@ export const AccountProfileDetails = ({ user }) => {
                 xs={12}
                 md={6}
               >
-                <MultipleSelectTopic />
+                <Grid
+                  xs={12}
+                  md={6}
+                >
+                  <Autocomplete
+                    multiple
+                    fullWidth
+                    id="tags-outlined"
+                    options={tagOptions}
+                    freeSolo
+                    value={tags}
+                    onChange={handleTagsChange}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => (
+                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                      ))
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        label="Tags (topic)"
+                      />
+                    )}
+                  />
+                </Grid>
+
               </Grid>
             </Grid>
           </Box>
         </CardContent>
 
         <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end', m: 1.5 }}>
+        <CardActions sx={{ justifyContent: 'center', m: 1.5 }}>
           <Button variant="contained">
             Save details
           </Button>
@@ -209,7 +256,7 @@ const Page = () => {
       try {
         const token = localStorage.getItem('token');
         // Send the new user data to the backend server
-        const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
+        const response = await axios.get('https://' + window.location.hostname + ':8000/api/user', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -228,7 +275,9 @@ const Page = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <LoadingScreen />
+    );
   }
 
 
@@ -245,7 +294,7 @@ const Page = () => {
           <Stack spacing={3}>
             <div>
               <Typography variant="h4">
-                Account
+                Account Details
               </Typography>
             </div>
             <div>
