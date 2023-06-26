@@ -37,7 +37,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
     const [ isMuted, setIsMuted ] = useState(false);
     const [ isVideoOff, setIsVideoOff ] = useState(false);
     const navigate = useNavigate();
-  
+
     useEffect(() => {
       if (isSpectator) {
         // if user is a spectator, then don't connect webcam stream
@@ -130,9 +130,8 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
   
       return () => stopAllVideoAudioMedia();
       //eslint-disable-next-line
-    }, []);
-  
-  
+    }, []);    
+
     const connectToSocketAndWebcamStream = async() => {
       //connecting to server using socket
       // webcamStream.current = null;
@@ -320,7 +319,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        // maxWidth: '95vw',
+        maxWidth: '100%',
       }}>
       <Card sx={{width: "100%", height: "fit-content"}}
           style={{
@@ -332,42 +331,33 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
             minHeight: '97%',
             justifyContent: 'center',
         }}>
+        <Button variant="outlined" color="error" onClick={leaveMeeting} style={{position: 'absolute', top: '1.5%', left: '1.5%'}}>
+          Leave
+        </Button>
         <Stack style={{width: '97%',}} spacing={3}>
           <Typography variant="h3" align="center" gutterBottom style={{marginBottom: '0px'}}>
             {roomData.name}
           </Typography>
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
-            <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>  
-              {/* <Grid item>
-              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
-                <video muted autoPlay playsInline ref={myVideo} width="90%"/>
-              </Grid> */}
-                  {/* Peers video and audio stream */}
-              {/* {peers.map((peer) => (
-                <Video controls peer={peer} />
-              ))} */}
-              <Grid item>
-                <Box>
+              <VideoGrid myVideo={myVideo} peers={peers} />
+              {/* <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>   */}
+                {/* <Grid item>
+                <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
+                  <video muted autoPlay playsInline ref={myVideo} width="90%"/>
+                </Grid> */}
+                    {/* Peers video and audio stream */}
+                {/* {peers.map((peer) => (
+                  <Video controls peer={peer} />
+                ))} */}
+
+                {/* <Grid item>
+                  <Box>
                 <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
                 <Skeleton variant="rectangular" height='200px' width='200px'/>
-                </Box>
-              </Grid>
-              <Grid item>
-                <Box>
-              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
-              <Skeleton variant="rectangular" height='200px' width='200px'/>
-                </Box>
-              </Grid>
-              {/* <Grid item>
-              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-              <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid> */}
-            </Grid>
+                  </Box>
+                </Grid> */}
+              {/* </Grid> */}
             <CardActions style={{justifyContent: 'center', position:'absolute', bottom:'0px', left:'0px', width:'100%'}}>
               <Stack direction={'row'} spacing={2} style={{width:'100%', justifyContent:'center'}}> 
               <Stack style={{alignContent:'center'}}>
@@ -398,7 +388,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
             </CardActions>
             </Card>
           {/*Video controls - possibly to be added*/}
-          {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%'}}>
+          {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%', minHeight:'25%'}}>
             {/*Chat container*/}
             <Chat style={{}} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
             {/*Spectators*/}
