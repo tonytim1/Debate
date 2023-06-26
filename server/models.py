@@ -7,6 +7,7 @@ class User:
     sid: str
     ready: bool = False
     team: bool = False
+    camera_ready: bool = False
 
 @dataclass
 class Room:
