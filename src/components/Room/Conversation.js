@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState, createRef } from "react";
-import UsersShow from 'src/components/roomPage/UsersShow';
-import AdminControl from 'src/components/roomPage/AdminControl';
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
-import { Typography, Stack, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
+import { Typography, Stack, Container, Grid, Card, CardActions, IconButton } from '@mui/material';
 import Chat from 'src/components/messages/Chat';
-import { useNavigate, useParams } from 'react-router-dom';
-import Scrollbar from 'src/components/scrollbar';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Peer from "simple-peer";
 import Video from 'src/components/conversation_room/Video';
@@ -40,6 +37,30 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
     useEffect(() => {
       if (isSpectator) {
         // if user is a spectator, then don't connect webcam stream
+        Object.entries(roomData.users_list).forEach(([userId, user]) => {
+          console.log("adding other user", userId);
+          //creating connection between two user via simple-peer for video
+          const peer = createPeer(user.sid, socket.current.id, null);
+          peersRef.current.push({
+            peerId: user.sid,
+            userId: userId,
+            peer
+          });
+          peers.push({
+            peerId: user.sid,
+            userId: userId,
+            peer
+          });
+          setPeers(peers);
+        })
+        setPeers(peers);
+        console.log("peers", peers);  
+
+        socket.current.on("returningSignalAck", payload => {
+          const item = peersRef.current.find(p => p.peerId === payload.calleeId);
+          console.log("got returningSignalAck! will signal item ", item);
+          item.peer.signal(payload.signal);
+        });
       }
       else {
         connectToSocketAndWebcamStream().then(() => {
@@ -47,8 +68,8 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
           console.log("WebcamReady");
 
           Object.entries(roomData.users_list).forEach(([userId, user]) => {
-            if (userId < currUserId) {   // only send to users with lower id so that we don't send the same message twice
-              console.log("other user", userId);
+            if (userId !== currUserId) {   // only send to users with lower id so that we don't send the same message twice
+              console.log("adding other user", userId);
               //creating connection between two user via simple-peer for video
               const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
               peersRef.current.push({
@@ -61,6 +82,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
                 userId: userId,
                 peer
               });
+              setPeers(peers);
             }
           })
           setPeers(peers);
@@ -152,6 +174,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
       //if initiator is true then newly created peer will send a signal to other peer it those two peers accept signal
       // then connection will be established between those two peers
       //trickle for enable/disable trickle ICE candidates
+      console.log("createPeer");
       const peer = new Peer({
         initiator: true,
         trickle: false,
@@ -161,6 +184,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
   
       //sending signal to second peer and if that receive than other(second) peer also will send an signal to this peer
       peer.on("signal", signal => {
+        console.log("sending signal")
         socket.current.emit("sendingSignal", { userId: currUserId, userSidToSendSignal: userSidToSendSignal, callerId: mySid, signal });
       })
       return peer;
@@ -168,6 +192,7 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
   
     //after receiving of others user's signal adding to peer array and returning own signal to other user
     function addPeer(incomingSignal, callerId, stream) {
+      console.log("addPeer");
       const peer = new Peer({
         initiator: false,
         trickle: false,
@@ -306,7 +331,13 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
     }
 
     const handleVideoToggle = () => {
-      setIsVideoMuted(!isVideoMuted);
+      if(!isVideoMuted) {
+        myVideo.current.srcObject.getVideoTracks()[0].enabled = false;
+        setIsVideoMuted(true);
+      } else {
+        myVideo.current.srcObject.getVideoTracks()[0].enabled = true;
+        setIsVideoMuted(false);
+      }
     }
 
     return (
@@ -338,32 +369,14 @@ const Conversation = ({ roomData, currUserId, roomId, isSpectator, socket, messa
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
             <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>  
-              <Grid item>
+              { isSpectator ? <>/</> : <Grid item>
                 <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
-                <video muted autoPlay playsInline ref={myVideo} width="320" height="240"/>
-              </Grid>
+                <video muted autoPlay playsInline ref={myVideo} width="160" height="120"/>
+              </Grid>}
                   {/*Peers video and audio stream*/}
               {peers.map((peer) => (
                 <Video controls peer={peer} />
               ))}
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              <Grid item>
-                <Typography variant="h5" gutterBottom>{`Loading ...`}</Typography>
-                <Skeleton variant="rectangular" width={320} height={240} />
-              </Grid>
-              
-
             </Grid>
             <CardActions style={{justifyContent: 'center'}}>
               <IconButton onClick={handleChatToggle}>

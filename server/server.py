@@ -454,8 +454,18 @@ def handle_disconnect():
         return
     if user_id in room.users_list:
         room.users_list.pop(user_id)
+    if user_id in room.spectators_list:
+        room.spectators_list.pop(user_id)
 
     leave_room(room=room_id)
+
+    if not room.users_list and not room.spectators_list:
+        # Delete the room if no users are left
+        rooms.pop(room_id)
+        close_room(room_id)
+        emit('rooms_deleted', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
+        return
+
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
