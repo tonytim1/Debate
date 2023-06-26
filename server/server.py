@@ -50,6 +50,12 @@ def index():
 def handle_connect():
     print('Client connected. id=', request.sid)
 
+
+# ---------- GET CONFIG ---------- #
+@app.route('/api/get_auth', methods=['GET'])
+def get_auth():
+    return jsonify(config)
+
 # ---------- SIGN UP ---------- #
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -118,7 +124,7 @@ def signin():
     try:
         login_user = auths.sign_in_with_email_and_password(email, password)
         token = login_user['idToken']
-        print(token)
+        
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
 
@@ -145,7 +151,6 @@ rooms = {}
 @app.route('/api/user', methods=['GET'])
 def get_user():
     id_token = request.headers.get('Authorization')
-    print(id_token)
     try:
         decoded_token = auths.get_account_info(id_token)['users'][0]
         user_uid = decoded_token['localId']

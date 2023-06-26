@@ -30,6 +30,7 @@ export default function AccountPopover() {
     console.log("logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
+    localStorage.removeItem("photoURL");
     navigate('/');
   };
 
@@ -52,7 +53,7 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar src={localStorage.getItem("photoURL")} alt="photoURL" />
       </IconButton>
 
       <Popover

@@ -84,10 +84,10 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                     
                 </List>
             </Box>
-            <Button style={{backgroundColor: '#e6ebf9ab'}} disabled={isDesabled} onClick={handle_switch} sx={{width:'0%'}}>
+            <Button style={{backgroundColor: '#e6ebf9ab', margin: '0px'}} disabled={isDesabled} onClick={handle_switch} sx={{width:'0%'}}>
                 change team
             </Button>
-            <Box sx={{width:'50%'}}>
+            <Box sx={{width:'50%'}} style={{margin: '0px'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
                     {teamNames[1]}
