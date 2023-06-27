@@ -52,7 +52,7 @@ const RoomLobby = ({ roomData, currUserId, roomId, isSpectator, setIsSpectator, 
           <Typography variant="h2">{name}</Typography>
         <Stack direction="row" sx={{ width: '95%' }} spacing={2} style={{flexGrow: '1', overflow: 'auto', marginTop: '11px', maxHeight:'40%', minHeight:'40%'}}>
           <UsersShow onSpecClick={handleDebaterClick} allowSpectators={allow_spectators} teamNames={team_names} teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} isSpectator={isSpectator} roomSize={room_size} />
-          <SpectatorsList is isConversation={false} onIconClick={handleSpectatorClick} isSpectator={isSpectator} allowSpectators={allow_spectators} spectsList={roomData.spectators_list}/>
+          <SpectatorsList onIconClick={handleSpectatorClick} isSpectator={isSpectator} allowSpectators={allow_spectators} spectsList={roomData.spectators_list} isConversation={false}/>
         </Stack>
         <Chat roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
         <Stack direction="row" spacing={8}>
