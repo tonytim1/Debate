@@ -266,8 +266,12 @@ def join_debate_room(data):
     if user_id in room.blacklist:
         emit('kick from room', room=sid)
         return
-    
-    if user_id in room.users_list.keys() or user_id in room.spectators_list:
+
+    # if no moderator, set the user to be the moderator
+    if room.moderator is None:
+        room.moderator = user_id
+
+    if user_id in room.users_list or user_id in room.spectators_list:
         print("user tried to join room he is already in")
         # update the user's socket id
         old_sid = room.users_list[user_id].sid if user_id in room.users_list else room.spectators_list[user_id].sid
@@ -369,8 +373,10 @@ def leave_debate_room(data):
             emit('check_report_user_list',{'reportedUserId':check_user,
                             'roomData': dataclasses.asdict(room)} ,to=room_id)
                             
-    if not room.users_list and not room.spectators_list:
-        # Delete the room if no users are left
+    if not room.users_list and room.is_conversation:
+        # Delete the conversation if no users are left, send a message to the spectators
+        leave_room(room_id)
+        emit('allUsersLeft', to=room_id)
         rooms.pop(room_id)
         close_room(room_id)
         emit('rooms_deleted', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
@@ -380,8 +386,10 @@ def leave_debate_room(data):
     if user_id == room.moderator:
         if room.users_list:
             room.moderator = list(room.users_list.keys())[0]
-        else:
+        elif room.spectators_list:
             room.moderator = list(room.spectators_list.keys())[0]
+        else:
+            room.moderator = None
 
     # leave the SocketIO broadcast room
     leave_room(room_id)
@@ -553,8 +561,10 @@ def kick_user(data):
             emit('check_report_user_list',{'reportedUserId':check_user,
                             'roomData': dataclasses.asdict(room)} ,to=room_id)
 
-    if not room.users_list and not room.spectators_list:
-        # Delete the room if no users are left
+    if not room.users_list and room.is_conversation:
+        # Delete the conversation if no users are left, send a message to the spectators
+        leave_room(room_id)
+        emit('allUsersLeft', to=room_id)
         rooms.pop(room_id)
         close_room(room_id)
         emit('rooms_deleted', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
@@ -564,8 +574,10 @@ def kick_user(data):
     if user_id == room.moderator:
         if room.users_list:
             room.moderator = list(room.users_list.keys())[0]
-        else:
+        elif room.spectators_list:
             room.moderator = list(room.spectators_list.keys())[0]
+        else:
+            room.moderator = None
 
     # leave the SocketIO broadcast room
     leave_room(room_id)

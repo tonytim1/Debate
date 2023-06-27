@@ -26,13 +26,11 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const myVideo = createRef(); //for display own video
     const webcamStream = useRef(); //own webcam stream
     const peersRef = useRef([]); //collection of peers who are currently connect to a room
-    const screenCaptureStream = useRef(); //screen capture stream
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
     const spectatorsRef = useRef([]);
     const [ showChat, setShowChat ] = useState(true);
-    const [ isMuted, setIsMuted ] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -94,6 +92,13 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
           peersRef.current = peers;
           setPeers(peers);
+        });
+
+        // if all users left, go back to home page
+        socket.current.on('allUsersLeft', () => {
+          console.log("allUsersLeft");
+          // TODO: add popup to inform user that all users left
+          navigate('/');
         });
       }
 
@@ -379,10 +384,10 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
               </Stack>
               { isSpectator ? (<></>) : (<Stack style={{alignContent:'center'}}>
                 <IconButton onClick={handleMuteToggle} style={{width:'fit-content', alignSelf:'center'}}>
-                  {!isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
+                  {!isAudioMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
                 </IconButton>
                 <Typography fontSize='small' alignSelf={'center'}>
-                  {!isMuted ? ('Mute') : ('Unmute')}
+                  {!isAudioMuted ? ('Mute') : ('Unmute')}
                 </Typography>
               </Stack>)}
               { isSpectator ? (<></>) : (<Stack style={{alignContent:'center'}}>
