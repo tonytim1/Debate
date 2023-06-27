@@ -1,5 +1,6 @@
 ToDOs:
 - add default rooms
+- joining a room when not logged in should popup login instead of stuck on loading screen
 - pop up window for spectators when conversation is closed
 - If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)
 - make video chat room prettier (change the layout...)
