@@ -4,8 +4,11 @@ import './VideoGrid.css'; // Import your CSS styles for the VideoGrid component
 import Skeleton from '@mui/material/Skeleton';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import VideoBox from './VideoBox';
+import { useEffect, useState } from 'react';
+
 const VideoGrid = ({ myVideo, peers }) => {
-  
+  const [numOfVids, setNumOfVids] = useState(myVideo !== null ? peers.length + 1 : peers.length);
   const calcGrid = (n) => {
     const gridMap = [];
 
@@ -34,16 +37,22 @@ const VideoGrid = ({ myVideo, peers }) => {
     return gridMap;
   }
 
-  peers = [1,2,3,4,5]
-  // const numOfVids = myVideo !== null ? peers.length + 1 : peers.length;
-  const numOfVids = 2
+  useEffect(() => {
+    setNumOfVids(myVideo !== null ? peers.length + 1 : peers.length);
+    console.log("numOfVids", numOfVids);
+  }, [peers, myVideo]);
+  
+  if (!myVideo || !peers) return null;
   return (
-    <div style={{display: 'grid', gridTemplateColumns: `repeat(${numOfVids <= 4 ? 2 : 3}, 1fr)`, gridAutoRows: `1fr`, height: '95%', alignItems: 'center', }}>
-      {myVideo !== null ? (<video muted autoPlay playsInline ref={myVideo} width='100%' style={{flex:'1 1 30%'}}/>) : null}
-      <Skeleton variant="rectangular" height="100px" width="30%" style={{flex:'1 1 30%'}} />
-      <Skeleton variant="rectangular" height="100px" width="30%" style={{flex:'1 1 30%'}}/>
-      
-    
+    <div style={{display: 'grid', gridTemplateColumns: `repeat(${numOfVids <= 4 ? 2 : 3}, 1fr)`, gridAutoRows: `1fr`, height: '95%', alignItems: 'center', gridGap:'15px'}}>
+      {myVideo !== null ? (
+        <VideoBox me={true} peer={myVideo}/>
+      ) : null}
+      {peers.map((peer) => (
+        <VideoBox me={false} peer={peer}/>
+      ))}
+      {/* <Skeleton variant="rectangular" height="100px" width="30%" style={{flex:'1 1 30%'}} />
+      <Skeleton variant="rectangular" height="100px" width="30%" style={{flex:'1 1 30%'}}/> */}
     </div>
 //     <Grid container spacing={1} height='98%'>
 //   {/* create a row for each val in gridMap */}

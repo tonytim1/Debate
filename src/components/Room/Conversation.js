@@ -362,16 +362,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
             {/*<VideoGrid myVideo={myVideo} peers={peers} />*/}
-            <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>
-              { isSpectator ? (<></>) : (<Grid item>
-                <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
-                <video muted autoPlay playsInline ref={myVideo} width="160" height="120"/>
-              </Grid>)}
-                  {/*Peers video and audio stream*/}
-              {peers.map((peer) => (
-                <Video controls peer={peer} />
-              ))}
-            </Grid>
+            <VideoGrid myVideo={myVideo} peers={peers} />
             <CardActions style={{justifyContent: 'center', position:'absolute', bottom:'0px', left:'0px', width:'100%'}}>
               <Stack direction={'row'} spacing={2} style={{width:'100%', justifyContent:'center'}}>
               <Stack style={{alignContent:'center'}}>
