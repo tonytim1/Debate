@@ -85,6 +85,10 @@ export default function RoomPage() {
     socket.current.on('receiveMessage', payload => {
       setMessages(messages => [...messages, payload]);
     });
+    socket.current.once('kick from room', () => {
+      navigate('/');
+      alert('you got kicked from this room!')
+    });
   };
   
   useEffect(() => {
