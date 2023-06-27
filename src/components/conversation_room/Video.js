@@ -19,7 +19,7 @@ const Video = ({ peer }) => {
 
   return (
     <Grid item xs={12} md={6}>
-        <Typography variant="h5" gutterBottom style={{position:'absolute'}}>{peer.userId || 'Uknown'}</Typography>
+        <Typography variant="h5" gutterBottom>{peer.userId || 'Uknown'}</Typography>
         <video autoPlay playsInline ref={refVideo} width="160" height="120" />
      </Grid>
   );

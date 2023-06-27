@@ -291,7 +291,14 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     }
   
     const leaveMeeting = () => {
-      navigate.push('/');
+      if (webcamStream.current) {
+        const webcamStreamTracks = webcamStream.current.getTracks();
+        webcamStreamTracks.forEach(track => {
+            track.stop();
+        });
+      }
+      socket.current.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });
+      navigate('/');
     };
   
     const handleChatToggle = () => {
