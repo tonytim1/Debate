@@ -39,23 +39,12 @@ Header.propTypes = {
   onOpenNav: PropTypes.func,
 };
 
-export default function Header({ onOpenNav }) {
+export default function Header() {
+
   return (
     <StyledRoot>
       <StyledToolbar>
-        {/* <IconButton
-          onClick={onOpenNav}
-          sx={{
-            mr: 1,
-            color: 'text.primary',
-            display: { lg: 'none' },
-          }}
-        >
-          <Iconify icon="eva:menu-2-fill" />
-        </IconButton> */}
-
         <Box sx={{ flexGrow: 1 }} />
-
         <Stack
           direction="row"
           alignItems="center"
@@ -64,8 +53,8 @@ export default function Header({ onOpenNav }) {
             sm: 1,
           }}
         >
-          {/* <NotificationsPopover /> */}
           <AccountPopover />
+          
         </Stack>
       </StyledToolbar>
     </StyledRoot>

@@ -4,10 +4,11 @@ import SimpleLayout from './layouts/simple';
 import Page404 from './pages/Page404';
 import RoomPage from './pages/RoomPage';
 import HomePage from './pages/HomePage';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './components/Cards/ProfileCard';
 
 export default function Router() {
   return (
+    
     // <BrowserRouter>
       <Routes>
         <Route

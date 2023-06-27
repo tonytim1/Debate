@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, createRef } from "react";
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
-import { Typography, Stack, Container, Grid, Card, CardActions, IconButton } from '@mui/material';
+import { Typography, Stack, Box, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
 import Chat from 'src/components/messages/Chat';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -12,6 +12,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
+import VideoGrid from "./VideoGrid";
 
 const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
     const config = {
@@ -33,7 +34,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const [ showChat, setShowChat ] = useState(true);
     const [ isMuted, setIsMuted ] = useState(false);
     const navigate = useNavigate();
-  
+
     useEffect(() => {
       if (isSpectator) {
         console.log("spectator joined");
@@ -162,11 +163,11 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           //   }
           // })
           // setPeers(peers);
-          // console.log("peers", peers);  
-    
+          // console.log("peers", peers);
+
           //a new user joined at same room send signal,callerId(simple-peer) and stream to server and server give it to
           //us to create peer between two peer and connect
-          socket.current.on("sendingSignalAck", payload => {            
+          socket.current.on("sendingSignalAck", payload => {
             console.log("sendingSignalAck", payload);
 
             let item = peersRef.current.find(p => p.peerId === payload.callerId);
@@ -188,7 +189,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
                 peerId: payload.callerId,
                 userId: payload.userId,
                 from: "addPeer",
-              }); 
+              });
               setSpectators(users => [...users, peerObj]);
               return;
             }
@@ -197,7 +198,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
               peerId: payload.callerId,
               userId: payload.userId,
               from: "addPeer",
-            }); 
+            });
             setPeers(users => [...users, peerObj]);
           });
     
@@ -229,11 +230,10 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           });
         });
       }
-  
+
       //eslint-disable-next-line
     }, []);
-  
-  
+
     const connectToSocketAndWebcamStream = async() => {
       //connecting to server using socket
       // webcamStream.current = null;
@@ -261,7 +261,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
         config: config,
         stream //My own stream of video and audio
       });
-      
+  
       //sending signal to second peer and if that receive than other(second) peer also will send an signal to this peer
       peer.on("signal", signal => {
         console.log("createPeer sendingSignal", signal);
@@ -281,7 +281,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
       });
   
       //other peer give its signal in signal object and this peer returning its own signal
-      peer.on("signal", signal => {  // on or once?
+      peer.on("signal", signal => {
         console.log("addPeer returningSignal", signal);
         socket.current.emit("returningSignal", { signal, callerId: callerId, userId: currUserId });
       });
@@ -328,7 +328,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        // maxWidth: '95vw',
+        maxWidth: '100%',
       }}>
       <Card sx={{width: "100%", height: "fit-content"}}
           style={{
@@ -340,13 +340,17 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
             minHeight: '97%',
             justifyContent: 'center',
         }}>
+        <Button variant="outlined" color="error" onClick={leaveMeeting} style={{position: 'absolute', top: '1.5%', left: '1.5%'}}>
+          Leave
+        </Button>
         <Stack style={{width: '97%',}} spacing={3}>
           <Typography variant="h3" align="center" gutterBottom style={{marginBottom: '0px'}}>
             {roomData.name}
           </Typography>
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
-            <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>  
+            {/*<VideoGrid myVideo={myVideo} peers={peers} />*/}
+            <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>
               { isSpectator ? (<></>) : (<Grid item>
                 <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
                 <video muted autoPlay playsInline ref={myVideo} width="160" height="120"/>
@@ -356,20 +360,37 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
                 <Video controls peer={peer} />
               ))}
             </Grid>
-            <CardActions style={{justifyContent: 'center'}}>
-              <IconButton onClick={handleChatToggle}>
-                {showChat ? (<SpeakerNotesOffIcon/>) : (<ChatIcon/>)}
-              </IconButton>
-              { isSpectator ? (<></>) : (<IconButton onClick={handleMuteToggle}>
-                {isAudioMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
-              </IconButton>)}
-              { isSpectator ? (<></>) : (<IconButton onClick={handleVideoToggle}>
-                {isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
-              </IconButton>)}
+            <CardActions style={{justifyContent: 'center', position:'absolute', bottom:'0px', left:'0px', width:'100%'}}>
+              <Stack direction={'row'} spacing={2} style={{width:'100%', justifyContent:'center'}}>
+              <Stack style={{alignContent:'center'}}>
+                <IconButton onClick={handleChatToggle} style={{width:'fit-content', alignSelf:'center'}}>
+                  {!showChat ? (<SpeakerNotesOffIcon/>) : (<ChatIcon/>)}
+                </IconButton>
+                <Typography fontSize='small' alignSelf={'center'}>
+                  {!showChat ? ('Show Chat') : ('Hide Chat')}
+                </Typography>
+              </Stack>
+              <Stack style={{alignContent:'center'}}>
+                <IconButton onClick={handleMuteToggle} style={{width:'fit-content', alignSelf:'center'}}>
+                  {!isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
+                </IconButton>
+                <Typography fontSize='small' alignSelf={'center'}>
+                  {!isMuted ? ('Mute') : ('Unmute')}
+                </Typography>
+              </Stack>
+              <Stack style={{alignContent:'center'}}>
+                <IconButton onClick={handleVideoToggle} style={{width:'fit-content', alignSelf:'center'}}>
+                  {!isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
+                </IconButton>
+                <Typography fontSize='small' alignSelf={'center'}>
+                  {isVideoMuted ? ('Show') : ('Hide')}
+                </Typography>
+              </Stack>
+              </Stack>
             </CardActions>
             </Card>
           {/*Video controls - possibly to be added*/}
-          {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%'}}>
+          {showChat ? (<Stack direction="row" spacing={2} alignItems="center" style={{maxHeight:'35%', minHeight:'25%'}}>
             {/*Chat container*/}
             <Chat style={{}} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
             {/*Spectators*/}
