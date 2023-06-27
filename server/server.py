@@ -353,13 +353,14 @@ def leave_debate_room(data):
         if room.users_list:
             room.moderator = list(room.users_list.keys())[0]
         else:
-            room.moderator = list(room.users_list.keys())[0]
+            room.moderator = list(room.spectators_list.keys())[0]
 
     # leave the SocketIO broadcast room
     leave_room(room_id)
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
+    emit('userLeft', { "sid": sid, "userId": user_id }, to=room_id)  # for conversations only
 
 
 @socketio.on('fetch_room_data')
@@ -518,14 +519,10 @@ def handle_disconnect():
     if room_id is None or room_id not in rooms:
         return
     room = rooms[room_id]
-    is_spectator = user_id in room.spectators_list
     if user_id is None:
         return
     if user_id in room.users_list:
         room.users_list.pop(user_id)
-    if user_id in room.spectators_list:
-        room.spectators_list.pop(user_id)
-
     if user_id in room.spectators_list:
         room.spectators_list.pop(user_id)
 
@@ -541,7 +538,7 @@ def handle_disconnect():
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
-    emit('userLeft', { "sid": sid, "userId": user_id, "isSpectator": is_spectator }, to=room_id)  # for conversations only
+    emit('userLeft', { "sid": sid, "userId": user_id }, to=room_id)  # for conversations only
 
 
 # ---------- CHAT ---------- #        

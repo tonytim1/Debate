@@ -370,22 +370,22 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
                   {!showChat ? ('Show Chat') : ('Hide Chat')}
                 </Typography>
               </Stack>
-              <Stack style={{alignContent:'center'}}>
+              { isSpectator ? (<></>) : (<Stack style={{alignContent:'center'}}>
                 <IconButton onClick={handleMuteToggle} style={{width:'fit-content', alignSelf:'center'}}>
                   {!isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
                 </IconButton>
                 <Typography fontSize='small' alignSelf={'center'}>
                   {!isMuted ? ('Mute') : ('Unmute')}
                 </Typography>
-              </Stack>
-              <Stack style={{alignContent:'center'}}>
+              </Stack>)}
+              { isSpectator ? (<></>) : (<Stack style={{alignContent:'center'}}>
                 <IconButton onClick={handleVideoToggle} style={{width:'fit-content', alignSelf:'center'}}>
                   {!isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
                 </IconButton>
                 <Typography fontSize='small' alignSelf={'center'}>
                   {isVideoMuted ? ('Show') : ('Hide')}
                 </Typography>
-              </Stack>
+              </Stack>)}
               </Stack>
             </CardActions>
             </Card>
