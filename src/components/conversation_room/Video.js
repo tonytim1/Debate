@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Grid, Typography } from '@mui/material';
+import { Grid, Typography, CircularProgress } from '@mui/material';
 
 const Video = ({ peer }) => {
   const refVideo = useRef();
@@ -12,10 +12,15 @@ const Video = ({ peer }) => {
     });
   }, []);
 
+  if (!peer || peer.from == "addPeer") {
+    console.log("not showing addPeer");
+    return (<></>);
+  }
+
   return (
     <Grid item xs={12} md={6}>
         <Typography variant="h5" gutterBottom>{peer.userId || 'Uknown'} {peer.from}</Typography>
-        <video autoPlay playsInline ref={refVideo} width="160" height="120" />
+        {<video autoPlay playsInline ref={refVideo} width="160" height="120" />}
      </Grid>
   );
 };

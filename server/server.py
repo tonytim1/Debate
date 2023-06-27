@@ -470,6 +470,7 @@ def handle_disconnect():
     if room_id is None or room_id not in rooms:
         return
     room = rooms[room_id]
+    is_spectator = user_id in room.spectators_list
     if user_id is None:
         return
     if user_id in room.users_list:
@@ -489,7 +490,7 @@ def handle_disconnect():
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
-    emit('userLeft', { "id": sid }, to=room_id)  # for conversations only
+    emit('userLeft', { "sid": sid, "userId": user_id, "isSpectator": is_spectator }, to=room_id)  # for conversations only
 
 
 # ---------- CHAT ---------- #        

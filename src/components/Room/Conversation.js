@@ -29,20 +29,19 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
+    const spectatorsRef = useRef([]);
     const [ showChat, setShowChat ] = useState(true);
     const [ isMuted, setIsMuted ] = useState(false);
-    const [ isVideoOff, setIsVideoOff ] = useState(false);
     const navigate = useNavigate();
   
     useEffect(() => {
       if (isSpectator) {
         console.log("spectator joined");
-
+        const peers = [];
         Object.entries(roomData.users_list).forEach(([userId, user]) => {
-          if (user.camera_ready) {   // only send to users with lower id so that we don't send the same message twice
+          if (user.camera_ready) {
             console.log("spectator adding other user", userId);
-            //creating connection between two user via simple-peer for video
-            const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
+            const peer = createPeer(user.sid, socket.current.id, null);
             peersRef.current.push({
               peerId: user.sid,
               userId: userId,
@@ -60,7 +59,6 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
         setPeers(peers);
         console.log("peers", peers);
 
-        // if user is a spectator, then don't connect webcam stream
         socket.current.on("userInConversationReady", payload => {
           console.log("userInConversationReady", payload);
           const peer = createPeer(payload.userSid, socket.current.id, null);
@@ -70,13 +68,13 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
             peer,
             from: "spectatorUserReady",
           });
-          peers.push({
+          setPeers((users) => [...users, {
             peerId: payload.userSid,
             userId: payload.userId,
             peer,
             from: "spectatorUserReady",
-          });
-          setPeers(peers);
+          }]);
+          console.log("peers ready", peers, peersRef.current);
         });
 
         socket.current.on("returningSignalAck", payload => {
@@ -84,12 +82,23 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           console.log("got returningSignalAck! will signal item ", item, "with payload", payload);
           item.peer.signal(payload.signal);
         });
+
+        //user left and server send its peerId to disconnect from that peer
+        socket.current.on('userLeft', payload => {
+          const peerObj = peersRef.current.find(p => p.peerId === payload.sid);
+          if(peerObj) {
+            console.log("destroying peer", peerObj);
+            peerObj.peer.destroy(); //cancel connection with disconnected peer
+          }
+          const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
+          peersRef.current = peers;
+          setPeers(peers);
+        });
       }
 
       else {
         connectToSocketAndWebcamStream().then(() => {
           console.log("WebcamReady");
-          //sending to the server that a user is ready
           socket.current.emit("WebcamReady", { userId: currUserId, roomId: roomId });
 
           socket.current.on("userInConversationReady", payload => {
@@ -114,9 +123,8 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
             setRoomData(roomData);
             console.log("usersInConversation", roomData.users_list);
             Object.entries(roomData.users_list).forEach(([userId, user]) => {
-              if (userId !== currUserId && user.camera_ready) {   // only send to users with lower id so that we don't send the same message twice
+              if (userId !== currUserId && user.camera_ready) {
                 console.log("adding other user", userId);
-                //creating connection between two user via simple-peer for video
                 const peer = createPeer(user.sid, socket.current.id, webcamStream.current);
                 peersRef.current.push({
                   peerId: user.sid,
@@ -156,25 +164,6 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           // setPeers(peers);
           // console.log("peers", peers);  
     
-          // // server send array of socket id's of other user of same room so that new user can connect with other user via
-          // // simple-peer for video transmission and message will be served using socket io
-          // socket.current.on("usersInConversation", users => { //triggered in server and here receiving it
-          //   const peers = [];
-          //   users.forEach(otherUserSocketId => {
-          //     //creating connection between two user via simple-peer for video
-          //     const peer = createPeer(otherUserSocketId, socket.current.id, webcamStream.current);
-          //     peersRef.current.push({
-          //       peerId: otherUserSocketId,
-          //       peer
-          //     });
-          //     peers.push({
-          //       peerId: otherUserSocketId,
-          //       peer
-          //     });
-          //   })
-          //   setPeers(peers);
-          // })
-    
           //a new user joined at same room send signal,callerId(simple-peer) and stream to server and server give it to
           //us to create peer between two peer and connect
           socket.current.on("sendingSignalAck", payload => {            
@@ -186,13 +175,21 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
             }
 
             let peer = addPeer(payload.signal, payload.callerId, webcamStream.current);
+            const peerObj = {
+              peer,
+              peerId: payload.callerId,
+              userId: payload.userId,
+              from: "addPeer",
+            };
             if (payload.isSpectator) {
               console.log("peer is a spectator so not adding to peers, instead adding to spectators", payload.userId);
-              setSpectators(spectators => [...spectators, {
+              spectatorsRef.current.push({
                 peer,
                 peerId: payload.callerId,
                 userId: payload.userId,
-              }]);
+                from: "addPeer",
+              }); 
+              setSpectators(users => [...users, peerObj]);
               return;
             }
             peersRef.current.push({
@@ -200,13 +197,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
               peerId: payload.callerId,
               userId: payload.userId,
               from: "addPeer",
-            });
-            const peerObj = {
-              peer,
-              peerId: payload.callerId,
-              userId: payload.userId,
-              from: "addPeer",
-            };  
+            }); 
             setPeers(users => [...users, peerObj]);
           });
     
@@ -218,17 +209,27 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           });
     
           //user left and server send its peerId to disconnect from that peer
-          socket.current.on('userLeft', id => {
-            const peerObj = peersRef.current.find(p => p.peerId === id);
-            if(peerObj) peerObj.peer.destroy(); //cancel connection with disconnected peer
-            const peers = peersRef.current.filter(p => p.peerId !== id);
+          socket.current.on('userLeft', payload => {
+            const peerObj = peersRef.current.find(p => p.peerId === payload.sid);
+            if(peerObj) {
+              console.log("destroying peer", peerObj);
+              peerObj.peer.destroy(); //cancel connection with disconnected peer
+            }
+            const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
             peersRef.current = peers;
             setPeers(peers);
+
+            // const spectatorObj = spectatorsRef.current.filter(p => p.peerId !== id);
+            // if(spectatorObj) {
+            //   console.log("destroying spectator", spectatorObj)
+            //   spectatorObj.peer.destroy(); //cancel connection with disconnected peer
+            // }
+            // const spectators = spectatorsRef.current.filter(p => p.peerId !== id);
+            // setSpectators(spectators);
           });
         });
       }
   
-      return () => stopAllVideoAudioMedia();
       //eslint-disable-next-line
     }, []);
   
@@ -266,6 +267,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
         console.log("createPeer sendingSignal", signal);
         socket.current.emit("sendingSignal", { userId: currUserId, userSidToSendSignal: userSidToSendSignal, callerId: mySid, isSpectator: isSpectator, signal });
       })
+      console.log("createPeer returning peer", peer);
       return peer;
     }
   
@@ -284,118 +286,8 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
         socket.current.emit("returningSignal", { signal, callerId: callerId, userId: currUserId });
       });
       peer.signal(incomingSignal);
+      console.log("addPeer returning peer", peer);
       return peer;
-    }
-  
-    // const shareScreen = async () => {
-    //   //getting screen video
-    //   screenCaptureStream.current = await navigator.mediaDevices.getDisplayMedia({ cursor: true });
-    //   //taking video track of stream
-    //   const screenCaptureVideoStreamTrack = screenCaptureStream.current.getVideoTracks()[0];
-  
-    //   //replacing video track of each peer connected with getDisplayMedia video track and audio will remain as it is
-    //   //as all browser does not return audio track with getDisplayMedia
-    //   peers.map(peer => (
-    //       peer.peer.replaceTrack(
-    //           peer.peer.streams[0].getVideoTracks()[0],
-    //           screenCaptureVideoStreamTrack,
-    //           peer.peer.streams[0]
-    //       )
-    //   ))
-    //   //destroying previous stream video track
-    //   const previousWebcamStream = myVideo.current.srcObject;
-    //   const previousWebcamStreamTracks = previousWebcamStream.getTracks();
-    //   previousWebcamStreamTracks.forEach(function(track) {
-    //       if(track.kind === 'video')  track.stop();
-    //   });
-    //   myVideo.current.srcObject = screenCaptureStream.current;
-  
-    //   //When user will stop share then own video(of webcam) will appears
-    //   screenCaptureStream.current.getVideoTracks()[0].addEventListener('ended', () => {
-    //       startWebCamVideo();
-    //       setIsAudioMuted(false);
-    //       setIsVideoMuted(false);
-    //   });
-    // }
-  
-    //Stopping webcam and screen media and audio also
-    const stopAllVideoAudioMedia = async () => {
-      //destroying previous stream(webcam stream)
-      const previousWebcamStream = webcamStream.current;
-      const previousWebcamStreamTracks = previousWebcamStream.getTracks();
-      previousWebcamStreamTracks.forEach(track => {
-        track.stop();
-      });
-    }
-  
-    //   //destroying previous stream(screen capture stream)
-    //   const previousScreenCaptureStream = screenCaptureStream.current;
-    //   if(previousScreenCaptureStream) {
-    //     const previousScreenCaptureStreamTracks = previousScreenCaptureStream.getTracks();
-    //     previousScreenCaptureStreamTracks.forEach(track => {
-    //       track.stop();
-    //     });
-    //   }
-    // }
-  
-    // const startWebCamVideo = async () => {
-    //   await stopAllVideoAudioMedia();
-  
-    //   const newWebcamStream = await getWebcamStream(); //getting webcam video and audio
-    //   const videoStreamTrack = newWebcamStream.getVideoTracks()[0]; //taking video track of stream
-    //   const audioStreamTrack = newWebcamStream.getAudioTracks()[0]; //taking audio track of stream
-    //   //replacing all video track of all peer connected to this peer
-    //   peers.map(peer => {
-    //     //replacing video track
-    //     peer.peer.replaceTrack(
-    //       peer.peer.streams[0].getVideoTracks()[0],
-    //       videoStreamTrack,
-    //       peer.peer.streams[0]
-    //     );
-    //     //replacing audio track
-    //     peer.peer.replaceTrack(
-    //       peer.peer.streams[0].getAudioTracks()[0],
-    //       audioStreamTrack,
-    //       peer.peer.streams[0]
-    //     );
-    //   });
-    //   myVideo.current.srcObject = newWebcamStream;
-    //   webcamStream.current = newWebcamStream;
-    //   screenCaptureStream.current = null;
-    // }
-  
-    const sendMessage = (e) => {
-      e.preventDefault();
-      //sending message text with roomId to sever it will send message along other data to all connected user of current room
-      if(socket) {
-        socket.current.emit('sendMessage', {
-          roomId: roomId,
-          message: setMessageRef.current.value
-        })
-        setMessageRef.current.value = "";
-      }
-    }
-  
-    //Mute or unmute audio
-    const muteOrUnmuteAudio = () => {
-      if(!isAudioMuted) {
-        webcamStream.current.getAudioTracks()[0].enabled = false;
-        setIsAudioMuted(true);
-      } else {
-        webcamStream.current.getAudioTracks()[0].enabled = true;
-        setIsAudioMuted(false);
-      }
-    }
-  
-    //stop or play video
-    const playOrStopVideo = () => {
-      if(!isVideoMuted) {
-        myVideo.current.srcObject.getVideoTracks()[0].enabled = false;
-        setIsVideoMuted(true);
-      } else {
-        myVideo.current.srcObject.getVideoTracks()[0].enabled = true;
-        setIsVideoMuted(false);
-      }
     }
   
     const leaveMeeting = () => {
@@ -407,7 +299,13 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     }
 
     const handleMuteToggle = () => {
-      setIsMuted(!isMuted);
+      if(!isAudioMuted) {
+        webcamStream.current.getAudioTracks()[0].enabled = false;
+        setIsAudioMuted(true);
+      } else {
+        webcamStream.current.getAudioTracks()[0].enabled = true;
+        setIsAudioMuted(false);
+      }
     }
 
     const handleVideoToggle = () => {
@@ -462,12 +360,12 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
               <IconButton onClick={handleChatToggle}>
                 {showChat ? (<SpeakerNotesOffIcon/>) : (<ChatIcon/>)}
               </IconButton>
-              <IconButton onClick={handleMuteToggle}>
-                {isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
-              </IconButton>
-              <IconButton onClick={handleVideoToggle}>
+              { isSpectator ? (<></>) : (<IconButton onClick={handleMuteToggle}>
+                {isAudioMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
+              </IconButton>)}
+              { isSpectator ? (<></>) : (<IconButton onClick={handleVideoToggle}>
                 {isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
-              </IconButton>
+              </IconButton>)}
             </CardActions>
             </Card>
           {/*Video controls - possibly to be added*/}
@@ -475,7 +373,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
             {/*Chat container*/}
             <Chat style={{}} roomId={roomId} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} currUserId={currUserId}/>
             {/*Spectators*/}
-            <SpectatorsList spectsList={roomData.spectators_list}/>
+            <SpectatorsList isSpectator={isSpectator} spectsList={roomData.spectators_list} allowSpectators={roomData.allow_spectators} isConversation={true}/>
           </Stack>) : null}
           
         </Stack>
