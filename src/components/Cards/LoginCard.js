@@ -156,7 +156,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('https://' + window.location.hostname + ':8000/api/signin', {
+      const response = await fetch('http://' + window.location.hostname + ':8000/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
