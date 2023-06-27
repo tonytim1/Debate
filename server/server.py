@@ -103,7 +103,7 @@ def signup():
         
         
         # Return success response
-        return jsonify({'message': 'Signup successful', 'userId': username, 'token': token }), 200
+        return jsonify({'message': 'Signup successful', 'userId': username, 'token': token, 'tags': tags }), 200
     
     except auth.EmailAlreadyExistsError:
         # Handle case when the provided email already exists
@@ -131,9 +131,10 @@ def signin():
         users_ref = db_firestore.collection('users').document(user_id)
         users_user_data = users_ref.get().to_dict()
         username = users_user_data['username']
+        tags = users_user_data['tags']
 
         # Return success response
-        return jsonify({'message': 'Login successful', 'userId': username, 'token': token }), 200
+        return jsonify({'message': 'Login successful', 'userId': username, 'token': token, 'tags': tags }), 200
     
     except Exception as e:
         # Handle other errors

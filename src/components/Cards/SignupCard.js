@@ -82,6 +82,7 @@ const SignupCard = ({showCard, onBackClick}) => {
             const userURL = `/user/${responseData.userId}`;
             localStorage.setItem('token', responseData.token);
             localStorage.setItem('userId', responseData.userId);
+            localStorage.setItem('tags', responseData.tags);
             console.log(localStorage.getItem("token"));
             window.location.reload();
             } else {

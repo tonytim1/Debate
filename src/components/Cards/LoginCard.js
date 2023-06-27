@@ -215,6 +215,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
         setUserUid(responseData.userId);
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('userId', responseData.userId);
+        localStorage.setItem('tags', responseData.tags);
         // console.log(localStorage.getItem("token"));
         window.location.reload();
       }
