@@ -89,7 +89,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                                   }}
                             >
                                 <ListItemAvatar>
-                                    <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
+                                    <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
@@ -132,7 +132,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                                   }}
                             >
                                 <ListItemAvatar>
-                                    <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
+                                    <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
@@ -175,7 +175,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                             backgroundColor: user.ready ? '#D1FFBD' : 'inherit',
                         }}>
                         <ListItemAvatar>
-                            <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
+                            <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                         </ListItemAvatar>
                         <ListItemText
                             primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}

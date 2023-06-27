@@ -252,6 +252,8 @@ def join_debate_room(data):
     sid = request.sid
     room_id = data.get('roomId')
     user_id = data.get('userId')
+    photo_url = data.get('photoUrl')
+    print("photo_url: ", photo_url)
     if user_id is None or room_id is None:
         print("user_id or room_id is None")
         return
@@ -297,7 +299,7 @@ def join_debate_room(data):
             emit('conversation already started', room=sid)
             return
         
-        room.spectators_list[user_id] = User(sid=sid)
+        room.spectators_list[user_id] = User(sid=sid, photo_url=photo_url)
         emit('spectator_join', dataclasses.asdict(room), room=sid)
 
     elif len(room.users_list) >= room.room_size:
@@ -310,7 +312,7 @@ def join_debate_room(data):
         emit('user_join', dataclasses.asdict(room) ,room=sid)
 
     else:  # room is not full, add user to room
-        room.users_list.update({user_id: User(sid=sid)})
+        room.users_list.update({user_id: User(sid=sid, photo_url=photo_url)})
         if user_id not in room.user_reports.keys():
             room.user_reports[user_id] = []
         emit('user_join', dataclasses.asdict(room), room=sid)

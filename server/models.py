@@ -6,6 +6,7 @@ class User:
     ready: bool = False
     team: bool = False
     camera_ready: bool = False
+    photo_url: Optional[str] = None
 
 @dataclass
 class Room:
