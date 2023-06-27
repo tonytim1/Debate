@@ -1,5 +1,6 @@
 import { Box, TextField, CardHeader, Avatar, Button, Card, CardActions, CardContent, Divider, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { useCallback, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -9,37 +10,23 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import axios from 'axios';
-import useAuthentication from "../hooks/useAuthentication";
+import useAuthentication from "../../hooks/useAuthentication";
 import LoadingScreen from 'src/components/Room/LoadingScreen';
 import { Autocomplete } from '@mui/material';
-
-
-const states = [
-  {
-    value: 'alabama',
-    label: 'Alabama'
-  },
-  {
-    value: 'new-york',
-    label: 'New York'
-  },
-  {
-    value: 'san-francisco',
-    label: 'San Francisco'
-  },
-  {
-    value: 'los-angeles',
-    label: 'Los Angeles'
-  }
-];
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import { blue, red } from '@mui/material/colors';
+import { Google, Facebook } from '@mui/icons-material';
 
 export const AccountProfileDetails = ({ user }) => {
-
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [tags, setTags] = useState([]);
+  const [provider, setProvider] = useState('');
 
   const tagOptions = [
     "Music",
@@ -56,11 +43,24 @@ export const AccountProfileDetails = ({ user }) => {
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
-      setEmail(user.email);
-      setUsername(user.username);
-      setPassword(user.password);
-      setTags(user.tags);
+      if (user.hasOwnProperty('name')) {
+        setName(user.name);
+      }
+      if (user.hasOwnProperty('email')) {
+        setEmail(user.email);
+      }
+      if (user.hasOwnProperty('password')) {
+        setPassword(user.password);
+      }
+      if (user.hasOwnProperty('username')) {
+        setUsername(user.username);
+      }
+      if (user.hasOwnProperty('tags')) {
+        setTags(user.tags);
+      }
+      if (user.hasOwnProperty('provider')) {
+        setProvider(user.provider);
+      }
     }
   }, [user]);
 
@@ -68,22 +68,51 @@ export const AccountProfileDetails = ({ user }) => {
     setTags(value);
   }
 
-  const handleSubmit = async () => { };
+
+  const handleUpdateDetails = async () => {
+    const UpdatedUser = {
+      email: email,
+      name: name,
+      username: username,
+      tags: tags,
+      image: '',
+      provider: provider,
+      token: localStorage.getItem('token')
+    };
+
+    const response = await fetch('http://' + window.location.hostname + ':8000/api/update_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(UpdatedUser),
+    });
+    if (response.ok) {
+      if (UpdatedUser.username !== '') {
+        localStorage.setItem('userId', UpdatedUser.username);
+      }
+      else {
+        localStorage.setItem('userId', UpdatedUser.name);
+      }
+      const homepage = "/dashboard/home";
+      navigate(homepage);
+    }
+  };
 
   return (
     <form
       autoComplete="off"
       noValidate
-      onSubmit={handleSubmit}
     >
 
       <Card>
+
         <CardHeader
           title="Profile"
         />
         <br></br>
         <CardContent sx={{ pt: 0 }}>
-          <Box sx={{ m: -1.5}}>
+          <Box sx={{ m: -1.5 }}>
             <Grid
               container
               spacing={3}
@@ -102,18 +131,6 @@ export const AccountProfileDetails = ({ user }) => {
                   value={email}
                 />
               </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
-                <TextField
-                  fullWidth
-                  label="Password"
-                  name="Password"
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </Grid>
 
               <Grid
                 xs={12}
@@ -123,8 +140,8 @@ export const AccountProfileDetails = ({ user }) => {
                   fullWidth
                   label="Name"
                   name="Name"
+                  disabled={user.provider !== 'password'}
                   onChange={(e) => setName(e.target.value)}
-                  required
                   value={name}
                 />
               </Grid>
@@ -144,7 +161,6 @@ export const AccountProfileDetails = ({ user }) => {
                   label="Username"
                   name="Username"
                   onChange={(e) => setUsername(e.target.value)}
-                  required
                   value={username}
                 />
               </Grid>
@@ -191,7 +207,7 @@ export const AccountProfileDetails = ({ user }) => {
 
         <Divider />
         <CardActions sx={{ justifyContent: 'center', m: 1.5 }}>
-          <Button variant="contained">
+          <Button variant="contained" onClick={handleUpdateDetails}>
             Save details
           </Button>
         </CardActions>
@@ -219,8 +235,8 @@ export const AccountProfile = ({ user }) => (
             width: 80
           }}
         />
-        <Typography variant="body2">
-          {user.name !== null ? user.name : "No Name"}
+        <Typography>
+          {/* {user.hasOwnProperty('name') ? user.name : "No Name"} */}
         </Typography>
         <Typography
           color="text.secondary"
@@ -245,18 +261,24 @@ export const AccountProfile = ({ user }) => (
     </CardActions>
   </Card>
 );
+
 const Page = () => {
   const isAuthenticated = useAuthentication();
   const token = localStorage.getItem('token');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
+  const BackButton = () => {
+    window.history.back();
+  };
+
+
   useEffect(() => {
     const getUserData = async () => {
       try {
         const token = localStorage.getItem('token');
         // Send the new user data to the backend server
-        const response = await axios.get('https://' + window.location.hostname + ':8000/api/user', {
+        const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -290,6 +312,9 @@ const Page = () => {
           py: 8
         }}
       >
+        <IconButton color="primary" onClick={BackButton}>
+          <ArrowBack />
+        </IconButton>
         <Container maxWidth="lg">
           <Stack spacing={3}>
             <div>
@@ -298,30 +323,44 @@ const Page = () => {
               </Typography>
             </div>
             <div>
+              {user.provider !== 'password' && (
+                <Card variant="outlined" style={{ width: '370px', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
+                  {user.provider === 'google.com' && <div style={{ marginRight: '10px', color: red[600] }}>
+                    <Google />
+                  </div>}
+                  {user.provider === 'facebook.com' && <div style={{ marginRight: '8px', color: blue[500] }}>
+                    <Facebook />
+                  </div>}
+                  <div style={{ color: blue[900] }}>
+                    You have signed in with '{user.provider}' account, you can add more details here :)
+                  </div>
+                </Card>
+              )}
+            </div>
+            <div>
               <Grid
                 container
                 spacing={3}
               >
+                {user.provider === 'password' && (
+                  <Grid xs={12} md={6} lg={8}>
+                    <AccountProfile user={user} />
+                  </Grid>
+                )}
+
                 <Grid
                   xs={12}
                   md={6}
                   lg={4}
                 >
-                  <AccountProfile user={user} />
-                </Grid>
-                <Grid
-                  xs={12}
-                  md={6}
-                  lg={8}
-                >
                   <AccountProfileDetails user={user} />
                 </Grid>
+
               </Grid>
             </div>
           </Stack>
-
         </Container>
-      </Box>
+      </Box >
     </>
   );
 };
@@ -337,7 +376,7 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+      width: 300,
     },
   },
 };

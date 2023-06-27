@@ -61,7 +61,7 @@ export default function HomePage() {
     setLoginAlert(false);
     sessionStorage.removeItem('loggedIn');
   };
-  
+
   useEffect(() => {
     socket.current = io('ws://' + window.location.hostname + ':8000')
   }, []);

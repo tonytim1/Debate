@@ -12,7 +12,6 @@ export default function AccountPopover() {
   const [open, setOpen] = useState(null);
   const navigate = useNavigate();
 
-
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
@@ -36,6 +35,9 @@ export default function AccountPopover() {
 
   return (
     <>
+
+      <meta name="referrer" content="no-referrer" />
+
       <IconButton
         onClick={handleOpen}
         sx={{
@@ -53,7 +55,7 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={localStorage.getItem("photoURL")} alt="photoURL" />
+        <Avatar src={localStorage.getItem("photoURL")} alt="photoURL" referrerPolicy="no-referrer" />
       </IconButton>
 
       <Popover
@@ -84,12 +86,15 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Stack sx={{ p: 1 }}>
-          <MenuItem onClick={() => window.location.href="/dashboard/home"} sx={{ m: 1 }}>
+          <MenuItem onClick={() => window.location.href = "/dashboard/home"} sx={{ m: 1 }}>
             Home
           </MenuItem>
           <MenuItem onClick={handleProfile} sx={{ m: 1 }}>
             Profile
           </MenuItem>
+
+
+          
         </Stack>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

@@ -154,14 +154,57 @@ def get_user():
     try:
         decoded_token = auths.get_account_info(id_token)['users'][0]
         user_uid = decoded_token['localId']
-        user_ref = db_firestore.collection('users').document(user_uid)
-        user_doc = user_ref.get().to_dict()
+        provider = decoded_token['providerUserInfo'][0]['providerId']
+        user_doc = {}
         user_doc["email"] = decoded_token['email']
+        user_doc["provider"] = provider
+        try:
+            user_ref = db_firestore.collection('users').document(user_uid)
+            user_doc.update(user_ref.get().to_dict())
+        except Exception as e:
+            if provider != "password":
+                user_doc["name"] = decoded_token['displayName']
+                user_doc['photoUrl'] = decoded_token['photoUrl']
+
         return jsonify(user_doc)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/check_user_data', methods=['GET'])
+def check_user_data():
+    user_id= request.headers.get('UserId')
+    print(user_id)
+    try:
+        user_ref = db_firestore.collection('users').document(user_id)
+        user_doc = user_ref.get().to_dict()
+        print(user_doc)
+        return jsonify(user_doc)
+    except Exception as e:
+        return None
 
+# ---------- UPDATE_USER ---------- #
+@app.route('/api/update_user', methods=['POST'])
+def update_user():
+    user_data = request.get_json()
+    user_dict = dict(user_data)
+    user_dict.pop('provider')
+    user_dict.pop('token')
+    try:
+        token = user_data.get('token')
+        user_info = auths.get_account_info(token)['users'][0]
+        user_id = user_info['localId']
 
+        
+        user_ref = db_firestore.collection('users').document(user_id).update(user_dict)
+        return jsonify({'message': 'Update successful', 'userId': user_data.get('username'), 'token': token }), 200
+    
+    except Exception as e:
+        if (user_data.get('provider') != 'password'):
+            user_ref = db_firestore.collection('users').document(user_id).set(user_dict)
+            return jsonify({'message': 'Create Database, Update successful', 'userId': user_data.get('username'), 'token': token }), 200
+    
+    
+    
 # ---------- HOME PAGE ---------- #
 @socketio.on("fetch_all_rooms")
 def get_all_rooms():

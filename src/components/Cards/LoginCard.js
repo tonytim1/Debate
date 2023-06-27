@@ -59,6 +59,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
   const signInWithGoogle = () => {
     const app = initializeApp(config, "secondary");
     const auth = getAuth(app);
+    const loginUser = {
+      username: ''};
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then((result) => {
@@ -72,7 +74,27 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           };
           setUserUid(user.userId);
           localStorage.setItem('token', user.token);
-          localStorage.setItem('userId', user.displayName);
+
+          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'UserId': user.userId
+            }
+          });
+          const userDoc = await response.json();
+          if (userDoc != null) {
+            if (userDoc.username != ''){
+              localStorage.setItem('userId', userDoc.username);
+            }
+            else{
+              localStorage.setItem('userId', user.displayName);
+            }
+          }
+          else{
+            localStorage.setItem('userId', user.displayName);
+          }
+
 
           const cred = GoogleAuthProvider.credentialFromResult(result);
           const token = cred.accessToken;
@@ -98,6 +120,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
     const app = initializeApp(config, "secondary");
     const auth = getAuth(app);
     const provider = new FacebookAuthProvider();
+    const loginUser = {
+      username: ''};
     signInWithPopup(auth, provider)
       .then((result) => {
         result.user.getIdToken().then(async (idToken) => {
@@ -110,7 +134,27 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           };
           setUserUid(user.userId);
           localStorage.setItem('token', user.token);
-          localStorage.setItem('userId', user.displayName);
+
+          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'UserId': user.userId
+            }
+          });
+          const userDoc = await response.json();
+          if (userDoc != null) {
+            if (loginUser.username != ''){
+              localStorage.setItem('userId', loginUser.username);
+            }
+            else{
+              localStorage.setItem('userId', user.displayName);
+            }
+          }
+          else{
+            localStorage.setItem('userId', user.displayName);
+          }
+
 
           const cred = FacebookAuthProvider.credentialFromResult(result);
           const token = cred.accessToken;
@@ -156,7 +200,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('https://' + window.location.hostname + ':8000/api/signin', {
+      const response = await fetch('http://' + window.location.hostname + ':8000/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
