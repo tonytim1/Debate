@@ -84,7 +84,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           });
           const userDoc = await response.json();
           if (userDoc != null) {
-            if (userDoc.username != ''){
+            if (userDoc.username !== ''){
               localStorage.setItem('userId', userDoc.username);
             }
             else{
