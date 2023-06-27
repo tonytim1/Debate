@@ -10,7 +10,7 @@ from firebase_admin import firestore
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit, close_room
-
+from default_rooms import get_mock_rooms
 from models import Room, User
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./server/debate-center-firebase-key.json"
@@ -145,7 +145,7 @@ def signin():
 # room_to_sockets = {}
 socket_to_user = {}
 socket_to_room = {}
-rooms = {}
+rooms = get_mock_rooms()
 
 # ---------- USER INFO ---------- #
 @app.route('/api/user', methods=['GET'])
