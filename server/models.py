@@ -19,7 +19,7 @@ class Room:
     allow_spectators: bool
     users_list: Dict[str, User]
     spectators_list: Dict[str, User]
-    moderator: str
+    moderator: Optional[str]
     is_conversation: bool
     pictureId: Optional[int]
     user_reports: Dict[str, List[str]]

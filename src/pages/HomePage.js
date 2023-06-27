@@ -157,7 +157,6 @@ export default function HomePage() {
     }
     if (sortType === 'recommended') {
       return Array.from(roomsData).sort((a, b) => {
-        console.log(a[1].tags, b[1].tags, tags);
         const count_a = countCommonValues(a[1].tags, tags ?? []);
         const count_b = countCommonValues(b[1].tags, tags ?? []);
         return count_b - count_a;

@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import VideoBox from './VideoBox';
 import { useEffect, useState } from 'react';
 
-const VideoGrid = ({ myVideo, peers }) => {
+const VideoGrid = ({ myVideo, peers, isSpectator }) => {
   const [numOfVids, setNumOfVids] = useState(myVideo !== null ? peers.length + 1 : peers.length);
   const calcGrid = (n) => {
     const gridMap = [];
@@ -45,7 +45,7 @@ const VideoGrid = ({ myVideo, peers }) => {
   if (!myVideo || !peers) return null;
   return (
     <div style={{display: 'grid', gridTemplateColumns: `repeat(${numOfVids <= 4 ? 2 : 3}, 1fr)`, gridAutoRows: `1fr`, height: '95%', alignItems: 'center', gridGap:'15px'}}>
-      {myVideo !== null ? (
+      {!isSpectator && myVideo !== null ? (
         <VideoBox me={true} peer={myVideo}/>
       ) : null}
       {peers.map((peer) => (

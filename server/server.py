@@ -269,7 +269,7 @@ def join_debate_room(data):
         return
 
     # if no moderator, set the user to be the moderator
-    if room.moderator is None:
+    if not room.moderator:
         room.moderator = user_id
 
     if user_id in room.users_list or user_id in room.spectators_list:
