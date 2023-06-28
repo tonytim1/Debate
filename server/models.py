@@ -1,26 +1,27 @@
 from dataclasses import dataclass
-from typing import Optional
-
-
+from typing import Optional, List, Dict
 @dataclass
 class User:
     sid: str
     ready: bool = False
     team: bool = False
     camera_ready: bool = False
+    photo_url: Optional[str] = None
 
 @dataclass
 class Room:
     id: str
     name: str
-    tags: list[str]
+    tags: List[str]
     teams: bool
-    team_names: list[str]
+    team_names: List[str]
     room_size: int
     time_to_start: float
     allow_spectators: bool
-    users_list: dict[str, User]
-    spectators_list: dict[str, User]
-    moderator: str
+    users_list: Dict[str, User]
+    spectators_list: Dict[str, User]
+    moderator: Optional[str]
     is_conversation: bool
     pictureId: Optional[int]
+    user_reports: Dict[str, List[str]]
+    blacklist: List[str]

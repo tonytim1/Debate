@@ -21,19 +21,21 @@ const SpectatorsList = ({ isSpectator, spectsList, allowSpectators, isConversati
           </Tooltip>)}
                 Scpectators
           </ListSubheader>
-          {Array.from( Object.keys(spectsList) ).map((userName, i) => (
-                <ListItem key={i}
+          {Object.entries(spectsList).map(([userId, user]) => {
+            return (
+                <ListItem key={userId}
                 secondaryAction={
                     <IconButton>
                         <MoreVertIcon sx={{fontSize: '15px'}}/>
                     </IconButton>
                 }>
                   <ListItemAvatar>
-                    <Avatar />
+                    <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                   </ListItemAvatar>
-                  <ListItemText id={i} primary={userName} />
+                  <ListItemText primary={userId} />
                 </ListItem>
-              ))}
+            );
+          })}
           </List>
       </Stack>
     </Card>

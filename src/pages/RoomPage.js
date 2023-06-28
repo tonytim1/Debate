@@ -48,7 +48,7 @@ export default function RoomPage() {
   const currUserId = localStorage.getItem("userId");
 
   const join_room = () => {
-    socket.current.emit('join_room', { roomId: roomId, userId: currUserId });
+    socket.current.emit('join_room', { roomId: roomId, userId: currUserId, photoUrl: localStorage.getItem("photoURL") });
   
     socket.current.once('user_join', ( roomData ) => {
       setRoomData(roomData);
@@ -84,6 +84,10 @@ export default function RoomPage() {
     });
     socket.current.on('receiveMessage', payload => {
       setMessages(messages => [...messages, payload]);
+    });
+    socket.current.once('kick from room', () => {
+      navigate('/');
+      alert('you got kicked from this room!')
     });
   };
   

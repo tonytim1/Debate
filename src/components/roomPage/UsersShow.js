@@ -10,10 +10,15 @@ import Divider from '@mui/material/Divider';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Container, Stack, Box, Tooltip, Button, Card, IconButton} from '@mui/material';
 import { useState } from 'react';
+import  ReportIcon  from '@mui/icons-material/Report';
+import {useNavigate} from 'react-router-dom';
 
-const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize}) => {
+const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize, user_reports}) => {
     const [isDesabled, setIsDisabled] = useState(false);
+    const navigate = useNavigate();
+    
     const handle_switch = async () => {
+
         setIsDisabled(true);
         socket.current.emit('switch_team', { 
             'roomId': roomId, 
@@ -23,6 +28,20 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
             setIsDisabled(false);
         }, 3000);
     };
+
+    const report_user = (userId) => {   
+            socket.current.emit('report_user', {
+                 'userId': currUserId,
+                  'reportedUserId': userId,
+                  'roomId': roomId });  
+    }
+    socket.current.once('check_report_user_list', data => {
+            if(currUserId === data.reportedUserId){
+                socket.current.emit('kick_user', { 'roomId': roomId, 'userId':currUserId });
+                console.log('you got kicked out of the room');
+                navigate('/');
+            }           
+    });
 
     return (
     <Container
@@ -70,12 +89,21 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                                   }}
                             >
                                 <ListItemAvatar>
-                                    <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
+                                    <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
                                     secondary={moderator === userId ? "Moderator" : "" }
                                 />
+                                {userId !== currUserId ? 
+                                <>
+                                <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}>
+                                    <ReportIcon/>
+                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
+                                </IconButton>
+                                </>
+                                    : ''
+                                }
                             </ListItem>
                             );
                             }
@@ -104,12 +132,26 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                                   }}
                             >
                                 <ListItemAvatar>
-                                    <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
+                                    <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
                                     secondary={moderator === userId ? "Moderator" : ""}
                                 />
+                                {userId !== currUserId ? 
+                                <>
+                                <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}>
+                                    <ReportIcon/>
+                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
+                                </IconButton>
+                                </>
+                                    : ''
+                                }
+                                {/* <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}> */}
+                                    {/* <ReportIcon/>  */}
+                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
+                                {/* </IconButton> */}
+
                             </ListItem>
                             );
                             }
@@ -133,12 +175,21 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                             backgroundColor: user.ready ? '#D1FFBD' : 'inherit',
                         }}>
                         <ListItemAvatar>
-                            <Avatar alt="Remy Sharp" src='/assets/images/avatars/avatar_default.jpg' />
+                            <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                         </ListItemAvatar>
                         <ListItemText
                             primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
                             secondary={moderator === userId ? "Moderator" : ""}
                         />
+                        {userId !== currUserId ? 
+                                <>
+                                <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}>
+                                    <ReportIcon/>
+                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
+                                </IconButton>
+                                </>
+                                    : ''
+                        }
                     </ListItem>
                     );
                 }

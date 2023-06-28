@@ -10,11 +10,10 @@ from firebase_admin import firestore
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit, close_room
-
+from default_rooms import get_mock_rooms
 from models import Room, User
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./server/debate-center-firebase-key.json"
-
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins='*')
@@ -69,6 +68,7 @@ def signup():
     tags = user_data.get('tags')
     image = user_data.get('image')
 
+
     try:
         # create new user base on email and password
         new_user = auths.create_user_with_email_and_password(email=email, password=password)
@@ -103,7 +103,7 @@ def signup():
         
         
         # Return success response
-        return jsonify({'message': 'Signup successful', 'userId': username, 'token': token }), 200
+        return jsonify({'message': 'Signup successful', 'userId': username, 'token': token, 'tags': tags }), 200
     
     except auth.EmailAlreadyExistsError:
         # Handle case when the provided email already exists
@@ -131,9 +131,10 @@ def signin():
         users_ref = db_firestore.collection('users').document(user_id)
         users_user_data = users_ref.get().to_dict()
         username = users_user_data['username']
+        tags = users_user_data['tags']
 
         # Return success response
-        return jsonify({'message': 'Login successful', 'userId': username, 'token': token }), 200
+        return jsonify({'message': 'Login successful', 'userId': username, 'token': token, 'tags': tags }), 200
     
     except Exception as e:
         # Handle other errors
@@ -145,7 +146,7 @@ def signin():
 # room_to_sockets = {}
 socket_to_user = {}
 socket_to_room = {}
-rooms = {}
+rooms = get_mock_rooms()
 
 # ---------- USER INFO ---------- #
 @app.route('/api/user', methods=['GET'])
@@ -250,6 +251,8 @@ def create_room():
         moderator=room_data.get('moderator'),
         is_conversation=False,
         pictureId=room_data.get('pictureId', -1),
+        blacklist=[],
+        user_reports={},
     )
     rooms[room_id] = room
     socketio.emit('rooms_new', dataclasses.asdict(room))
@@ -265,6 +268,8 @@ def join_debate_room(data):
     sid = request.sid
     room_id = data.get('roomId')
     user_id = data.get('userId')
+    photo_url = data.get('photoUrl')
+    print("photo_url: ", photo_url)
     if user_id is None or room_id is None:
         print("user_id or room_id is None")
         return
@@ -276,6 +281,14 @@ def join_debate_room(data):
         return
 
     room = rooms[room_id]
+
+    if user_id in room.blacklist:
+        emit('kick from room', room=sid)
+        return
+
+    # if no moderator, set the user to be the moderator
+    if not room.moderator:
+        room.moderator = user_id
 
     if user_id in room.users_list or user_id in room.spectators_list:
         print("user tried to join room he is already in")
@@ -302,7 +315,7 @@ def join_debate_room(data):
             emit('conversation already started', room=sid)
             return
         
-        room.spectators_list[user_id] = User(sid=sid)
+        room.spectators_list[user_id] = User(sid=sid, photo_url=photo_url)
         emit('spectator_join', dataclasses.asdict(room), room=sid)
 
     elif len(room.users_list) >= room.room_size:
@@ -310,17 +323,24 @@ def join_debate_room(data):
             # Room is full, send a specific response
             emit('room is full', room=sid)
             return
-        
-        room.spectators_list[user_id] = User(sid=sid)
-        emit('spectator_join', dataclasses.asdict(room), room=sid)
-        
+        # TODO: add user to spectators list
+        room.spectators_list.append(user_id)
+        emit('user_join', dataclasses.asdict(room) ,room=sid)
+
     else:  # room is not full, add user to room
-        room.users_list.update({user_id: User(sid=sid)})
+        room.users_list.update({user_id: User(sid=sid, photo_url=photo_url)})
+        if user_id not in room.user_reports.keys():
+            room.user_reports[user_id] = []
         emit('user_join', dataclasses.asdict(room), room=sid)
         
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
+    
+    # Join the SocketIO broadcast room
+    socket_to_room[sid] = room_id
+    socket_to_user[sid] = user_id
+    join_room(room_id)
     
     # Join the SocketIO broadcast room
     socket_to_room[sid] = room_id
@@ -356,9 +376,26 @@ def leave_debate_room(data):
         emit('leave_room_error', {'error': 'User is not in the room'})
         leave_room(room_id)
         return
-
-    if not room.users_list and not room.spectators_list:
-        # Delete the room if no users are left
+    
+    # delete user_id from user_reports list
+    for other_user in room.users_list.keys():
+        if user_id in room.user_reports[other_user]:
+            room.user_reports[other_user].remove(user_id)
+    
+    # delete user_id from user_reports
+    room.user_reports.pop(user_id)
+    
+    # check users_report after user leaves
+    for check_user in room.users_list.keys():
+        if  len(room.user_reports[check_user]) >= int(len(room.users_list) / 2) + 1 :
+            room.blacklist.append(check_user)
+            emit('check_report_user_list',{'reportedUserId':check_user,
+                            'roomData': dataclasses.asdict(room)} ,to=room_id)
+                            
+    if not room.users_list and room.is_conversation:
+        # Delete the conversation if no users are left, send a message to the spectators
+        leave_room(room_id)
+        emit('allUsersLeft', to=room_id)
         rooms.pop(room_id)
         close_room(room_id)
         emit('rooms_deleted', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
@@ -368,14 +405,17 @@ def leave_debate_room(data):
     if user_id == room.moderator:
         if room.users_list:
             room.moderator = list(room.users_list.keys())[0]
+        elif room.spectators_list:
+            room.moderator = list(room.spectators_list.keys())[0]
         else:
-            room.moderator = list(room.users_list.keys())[0]
+            room.moderator = None
 
     # leave the SocketIO broadcast room
     leave_room(room_id)
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
+    emit('userLeft', { "sid": sid, "userId": user_id }, to=room_id)  # for conversations only
 
 
 @socketio.on('fetch_room_data')
@@ -465,6 +505,106 @@ def handle_ready_click(data):
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
 
+@socketio.on('report_user')
+def report_user(data):
+    reported_user_id = data.get('reportedUserId')
+    user_id = data.get('userId')
+    room_id = data.get('roomId')
+    print(f"reported_user_id: {reported_user_id}, user_id: {user_id},roomId: {room_id} ")
+
+    if room_id not in rooms:
+        return
+    
+    room = rooms[room_id] 
+
+    # add or remove from user_reports
+    if reported_user_id not in room.user_reports.keys():
+        room.user_reports[reported_user_id] = []
+
+    if user_id not in room.user_reports[reported_user_id]:
+        room.user_reports[reported_user_id].append(user_id)
+    else:
+        room.user_reports[reported_user_id].remove(user_id)
+
+    # update blacklist
+    if  len(room.user_reports[reported_user_id]) >= int(len(room.users_list) / 2) + 1 :
+        room.blacklist.append(reported_user_id)
+        emit('check_report_user_list',{'reportedUserId':reported_user_id,
+                        'roomData': dataclasses.asdict(room)} ,to=room_id)
+
+
+    # Notify all users in the room about the change
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+
+
+@socketio.on('kick_user')
+def kick_user(data):
+    # Get the request data
+    sid = request.sid
+    room_id = data.get('roomId')
+    user_id = data.get('userId')
+
+    if sid in socket_to_room:
+        socket_to_room.pop(sid)
+    if sid in socket_to_user:
+        socket_to_user.pop(sid)
+
+    if room_id not in rooms:
+        # Room not found, send a specific response
+        emit('leave_room_error', {'error': 'Room not found'})
+        return
+
+    room = rooms[room_id]
+
+    # delete user_id from user_reports list
+    for other_user in room.users_list.keys():
+        if user_id in room.user_reports[other_user]:
+            room.user_reports[other_user].remove(user_id)
+    
+    # delete user_id from users_list and user_reports
+    if user_id in room.users_list:
+        room.users_list.pop(user_id)
+    elif user_id in room.spectators_list:
+        room.spectators_list.pop(user_id)
+    else: 
+        emit('leave_room_error', {'error': 'User is not in the room'})
+        leave_room(room_id)
+        return
+    
+    room.user_reports.pop(user_id)
+    
+    # check users_report after user leaves
+    for check_user in room.users_list.keys():
+        if  len(room.user_reports[check_user]) >= int(len(room.users_list.keys()) / 2) + 1 :
+            room.blacklist.append(check_user)
+            emit('check_report_user_list',{'reportedUserId':check_user,
+                            'roomData': dataclasses.asdict(room)} ,to=room_id)
+
+    if not room.users_list and room.is_conversation:
+        # Delete the conversation if no users are left, send a message to the spectators
+        leave_room(room_id)
+        emit('allUsersLeft', to=room_id)
+        rooms.pop(room_id)
+        close_room(room_id)
+        emit('rooms_deleted', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
+        return
+
+    # If the moderator left, assign a new moderator
+    if user_id == room.moderator:
+        if room.users_list:
+            room.moderator = list(room.users_list.keys())[0]
+        elif room.spectators_list:
+            room.moderator = list(room.spectators_list.keys())[0]
+        else:
+            room.moderator = None
+
+    # leave the SocketIO broadcast room
+    leave_room(room_id)
+    # Notify all users in the room about the change
+    emit('room_data_updated', dataclasses.asdict(room), to=room_id)
+    emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
+    emit('userLeft', { "sid": sid, "userId": user_id }, to=room_id)  # for conversations only
+
 # -------------------------------------- #
 
 # -------------- CONVERSATION PAGE ------------- #
@@ -534,14 +674,10 @@ def handle_disconnect():
     if room_id is None or room_id not in rooms:
         return
     room = rooms[room_id]
-    is_spectator = user_id in room.spectators_list
     if user_id is None:
         return
     if user_id in room.users_list:
         room.users_list.pop(user_id)
-    if user_id in room.spectators_list:
-        room.spectators_list.pop(user_id)
-
     if user_id in room.spectators_list:
         room.spectators_list.pop(user_id)
 
@@ -557,7 +693,7 @@ def handle_disconnect():
     # update room data and notify users
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
-    emit('userLeft', { "sid": sid, "userId": user_id, "isSpectator": is_spectator }, to=room_id)  # for conversations only
+    emit('userLeft', { "sid": sid, "userId": user_id }, to=room_id)  # for conversations only
 
 
 # ---------- CHAT ---------- #        

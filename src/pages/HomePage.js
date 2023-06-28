@@ -47,7 +47,8 @@ export default function HomePage() {
 
   const [roomsData, setRoomsData] = useState(new Map());
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredRooms, setFilteredRooms] = useState(false);
+  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [sortedRooms, setSortedRooms] = useState([]);
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
@@ -56,6 +57,7 @@ export default function HomePage() {
   const socket = useRef();
   const navigate = useNavigate();
   const username = localStorage.getItem("userId");
+  const tags = localStorage.getItem("tags");
   const isAuthenticated = useAuthentication();
   const [loginAlert, setLoginAlert] = useState(true);
 
@@ -123,14 +125,18 @@ export default function HomePage() {
 
   useEffect(() => {
     filterRooms('');
-  }, [roomsData]);
+  }, [sortedRooms]);
+
+  useEffect(() => {
+    setSortedRooms(sortRooms(roomsData));
+  }, [sortType, roomsData]);
 
   useEffect(() => {
     setShowLoginCard(!isAuthenticated);
   }, [isAuthenticated]);
 
   const filterRooms = (query) => {
-    const filtered = Array.from(roomsData).filter(([roomId, data]) => {
+    const filtered = Array.from(sortedRooms).filter(([roomId, data]) => {
       const tags = data.tags || [];
       const name = data.name || '';
       const lowerQuery = query.toLowerCase();
@@ -139,7 +145,37 @@ export default function HomePage() {
     setFilteredRooms(filtered);
   };
 
+  const sortRooms = () => {
+    if (sortType === 'soon') {
+      return Array.from(roomsData).sort((a, b) => {
+        return a[1].time_to_start - b[1].time_to_start;
+      });
+    }
+    if (sortType === 'recommended') {
+      return Array.from(roomsData).sort((a, b) => {
+        const count_a = countCommonValues(a[1].tags, tags ?? []);
+        const count_b = countCommonValues(b[1].tags, tags ?? []);
+        return count_b - count_a;
+      });
+    }
+    if (sortType === 'popular') {      
+      return Array.from(roomsData).sort((a, b) => {
+        
+        return Object.keys(b[1].users_list).length - Object.keys(a[1].users_list).length || Object.keys(b[1].spectators_list).length - Object.keys(a[1].spectators_list).length;
+      });
+    }
+    return Array.from(roomsData);
+  };
 
+  function countCommonValues(array1, array2) {
+    let count = 0
+    for (let i = 0; i < array1.length; i++) {
+      if (array2.includes(array1[i])) {
+        count += 1;
+      }
+    }
+    return count;
+  }
 
   return (
     <>

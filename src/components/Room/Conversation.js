@@ -26,13 +26,11 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const myVideo = createRef(); //for display own video
     const webcamStream = useRef(); //own webcam stream
     const peersRef = useRef([]); //collection of peers who are currently connect to a room
-    const screenCaptureStream = useRef(); //screen capture stream
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
     const spectatorsRef = useRef([]);
     const [ showChat, setShowChat ] = useState(true);
-    const [ isMuted, setIsMuted ] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -94,6 +92,13 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
           peersRef.current = peers;
           setPeers(peers);
+        });
+
+        // if all users left, go back to home page
+        socket.current.on('allUsersLeft', () => {
+          console.log("allUsersLeft");
+          // TODO: add popup to inform user that all users left
+          navigate('/');
         });
       }
 
@@ -291,7 +296,14 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     }
   
     const leaveMeeting = () => {
-      navigate.push('/');
+      if (webcamStream.current) {
+        const webcamStreamTracks = webcamStream.current.getTracks();
+        webcamStreamTracks.forEach(track => {
+            track.stop();
+        });
+      }
+      socket.current.emit('leave_click', { 'roomId': roomId, 'userId':currUserId });
+      navigate('/');
     };
   
     const handleChatToggle = () => {
@@ -350,16 +362,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
             {/*<VideoGrid myVideo={myVideo} peers={peers} />*/}
-            <Grid container spacing={2} style={{minHeight: "94%", justifyContent:'center'}}>
-              { isSpectator ? (<></>) : (<Grid item>
-                <Typography variant="h5" gutterBottom>{`Me (${currUserId})`}</Typography>
-                <video muted autoPlay playsInline ref={myVideo} width="160" height="120"/>
-              </Grid>)}
-                  {/*Peers video and audio stream*/}
-              {peers.map((peer) => (
-                <Video controls peer={peer} />
-              ))}
-            </Grid>
+            <VideoGrid myVideo={myVideo} peers={peers} isSpectator={isSpectator}/>
             <CardActions style={{justifyContent: 'center', position:'absolute', bottom:'0px', left:'0px', width:'100%'}}>
               <Stack direction={'row'} spacing={2} style={{width:'100%', justifyContent:'center'}}>
               <Stack style={{alignContent:'center'}}>
@@ -370,22 +373,22 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
                   {!showChat ? ('Show Chat') : ('Hide Chat')}
                 </Typography>
               </Stack>
-              <Stack style={{alignContent:'center'}}>
+              { isSpectator ? (<></>) : (<Stack style={{alignContent:'center'}}>
                 <IconButton onClick={handleMuteToggle} style={{width:'fit-content', alignSelf:'center'}}>
-                  {!isMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
+                  {!isAudioMuted ? (<MicIcon/>) : (<MicOffIcon/>)}
                 </IconButton>
                 <Typography fontSize='small' alignSelf={'center'}>
-                  {!isMuted ? ('Mute') : ('Unmute')}
+                  {!isAudioMuted ? ('Mute') : ('Unmute')}
                 </Typography>
-              </Stack>
-              <Stack style={{alignContent:'center'}}>
+              </Stack>)}
+              { isSpectator ? (<></>) : (<Stack style={{alignContent:'center'}}>
                 <IconButton onClick={handleVideoToggle} style={{width:'fit-content', alignSelf:'center'}}>
                   {!isVideoMuted ? (<VideocamIcon/>) : (<VideocamOffIcon/>)}
                 </IconButton>
                 <Typography fontSize='small' alignSelf={'center'}>
                   {isVideoMuted ? ('Show') : ('Hide')}
                 </Typography>
-              </Stack>
+              </Stack>)}
               </Stack>
             </CardActions>
             </Card>
