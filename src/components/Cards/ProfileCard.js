@@ -105,24 +105,17 @@ export const AccountProfileDetails = ({ user }) => {
     <form
       autoComplete="off"
       noValidate
+      style={{width:'100%'}}
     >
 
-      <Card>
-
+      <Card style={{width:'100%'}}>
         <CardHeader
           title="Profile"
         />
         <br></br>
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
-            <Grid
-              container
-              spacing={3}
-            >
-              <Grid
-                xs={12}
-                md={6}
-              >
+            <Stack spacing={3}>
                 <TextField
                   fullWidth
                   label="Email"
@@ -132,12 +125,7 @@ export const AccountProfileDetails = ({ user }) => {
                   required
                   value={email}
                 />
-              </Grid>
-
-              <Grid
-                xs={12}
-                md={6}
-              >
+            
                 <TextField
                   fullWidth
                   label="Name"
@@ -146,18 +134,7 @@ export const AccountProfileDetails = ({ user }) => {
                   onChange={(e) => setName(e.target.value)}
                   value={name}
                 />
-              </Grid>
 
-
-              <Grid
-                xs={12}
-                md={6}
-              >
-              </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
                 <TextField
                   fullWidth
                   label="Username"
@@ -166,20 +143,7 @@ export const AccountProfileDetails = ({ user }) => {
                   onChange={(e) => setUsername(e.target.value)}
                   value={username}
                 />
-              </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
-              </Grid>
-              <Grid
-                xs={12}
-                md={6}
-              >
-                <Grid
-                  xs={12}
-                  md={6}
-                >
+
                   <Autocomplete
                     multiple
                     fullWidth
@@ -201,10 +165,7 @@ export const AccountProfileDetails = ({ user }) => {
                       />
                     )}
                   />
-                </Grid>
-
-              </Grid>
-            </Grid>
+            </Stack>
           </Box>
         </CardContent>
 
@@ -221,7 +182,7 @@ export const AccountProfileDetails = ({ user }) => {
 
 
 export const AccountProfile = ({ user }) => (
-  <Card>
+  <Card style={{width:'100%'}}>
     <CardContent>
       <Box
         sx={{
@@ -362,33 +323,15 @@ const Page = () => {
 
 
   return (
-    <>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          py: 8
-        }}
-      >
+          <Container maxWidth="lg">
         <IconButton color="primary" onClick={BackButton}>
           <ArrowBack />
         </IconButton>
-
-
-
-
-
-        <Container maxWidth="lg">
-          <Stack spacing={3}>
+    <Stack spacing={3} style={{width: '100%', alignItems:'center'}}>
             <div>
               <Typography variant="h4">
                 Account Details
               </Typography>
-              <CardActions sx={{ justifyContent: 'left', m: 1.5 }}>
-                <Button variant="contained" onClick={handleLogout} style={{ background: red[800] }} >
-                  Delete Account
-                </Button>
-              </CardActions>
             </div>
             <div>
               {user.provider !== 'password' && (
@@ -405,31 +348,17 @@ const Page = () => {
                 </Card>
               )}
             </div>
-            <div>
-              <Grid
-                container
-                spacing={3}
-              >
                 {user.provider === 'password' && (
-                  <Grid xs={12} md={6} lg={8}>
                     <AccountProfile user={user} />
-                  </Grid>
                 )}
 
-                <Grid
-                  xs={12}
-                  md={6}
-                  lg={4}
-                >
                   <AccountProfileDetails user={user} />
-                </Grid>
 
-              </Grid>
-            </div>
-          </Stack>
+                  <Button variant="contained" onClick={handleLogout} style={{ background: red[800] }} >
+                  Delete Account
+                </Button>
+      </Stack>
         </Container>
-      </Box >
-    </>
   );
 };
 export default Page;
