@@ -90,6 +90,7 @@ export const AccountProfileDetails = ({ user }) => {
       body: JSON.stringify(UpdatedUser),
     });
     if (response.ok) {
+      localStorage.setItem('tags', UpdatedUser.tags);
       if (UpdatedUser.username !== '') {
         localStorage.setItem('userId', UpdatedUser.username);
       }

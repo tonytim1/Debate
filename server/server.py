@@ -161,6 +161,7 @@ def get_user():
         user_doc["provider"] = provider
         try:
             user_ref = db_firestore.collection('users').document(user_uid)
+            print("API USER", user_ref.get().to_dict())
             user_doc.update(user_ref.get().to_dict())
         except Exception as e:
             if provider != "password":
@@ -196,7 +197,7 @@ def update_user():
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
         user_ref = db_firestore.collection('users').document(user_id).update(user_dict)
-        return jsonify({'message': 'Update successful', 'userId': user_data.get('username'), 'token': token }), 200
+        return jsonify({'message': 'Update successful', 'userId': user_data.get('username'), 'token': token, "tags": user_dict["tags"] }), 200
 
     except Exception as e:
         if (user_data.get('provider') != 'password'):

@@ -59,6 +59,7 @@ export const AccountProfileDetails = () => {
                 const responseData = await response.json();
                 localStorage.setItem('token', responseData.token);
                 localStorage.setItem('userId', responseData.userId);
+                localStorage.setItem('tags', responseData.tags);
                 localStorage.setItem('finishBoardingPass', 'true');
                 window.location.reload();
             }

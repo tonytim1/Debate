@@ -86,6 +86,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
           });
           const userDoc = await response.json();
           if (userDoc != null) {
+            localStorage.setItem('tags', userDoc.tags);
             alreadyLogin();
             localStorage.setItem('finishBoardingPass', 'true');
             if (userDoc.username != ''){
@@ -228,6 +229,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
         setUserUid(responseData.userId);
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('userId', responseData.userId);
+        localStorage.setItem('tags', responseData.tags);
         localStorage.setItem('provider', 'password');
         localStorage.setItem('finishBoardingPass', 'true');
         // console.log(localStorage.getItem("token"));
