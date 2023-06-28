@@ -24,7 +24,7 @@ const VideoBox = ({ me, peer }) => {
         variant="h4" 
         style={{
           position: 'absolute',
-          marginLeft: '15px',
+          marginLeft: '80px',
           marginTop: '15px',
           color: 'black',
           borderRadius: '12px',
@@ -35,9 +35,9 @@ const VideoBox = ({ me, peer }) => {
       </Typography>
 
       {me ? (
-        <video muted autoPlay playsInline ref={peer} width="100%" style={{borderRadius:"30px"}}/>
+        <video muted autoPlay playsInline ref={peer} width="auto" style={{borderRadius:"30px", maxWidth:'80%'}}/>
       ) : (
-        <video autoPlay playsInline ref={refVideo} width="100%" style={{borderRadius:"30px"}}/>
+        <video autoPlay playsInline ref={refVideo} width="auto" style={{borderRadius:"30px", maxWidth:'80%'}}/>
       )}
     </div>
   );
