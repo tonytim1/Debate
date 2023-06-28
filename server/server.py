@@ -173,11 +173,9 @@ def get_user():
 @app.route('/api/check_user_data', methods=['GET'])
 def check_user_data():
     user_id= request.headers.get('UserId')
-    print(user_id)
     try:
         user_ref = db_firestore.collection('users').document(user_id)
         user_doc = user_ref.get().to_dict()
-        print(user_doc)
         return jsonify(user_doc)
     except Exception as e:
         return None
@@ -187,14 +185,15 @@ def check_user_data():
 def update_user():
     user_data = request.get_json()
     user_dict = dict(user_data)
-    user_dict.pop('provider')
-    user_dict.pop('token')
+    try:
+        user_dict.pop('token')
+        user_dict.pop('provider')
+    except:
+        pass
     try:
         token = user_data.get('token')
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
-
-
         user_ref = db_firestore.collection('users').document(user_id).update(user_dict)
         return jsonify({'message': 'Update successful', 'userId': user_data.get('username'), 'token': token }), 200
 
@@ -203,7 +202,24 @@ def update_user():
             user_ref = db_firestore.collection('users').document(user_id).set(user_dict)
             return jsonify({'message': 'Create Database, Update successful', 'userId': user_data.get('username'), 'token': token }), 200
 
+# ---------- DELETE USER ---------- #
+@app.route('/api/delete_user', methods=['POST'])
+def delete_user():
+    user_data = request.get_json()
+    try:
+        token = user_data.get('token')
+        provider = user_data.get('provider')
+        user_info = auths.get_account_info(token)['users'][0]
+        user_id = user_info['localId']
+        user_ref = db_firestore.collection('users').document(user_id).delete()
+        print(provider)
+        if (provider == 'password'):
+            print('hereeeeeeeee')
+            auths.delete_user_account(token)
+        return jsonify({'message': 'Delete successful', 'userId': user_data.get('username'), 'token': token }), 200
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # ---------- HOME PAGE ---------- #
 @socketio.on("fetch_all_rooms")

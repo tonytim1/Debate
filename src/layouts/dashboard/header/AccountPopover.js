@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
@@ -11,6 +11,15 @@ import { useNavigate } from 'react-router-dom';
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
   const navigate = useNavigate();
+
+  const [photoURL, setPhotoURL] = useState('');
+
+  useEffect(() => {
+    const storedPhotoURL = localStorage.getItem('photoURL');
+    if (storedPhotoURL) {
+      setPhotoURL(storedPhotoURL);
+    }
+  }, []);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -30,6 +39,7 @@ export default function AccountPopover() {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("photoURL");
+    localStorage.removeItem("provider");
     navigate('/');
   };
 
@@ -55,7 +65,7 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={localStorage.getItem("photoURL")} alt="photoURL" referrerPolicy="no-referrer" />
+        <Avatar src={photoURL} alt="photoURL" />
       </IconButton>
 
       <Popover

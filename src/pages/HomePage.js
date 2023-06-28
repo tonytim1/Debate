@@ -13,6 +13,7 @@ import CreateRoomCard from 'src/components/Cards/CreateRoomCard';
 import SignupCard from 'src/components/Cards/SignupCard';
 import LoginCard from 'src/components/Cards/LoginCard';
 import RoomCard from 'src/components/homepage/RoomCard';
+import LoginStageCard from 'src/components/Cards/LoginStageCard';
 
 // ----------------------------------------------------------------------
 
@@ -50,6 +51,7 @@ export default function HomePage() {
   const [showCreateRoomCard, setShowCreateRoomCard] = useState(false);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
+  const [showLoginStageCard, setShowLoginStageCard] = useState(false);
   const [sortType, setSortType] = useState('recommended'); // ['soon', 'recommended', 'popular']
   const socket = useRef();
   const navigate = useNavigate();
@@ -69,12 +71,6 @@ export default function HomePage() {
   const fetchRooms = async () => {
     socket.current.emit('fetch_all_rooms');
   };
-
-  // useEffect(() => {
-  //   if(!isAuthenticated) {
-  //     navigate('/dashboard/login');
-  //   }
-  // }, [isAuthenticated]);
 
   const handleKeyPress = (event) => {
     if (event.key === 'Escape') {
@@ -152,7 +148,7 @@ export default function HomePage() {
       </Helmet>
       <Container>
         <Stack spacing={2} alignItems="center" justifyContent="center" mb={1}>
-        <Snackbar open={loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
+        <Snackbar open={isAuthenticated && loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
         anchorOrigin={{
           vertical: 'top',  // Set the vertical position of the Snackbar (top, bottom)
           horizontal: 'right'  // Set the horizontal position of the Snackbar (left, center, right)
@@ -243,7 +239,9 @@ export default function HomePage() {
           )}
         </Stack>
       </Container>
-      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setShowLoginCard(false); }} />
+      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setShowLoginCard(false); }} onLoginStageClick={() => { setShowLoginStageCard(true); setShowLoginCard(false);}}
+      alreadyLogin={() => { setShowLoginCard(false); }}/>
+      <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setShowLoginCard(true); }} />
       <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setShowLoginCard(true); }} />
       <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
     </>

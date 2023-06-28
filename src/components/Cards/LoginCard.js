@@ -10,7 +10,9 @@ import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
 
-const LoginCard = ({ showLoginReminder, onSignupClick }) => {
+
+
+const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alreadyLogin }) => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
   const [loginError, setLoginError] = useState({});
@@ -84,6 +86,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           });
           const userDoc = await response.json();
           if (userDoc != null) {
+            alreadyLogin();
+            localStorage.setItem('finishBoardingPass', 'true');
             if (userDoc.username != ''){
               localStorage.setItem('userId', userDoc.username);
             }
@@ -93,16 +97,19 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           }
           else{
             localStorage.setItem('userId', user.displayName);
+            localStorage.setItem('finishBoardingPass', 'false');
+            onLoginStageClick();
           }
-
 
           const cred = GoogleAuthProvider.credentialFromResult(result);
           const token = cred.accessToken;
           localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
-
+          localStorage.setItem('provider', user.providerData[0].providerId);
           sessionStorage.setItem('loggedIn', 'true');
           setLoginFailed(false);
+          if (userDoc != null) {
           window.location.reload();
+          }
         });
       })
       .catch((error) => {
@@ -144,6 +151,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           });
           const userDoc = await response.json();
           if (userDoc != null) {
+            alreadyLogin();
+            localStorage.setItem('finishBoardingPass', 'true');
             if (loginUser.username != ''){
               localStorage.setItem('userId', loginUser.username);
             }
@@ -153,16 +162,20 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
           }
           else{
             localStorage.setItem('userId', user.displayName);
+            localStorage.setItem('finishBoardingPass', 'false');
+            onLoginStageClick();
           }
 
 
           const cred = FacebookAuthProvider.credentialFromResult(result);
           const token = cred.accessToken;
           localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
-
+          localStorage.setItem('provider', user.providerData[0].providerId);
           sessionStorage.setItem('loggedIn', 'true');
           setLoginFailed(false);
-          window.location.reload();
+          if (userDoc != null) {
+            window.location.reload();
+            }
         });
       })
       .catch((error) => {
@@ -215,6 +228,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick }) => {
         setUserUid(responseData.userId);
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('userId', responseData.userId);
+        localStorage.setItem('provider', 'password');
+        localStorage.setItem('finishBoardingPass', 'true');
         // console.log(localStorage.getItem("token"));
         window.location.reload();
       }

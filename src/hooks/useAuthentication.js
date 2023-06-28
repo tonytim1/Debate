@@ -7,7 +7,8 @@ const useAuthentication = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if(token) setIsAuthenticated(true);
+    const pass = localStorage.getItem('finishBoardingPass');
+    if(token && pass === 'true') setIsAuthenticated(true);
     else setIsAuthenticated(false);
     //eslint-disable-next-line
   }, [ location.pathname ]);
