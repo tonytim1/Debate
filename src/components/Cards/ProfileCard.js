@@ -28,6 +28,8 @@ export const AccountProfileDetails = ({ user }) => {
   const [tags, setTags] = useState([]);
   const [provider, setProvider] = useState('');
 
+
+
   const tagOptions = [
     "Music",
     "Climate change",
@@ -160,6 +162,7 @@ export const AccountProfileDetails = ({ user }) => {
                   fullWidth
                   label="Username"
                   name="Username"
+                  disabled
                   onChange={(e) => setUsername(e.target.value)}
                   value={username}
                 />
@@ -267,6 +270,59 @@ const Page = () => {
   const token = localStorage.getItem('token');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [config, setConfig] = useState();
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const getAuth = async () => {
+      try {
+        const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+        setConfig(response.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    getAuth();
+  }, []);
+
+  const handleLogout = async () => {
+    const user = {
+      token: localStorage.getItem('token'),
+      provider: localStorage.getItem('provider')
+    };
+    try {
+      const response = await fetch('http://' + window.location.hostname + ':8000/api/delete_user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
+      });
+      if (response.ok) {
+
+        // if (user.provider !== 'password') {
+        //   pass
+        // }
+        console.log("logout");
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("photoURL");
+        localStorage.removeItem("provider");
+        const homepage = "/dashboard/home";
+        navigate(homepage);
+
+      }
+    }
+    catch (error) {
+      console.log(error);
+    }
+  };
 
   const BackButton = () => {
     window.history.back();
@@ -275,21 +331,23 @@ const Page = () => {
 
   useEffect(() => {
     const getUserData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        // Send the new user data to the backend server
-        const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-        });
-        setUser(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setLoading(false);
+      if (localStorage.getItem('token') !== null) {
+        try {
+          const token = localStorage.getItem('token');
+          // Send the new user data to the backend server
+          const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+          });
+          setUser(response.data);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setLoading(false);
+        }
       }
     };
 
@@ -315,12 +373,22 @@ const Page = () => {
         <IconButton color="primary" onClick={BackButton}>
           <ArrowBack />
         </IconButton>
+
+
+
+
+
         <Container maxWidth="lg">
           <Stack spacing={3}>
             <div>
               <Typography variant="h4">
                 Account Details
               </Typography>
+              <CardActions sx={{ justifyContent: 'left', m: 1.5 }}>
+                <Button variant="contained" onClick={handleLogout} style={{ background: red[800] }} >
+                  Delete Account
+                </Button>
+              </CardActions>
             </div>
             <div>
               {user.provider !== 'password' && (
