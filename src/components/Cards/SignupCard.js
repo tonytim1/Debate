@@ -1,82 +1,45 @@
-import { Card, Fade, CardActions, CardContent, Avatar, Collapse, Alert } from '@mui/material';
 import React from 'react';
 import 'src/components/Cards/Cards.css'
-import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-// @mui
-import { styled } from '@mui/material/styles';
-import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 import { Box } from "@mui/system";
+import { LoadingButton } from '@mui/lab';
+import { useState } from 'react';
 import {
-    Table,
-    TableRow,
-    TableBody,
-    TableCell,
-    Container,
+    Card, CardActions, CardContent, Avatar, Collapse, Alert,
     Typography,
     Stack,
     TextField,
     Divider,
     Chip,
     Autocomplete,
-    Grid,
     Button,
     IconButton,
 } from '@mui/material';
-// sections
-import { LoadingButton } from '@mui/lab';
-import { useState } from 'react';
-
 
 const SignupCard = ({ showCard, onBackClick }) => {
-    const navigate = useNavigate();
+    // fields
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [conf_password, setConfPassword] = useState('');
     const [tags, setTags] = useState([]);
     const [selectedImage, setSelectedImage] = useState('');
-    const [image, setImage] = useState('');
+    const [image, setImage] = useState(null);
 
+    // errors
     const [SignUpFailed, setSignUpFailed] = useState(false);
-    const [emailMissing, setEmailMissing] = useState(false);
-    const [passwordMissing, setPasswordMissing] = useState(false);
+    const [emailMissingBool, setEmailMissingBool] = useState(false);
+    const [emailMissingText, setEmailMissingText] = useState('');
+    const [passwordMissingBool, setPasswordMissing] = useState(false);
+    const [confPasswordBool, setConfPasswordMissing] = useState(false);
     const [usernameMissing, setUsernameMissing] = useState(false);
+    const [passwordMissingText, setPasswordMissingText] = useState('');
+    const [confpasswordMissingText, setconfpasswordMissingText] = useState('');
+    
 
-    const validateForm = (email, password, username) => {
-        const email_err = !email
-        const pass_err = !password
-        const username_err = !username
-
-        setEmailMissing(email_err);
-        setPasswordMissing(pass_err)
-        setUsernameMissing(username_err)
-        console.log(email_err, pass_err, username_err)
-
-        return !(email_err || pass_err || username_err)
-    };
-
-    const handleInitializeClick = async (e) => {
-        e.preventDefault();
-        if (validateForm(email, password, username)) {
-            console.log("valid")
-            handleSignUp();
-        }
-    };
-
-
-    const handleImageChange = async (event) => {
-        const file = event.target.files[0];
-        setSelectedImage(URL.createObjectURL(file));
-        setImage(file);
-    };
-
-
-    if (!showCard) {
-        return null;
-    }
-
+    // consts
     const tagOptions = [
         "Music",
         "Climate change",
@@ -90,9 +53,43 @@ const SignupCard = ({ showCard, onBackClick }) => {
         "Politics",
     ];
 
+    const handleTagsChange = (event, value) => {
+        setTags(value);
+    };
+
+    const handleImageChange = async (event) => {
+        const file = event.target.files[0];
+        setSelectedImage(URL.createObjectURL(file));
+        setImage(file);
+    };
+
+    const validateForm = (email, password, conf_pass, username) => {
+        /* validate the email, password and username */
+
+        const email_err = !email;
+        const email_err_message = !email ? 'Email is missing': '';
+        const pass_err = !password || password.length < 6;
+        const pass_err_message = !password ? 'Password is missing' : 'Password is under 6 chars';
+        const conf_err = !conf_pass || conf_pass !== password;
+        const conf_err_message = !conf_pass ? 'Confirm pass is missing' : 'Password did not match';
+        const username_err = !username;
+
+        setEmailMissingBool(email_err)
+        setPasswordMissing(pass_err)
+        setUsernameMissing(username_err)
+        setConfPasswordMissing(conf_err)
+
+        setEmailMissingText(email_err_message)
+        setPasswordMissingText(pass_err_message)
+        setconfpasswordMissingText(conf_err_message)
+
+
+        return !(email_err || pass_err || username_err || conf_err)
+    };
+
     const handleSignUp = async () => {
         try {
-            //user details
+            // user details
             const newUser = {
                 email: email,
                 password: password,
@@ -112,28 +109,33 @@ const SignupCard = ({ showCard, onBackClick }) => {
 
             if (response.ok) {
                 const responseData = await response.json();
-                const userURL = `/user/${responseData.userId}`;
                 localStorage.setItem('token', responseData.token);
                 localStorage.setItem('userId', responseData.userId);
                 localStorage.setItem('tags', responseData.tags);
-                console.log(localStorage.getItem("token"));
-                setSignUpFailed(false);
+                setEmailMissingBool(false);
                 window.location.reload();
             } else {
-                setSignUpFailed(true);
+                setEmailMissingBool(true);
+                setEmailMissingText('Invalid email or email already exists');
                 console.error('Failed to sign up');
             }
         } catch (error) {
-            setSignUpFailed(true);
+            setEmailMissingBool(true);
+            setEmailMissingText('Invalid email or email already exists');
             console.error(error);
         }
     };
 
-
-
-    const handleTagsChange = (event, value) => {
-        setTags(value);
+    const handleInitializeClick = async (e) => {
+        e.preventDefault();
+        if (validateForm(email, password, conf_password, username)) {
+            handleSignUp();
+        }
     };
+
+    if (!showCard) {
+        return null;
+    }
 
     return (
         <div className="base-card">
@@ -165,14 +167,14 @@ const SignupCard = ({ showCard, onBackClick }) => {
                                     fullWidth
                                     required
                                     value={email}
-                                    label={emailMissing ? "Email Is Missing" : "Email Address"}
-                                    error={emailMissing}
+                                    label={emailMissingBool ? emailMissingText : "Email Address"}
+                                    error={emailMissingBool}
                                     onChange={(e) => setEmail(e.target.value)} />
                                 <TextField
                                     fullWidth
                                     required
                                     value={username}
-                                    label={usernameMissing ? "Username Is Missing" : "Username"}
+                                    label={usernameMissing ?  "Username is missing" : "Username"}
                                     error={usernameMissing}
                                     onChange={(e) => setUsername(e.target.value)} />
 
@@ -213,10 +215,17 @@ const SignupCard = ({ showCard, onBackClick }) => {
                                     required
                                     type="password"
                                     value={password}
-                                    label={passwordMissing ? "Password Is Missing" : "Password"}
-                                    error={emailMissing}
+                                    label={passwordMissingBool ? passwordMissingText : "Password"}
+                                    error={passwordMissingBool}
                                     onChange={(e) => setPassword(e.target.value)} />
-                                <TextField label="Confirm Password" fullWidth type="password" />
+                                <TextField
+                                    fullWidth 
+                                    required
+                                    type="password"
+                                    value={conf_password}
+                                    label={confPasswordBool ? confpasswordMissingText : "Confirm Password"}
+                                    error={confPasswordBool}
+                                    onChange={(e) => setConfPassword(e.target.value)} />
                             </div>
 
                         </div>
@@ -259,12 +268,6 @@ const SignupCard = ({ showCard, onBackClick }) => {
                                 </CardActions>
                             </Card>
                         </div>
-                        <Collapse in={SignUpFailed}>
-                            <Alert severity="error">
-                                Login failed, check again your email and password
-                            </Alert>
-                        </Collapse>
-
 
                         <Divider sx={{ my: 3 }} />
                         <LoadingButton

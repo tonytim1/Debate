@@ -314,7 +314,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
 
             <Typography variant="body2">
               Don’t have an account? {''}
-              <Link variant="subtitle2" onClick={onSignupClick}>Get started</Link>
+              <Link variant="subtitle2" onClick={onSignupClick} style={{ cursor: 'pointer' }}>Get started</Link>
             </Typography>
 
             <Stack spacing={2}>
