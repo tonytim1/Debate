@@ -2,7 +2,6 @@ import dataclasses
 import os
 import time
 import uuid
-
 import firebase_admin
 import pyrebase
 from firebase_admin import credentials, auth
