@@ -1,42 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// @mui
-import { Stack, Link, Card, IconButton, Fade, Snackbar, Button, InputAdornment, Alert, AlertTitle, TextField, Typography, Divider, Collapse } from '@mui/material';
+import { Stack, Link, Card, IconButton, Button, InputAdornment, Alert, TextField, Typography, Collapse } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-// components
 import Iconify from 'src/components/iconify/Iconify';
 import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
 import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
 
-
-
 const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alreadyLogin }) => {
-  const navigate = useNavigate();
-  const [formErrors, setFormErrors] = useState({});
-  const [loginError, setLoginError] = useState({});
   const [emailMissing, setEmailMissing] = useState(false);
   const [passwordMissing, setPasswordMissing] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
-  const [isSubmit, setIsSubmit] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [user_uid, setUserUid] = useState();
+  const [config, setConfig] = useState();
   const [user, setUserDetails] = useState({
     email: "",
     password: "",
   })
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginSignup, setLoginSignup] = useState(true);
-  const [user_uid, setUserUid] = useState();
-  const [config, setConfig] = useState();
-
-  const [errorAlertOpen, setErrorAlertOpen] = useState(false); // State to control the visibility of the error alert
-
-
-  const handleAlertClose = () => {
-    setErrorAlertOpen(false);
-  };
-
 
   useEffect(() => {
     const getAuth = async () => {
@@ -57,6 +40,14 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
 
     getAuth();
   }, []);
+  
+  const changeHandler = (e) => {
+    const { name, value } = e.target;
+    setUserDetails({
+      ...user,
+      [name]: value,
+    });
+  };
 
   const signInWithGoogle = () => {
     const app = initializeApp(config, "secondary");
@@ -72,7 +63,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
             userId: result.user.uid,
             email: result.user.email,
             displayName: result.user.displayName,
-            photoURL: result.user.photoURL
+            photoURL: result.user.photoURL,
+            provider: result.user.providerData[0].providerId
           };
           setUserUid(user.userId);
           localStorage.setItem('token', user.token);
@@ -89,11 +81,9 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
             localStorage.setItem('tags', userDoc.tags);
             alreadyLogin();
             localStorage.setItem('finishBoardingPass', 'true');
+            console.log(userDoc.username);
             if (userDoc.username != ''){
               localStorage.setItem('userId', userDoc.username);
-            }
-            else{
-              localStorage.setItem('userId', user.displayName);
             }
           }
           else{
@@ -104,8 +94,9 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
 
           const cred = GoogleAuthProvider.credentialFromResult(result);
           const token = cred.accessToken;
-          localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
-          localStorage.setItem('provider', user.providerData[0].providerId);
+          localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
+          console.log(user.provider);
+          localStorage.setItem('provider', user.provider);
           sessionStorage.setItem('loggedIn', 'true');
           setLoginFailed(false);
           if (userDoc != null) {
@@ -138,7 +129,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
             userId: result.user.uid,
             email: result.user.email,
             displayName: result.user.displayName,
-            photoURL: result.user.photoURL
+            photoURL: result.user.photoURL,
+            provider: result.user.providerData[0].providerId
           };
           setUserUid(user.userId);
           localStorage.setItem('token', user.token);
@@ -157,9 +149,6 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
             if (loginUser.username != ''){
               localStorage.setItem('userId', loginUser.username);
             }
-            else{
-              localStorage.setItem('userId', user.displayName);
-            }
           }
           else{
             localStorage.setItem('userId', user.displayName);
@@ -170,8 +159,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
 
           const cred = FacebookAuthProvider.credentialFromResult(result);
           const token = cred.accessToken;
-          localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
-          localStorage.setItem('provider', user.providerData[0].providerId);
+          localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
+          localStorage.setItem('provider', user.provider);
           sessionStorage.setItem('loggedIn', 'true');
           setLoginFailed(false);
           if (userDoc != null) {
@@ -190,22 +179,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
       });
   };
 
-  const changeHandler = (e) => {
-    const { name, value } = e.target;
-    setUserDetails({
-      ...user,
-      [name]: value,
-    });
-  };
-
-  const handleClick = async (e) => {
-    e.preventDefault();
-    if (validateForm(user)) {
-      validateUser(user);
-    }
-  };
-
-  const validateUser = async (user) => {
+  const signInRegular = async (user) => {
     try {
       //user details
       const loginUser = {
@@ -232,6 +206,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
         localStorage.setItem('tags', responseData.tags);
         localStorage.setItem('provider', 'password');
         localStorage.setItem('finishBoardingPass', 'true');
+        localStorage.setItem('profilePhotoURL', responseData.profilePhotoURL);
         // console.log(localStorage.getItem("token"));
         window.location.reload();
       }
@@ -244,17 +219,6 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
     }
   };
 
-  // const setLoginErrorMes = () =>{
-  //   const errors = {};
-  //   errors.login = "User not found";
-  //   setLoginError(errors);
-  // }
-
-  // const clearLoginErrorMes = () =>{
-  //   const errors = {};
-  //   setLoginError(errors);
-  // }
-
   const validateForm = (values) => {
     const email_err = !values.email
     const pass_err = !values.password
@@ -265,35 +229,39 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
     return !(email_err || pass_err)
   };
 
-  // useEffect(() => {
-  //   if (Object.keys(formErrors).length == 0 && Object.keys(loginError).length == 0 && isSubmit) {
-  //     const userURL = `/user/${user_uid}`;
-  //     navigate('/');
-  //   }
-  // }, [formErrors], [loginError]);
+  const handleClick = async (e) => {
+    e.preventDefault();
+    if (validateForm(user)) {
+      signInRegular(user);
+    }
+  };
 
   if (!showLoginReminder) {
-    return null; // Return null if the prop is false, hiding the component
+    return null;
   }
+
   if (loading) {
     return (
       <LoadingScreen />
     );
   }
 
-
   return (
     <div className="base-card">
       <div className="overlay-background" />
-      <Card className='welcome-card' sx={{ width: '90%' }}>
+      <Card className='welcome-card' sx={{
+            minHeight: 'fit-content',
+            minWidth: 'fit-content',
+            width: '80%',
+            maxWidth: '500px',
+            maxHeight: '80%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+            }}>
 
         <Stack spacing={4} alignItems="center">
           <Stack spacing={1}>
-            {/* <Snackbar open={errorAlertOpen ? true : false} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <Alert onClose={handleAlertClose} severity="error">
-                The email is already registered with a different account.
-              </Alert>
-            </Snackbar> */}
             <Typography variant="h2">
               Welcome
             </Typography>

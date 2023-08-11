@@ -1,12 +1,11 @@
 import React from 'react';
 import 'src/components/Cards/Cards.css'
-import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box } from "@mui/system";
 import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
 import {
-    Card, CardActions, CardContent, Avatar, Collapse, Alert,
+    Card, CardActions, CardContent, Avatar,
     Typography,
     Stack,
     TextField,
@@ -29,12 +28,12 @@ const SignupCard = ({ showCard, onBackClick }) => {
     const [image, setImage] = useState(null);
 
     // errors
-    const [SignUpFailed, setSignUpFailed] = useState(false);
     const [emailMissingBool, setEmailMissingBool] = useState(false);
     const [emailMissingText, setEmailMissingText] = useState('');
+    const [usernameMissing, setUsernameMissing] = useState(false);
+    const [usernameExsistText, setUsernameExsistText] = useState('');
     const [passwordMissingBool, setPasswordMissing] = useState(false);
     const [confPasswordBool, setConfPasswordMissing] = useState(false);
-    const [usernameMissing, setUsernameMissing] = useState(false);
     const [passwordMissingText, setPasswordMissingText] = useState('');
     const [confpasswordMissingText, setconfpasswordMissingText] = useState('');
     
@@ -58,9 +57,8 @@ const SignupCard = ({ showCard, onBackClick }) => {
     };
 
     const handleImageChange = async (event) => {
-        const file = event.target.files[0];
-        setSelectedImage(URL.createObjectURL(file));
-        setImage(file);
+        setImage(event.target.files[0]);
+        setSelectedImage(URL.createObjectURL(event.target.files[0]));
     };
 
     const validateForm = (email, password, conf_pass, username) => {
@@ -73,6 +71,7 @@ const SignupCard = ({ showCard, onBackClick }) => {
         const conf_err = !conf_pass || conf_pass !== password;
         const conf_err_message = !conf_pass ? 'Confirm pass is missing' : 'Password did not match';
         const username_err = !username;
+        const username_err_message = !username ? 'Username is missing': '';
 
         setEmailMissingBool(email_err)
         setPasswordMissing(pass_err)
@@ -82,6 +81,7 @@ const SignupCard = ({ showCard, onBackClick }) => {
         setEmailMissingText(email_err_message)
         setPasswordMissingText(pass_err_message)
         setconfpasswordMissingText(conf_err_message)
+        setUsernameExsistText(username_err_message)
 
 
         return !(email_err || pass_err || username_err || conf_err)
@@ -96,6 +96,7 @@ const SignupCard = ({ showCard, onBackClick }) => {
                 name: name,
                 username: username,
                 tags: tags,
+                image: image
             };
 
             // Send the new user data to the backend server
@@ -106,24 +107,54 @@ const SignupCard = ({ showCard, onBackClick }) => {
                 },
                 body: JSON.stringify(newUser),
             });
-
+            const responseData = await response.json();
             if (response.ok) {
-                const responseData = await response.json();
                 localStorage.setItem('token', responseData.token);
                 localStorage.setItem('userId', responseData.userId);
                 localStorage.setItem('tags', responseData.tags);
+                localStorage.setItem('provider', 'password');
                 setEmailMissingBool(false);
+                setUsernameMissing(false);
+                try {
+                    const formData = new FormData();
+                    formData.append('file', image); // Assuming you have a 'file' state containing the selected image file
+                    formData.append('token', responseData.token);
+                    formData.append('username', newUser.username); // Add the username to the form data
+                    
+
+                    // Upload the image and include the username in the request
+                    const imageResponse = await fetch('http://' + window.location.hostname + ':8000/api/upload_image', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const imageResponseData = await imageResponse.json();
+                    if (imageResponse.ok) {
+                        localStorage.setItem('profilePhotoURL', imageResponseData.profilePhotoURL);
+                        console.log('Image uploaded successfully');
+                    } else {
+                        console.error(imageResponseData);
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
                 window.location.reload();
             } else {
-                setEmailMissingBool(true);
-                setEmailMissingText('Invalid email or email already exists');
-                console.error('Failed to sign up');
+                if ('email' in responseData){
+                    setEmailMissingBool(true);
+                    setEmailMissingText(responseData.email);
+                }
+                else {
+                    if ('username' in responseData){
+                        setUsernameMissing(true);
+                        setUsernameExsistText(responseData.username);
+                    }
+                }
             }
         } catch (error) {
-            setEmailMissingBool(true);
-            setEmailMissingText('Invalid email or email already exists');
             console.error(error);
         }
+
+
     };
 
     const handleInitializeClick = async (e) => {
@@ -140,7 +171,16 @@ const SignupCard = ({ showCard, onBackClick }) => {
     return (
         <div className="base-card">
             <div className="overlay-background" />
-            <Card className='welcome-card' sx={{ width: '90%' }}>
+            <Card className='welcome-card' sx={{
+            minHeight: 'fit-content',
+            minWidth: 'fit-content',
+            width: '80%',
+            maxWidth: '500px',
+            maxHeight: '80%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+            }}>
                 <Box
                     component="form"
                     sx={{
@@ -174,7 +214,7 @@ const SignupCard = ({ showCard, onBackClick }) => {
                                     fullWidth
                                     required
                                     value={username}
-                                    label={usernameMissing ?  "Username is missing" : "Username"}
+                                    label={usernameMissing ?  usernameExsistText : "Username"}
                                     error={usernameMissing}
                                     onChange={(e) => setUsername(e.target.value)} />
 
@@ -229,9 +269,11 @@ const SignupCard = ({ showCard, onBackClick }) => {
                             </div>
 
                         </div>
+                        <Divider sx={{ my: 3 }} />
                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                             <input
                                 accept="image/*"
+                                name='file'
                                 id="upload-image"
                                 multiple
                                 type="file"
@@ -261,7 +303,7 @@ const SignupCard = ({ showCard, onBackClick }) => {
                                 <Divider />
                                 <CardActions>
                                     <label htmlFor="upload-image">
-                                        <Button variant="contained" component="span">
+                                        <Button variant="outlined" component="span">
                                             Upload Profile Picture
                                         </Button>
                                     </label>
@@ -273,7 +315,6 @@ const SignupCard = ({ showCard, onBackClick }) => {
                         <LoadingButton
                             sx={{ display: 'block', margin: '0 auto', background: 'green' }}
                             type="submit"
-                            size="large"
                             variant="contained"
                             onClick={handleInitializeClick}
                         >

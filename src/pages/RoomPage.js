@@ -48,7 +48,7 @@ export default function RoomPage() {
   const currUserId = localStorage.getItem("userId");
 
   const join_room = () => {
-    socket.current.emit('join_room', { roomId: roomId, userId: currUserId, photoUrl: localStorage.getItem("photoURL") });
+    socket.current.emit('join_room', { roomId: roomId, userId: currUserId, photoUrl: localStorage.getItem("profilePhotoURL") });
   
     socket.current.once('user_join', ( roomData ) => {
       setRoomData(roomData);

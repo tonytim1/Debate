@@ -1,9 +1,6 @@
 import { useState, useEffect} from 'react';
-// @mui
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
-// mocks_
-import account from '../../../_mock/account';
 import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
@@ -15,7 +12,8 @@ export default function AccountPopover() {
   const [photoURL, setPhotoURL] = useState('');
 
   useEffect(() => {
-    const storedPhotoURL = localStorage.getItem('photoURL');
+    const storedPhotoURL = localStorage.getItem('profilePhotoURL');
+    console.log(storedPhotoURL);
     if (storedPhotoURL) {
       setPhotoURL(storedPhotoURL);
     }
@@ -38,7 +36,7 @@ export default function AccountPopover() {
     console.log("logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    localStorage.removeItem("photoURL");
+    localStorage.removeItem("profilePhotoURL");
     localStorage.removeItem("provider");
     navigate('/');
   };

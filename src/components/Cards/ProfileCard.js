@@ -2,12 +2,6 @@ import { Box, TextField, CardHeader, Avatar, Button, Card, CardActions, CardCont
 import { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as React from 'react';
-import { useTheme } from '@mui/material/styles';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import axios from 'axios';
 import useAuthentication from "../../hooks/useAuthentication";
@@ -71,13 +65,13 @@ export const AccountProfileDetails = ({ user }) => {
   }
 
 
+
   const handleUpdateDetails = async () => {
     const UpdatedUser = {
       email: email,
       name: name,
       username: username,
       tags: tags,
-      image: '',
       provider: provider,
       token: localStorage.getItem('token')
     };
@@ -91,12 +85,6 @@ export const AccountProfileDetails = ({ user }) => {
     });
     if (response.ok) {
       localStorage.setItem('tags', UpdatedUser.tags);
-      if (UpdatedUser.username !== '') {
-        localStorage.setItem('userId', UpdatedUser.username);
-      }
-      else {
-        localStorage.setItem('userId', UpdatedUser.name);
-      }
       const homepage = "/dashboard/home";
       navigate(homepage);
     }
@@ -106,10 +94,10 @@ export const AccountProfileDetails = ({ user }) => {
     <form
       autoComplete="off"
       noValidate
-      style={{width:'100%'}}
+      style={{ width: '100%' }}
     >
 
-      <Card style={{width:'100%'}}>
+      <Card style={{ width: '100%' }}>
         <CardHeader
           title="Profile"
         />
@@ -117,55 +105,55 @@ export const AccountProfileDetails = ({ user }) => {
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
             <Stack spacing={3}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="Email"
-                  disabled
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  value={email}
-                />
-            
-                <TextField
-                  fullWidth
-                  label="Name"
-                  name="Name"
-                  disabled={user.provider !== 'password'}
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                />
+              <TextField
+                fullWidth
+                label="Email"
+                name="Email"
+                disabled
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                value={email}
+              />
 
-                <TextField
-                  fullWidth
-                  label="Username"
-                  name="Username"
-                  disabled
-                  onChange={(e) => setUsername(e.target.value)}
-                  value={username}
-                />
+              <TextField
+                fullWidth
+                label="Name"
+                name="Name"
+                disabled={user.provider !== 'password'}
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+              />
 
-                  <Autocomplete
-                    multiple
-                    fullWidth
-                    id="tags-outlined"
-                    options={tagOptions}
-                    freeSolo
-                    value={tags}
-                    onChange={handleTagsChange}
-                    renderTags={(value, getTagProps) =>
-                      value.map((option, index) => (
-                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-                      ))
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label="Tags (topic)"
-                      />
-                    )}
+              <TextField
+                fullWidth
+                label="Username"
+                name="Username"
+                disabled
+                onChange={(e) => setUsername(e.target.value)}
+                value={username}
+              />
+
+              <Autocomplete
+                multiple
+                fullWidth
+                id="tags-outlined"
+                options={tagOptions}
+                freeSolo
+                value={tags}
+                onChange={handleTagsChange}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    label="Tags (topic)"
                   />
+                )}
+              />
             </Stack>
           </Box>
         </CardContent>
@@ -182,50 +170,60 @@ export const AccountProfileDetails = ({ user }) => {
 };
 
 
-export const AccountProfile = ({ user }) => (
-  <Card style={{width:'100%'}}>
-    <CardContent>
-      <Box
-        sx={{
-          alignItems: 'center',
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
-        <Avatar
+export const AccountProfile = ({ user }) => {
+  const [selectedImage, setSelectedImage] = useState('');
+  const [image, setImage] = useState(null);
+  
+  const handleImageChange = async (event) => {
+    setImage(event.target.files[0]);
+    setSelectedImage(URL.createObjectURL(event.target.files[0]));
+  };
 
-          sx={{
-            height: 80,
-            mb: 2,
-            width: 80
-          }}
-        />
-        <Typography>
-          {/* {user.hasOwnProperty('name') ? user.name : "No Name"} */}
-        </Typography>
-        <Typography
-          color="text.secondary"
-          variant="body2"
-        >
-        </Typography>
-        <Typography
-          color="text.secondary"
-          variant="body2"
-        >
-        </Typography>
-      </Box>
-    </CardContent>
-    <Divider />
-    <CardActions>
-      <Button
-        fullWidth
-        variant="text"
-      >
-        Upload picture
-      </Button>
-    </CardActions>
-  </Card>
-);
+  return (
+    <Card style={{ width: '100%' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <input
+        accept="image/*"
+        name='file'
+        id="upload-image"
+        multiple
+        type="file"
+        style={{ display: 'none' }}
+        onChange={handleImageChange}
+      />
+      <Card sx={{ width: 200 }}>
+        <CardContent>
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center', // Add this line to center horizontally
+            }}
+          >
+            <Avatar
+              src={selectedImage ? selectedImage : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}
+              sx={{
+                height: 120,
+                mb: 2,
+                width: 120
+              }}
+            />
+          </Box>
+        </CardContent>
+        <Divider />
+        <CardActions>
+          <label htmlFor="upload-image">
+            <Button variant="outlined" component="span">
+              Upload Profile Picture
+            </Button>
+          </label>
+        </CardActions>
+      </Card>
+    </div>
+    </Card>
+  );
+};
 
 const Page = () => {
   const isAuthenticated = useAuthentication();
@@ -253,7 +251,7 @@ const Page = () => {
     getAuth();
   }, []);
 
-  const handleLogout = async () => {
+  const handleDelete = async () => {
     const user = {
       token: localStorage.getItem('token'),
       provider: localStorage.getItem('provider')
@@ -267,14 +265,10 @@ const Page = () => {
         body: JSON.stringify(user),
       });
       if (response.ok) {
-
-        // if (user.provider !== 'password') {
-        //   pass
-        // }
         console.log("logout");
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
-        localStorage.removeItem("photoURL");
+        localStorage.removeItem("profilePhotoURL");
         localStorage.removeItem("provider");
         const homepage = "/dashboard/home";
         navigate(homepage);
@@ -324,124 +318,42 @@ const Page = () => {
 
 
   return (
-          <Container maxWidth="lg">
-        <IconButton color="primary" onClick={BackButton}>
-          <ArrowBack />
-        </IconButton>
-    <Stack spacing={3} style={{width: '100%', alignItems:'center'}}>
-            <div>
-              <Typography variant="h4">
-                Account Details
-              </Typography>
-            </div>
-            <div>
-              {user.provider !== 'password' && (
-                <Card variant="outlined" style={{ width: '370px', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
-                  {user.provider === 'google.com' && <div style={{ marginRight: '10px', color: red[600] }}>
-                    <Google />
-                  </div>}
-                  {user.provider === 'facebook.com' && <div style={{ marginRight: '8px', color: blue[500] }}>
-                    <Facebook />
-                  </div>}
-                  <div style={{ color: blue[900] }}>
-                    You have signed in with '{user.provider}' account, you can add more details here :)
-                  </div>
-                </Card>
-              )}
-            </div>
-                {user.provider === 'password' && (
-                    <AccountProfile user={user} />
-                )}
+    <Container maxWidth="lg">
+      <IconButton color="primary" onClick={BackButton}>
+        <ArrowBack />
+      </IconButton>
+      <Stack spacing={3} style={{ width: '100%', alignItems: 'center' }}>
+        <div>
+          <Typography variant="h4">
+            Account Details
+          </Typography>
+        </div>
+        <div>
+          {user.provider !== 'password' && (
+            <Card variant="outlined" style={{ width: '370px', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
+              {user.provider === 'google.com' && <div style={{ marginRight: '10px', color: red[600] }}>
+                <Google />
+              </div>}
+              {user.provider === 'facebook.com' && <div style={{ marginRight: '8px', color: blue[500] }}>
+                <Facebook />
+              </div>}
+              <div style={{ color: blue[900] }}>
+                You have signed in with '{user.provider}' account, you can add more details here :)
+              </div>
+            </Card>
+          )}
+        </div>
+        {user.provider === 'password' && (
+          <AccountProfile user={user} />
+        )}
 
-                  <AccountProfileDetails user={user} />
+        <AccountProfileDetails user={user} />
 
-                  <Button variant="contained" onClick={handleLogout} style={{ background: red[800] }} >
-                  Delete Account
-                </Button>
+        <Button variant="contained" onClick={handleDelete} style={{ background: red[800] }} >
+          Delete Account
+        </Button>
       </Stack>
-        </Container>
+    </Container>
   );
 };
 export default Page;
-
-
-
-
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 300,
-    },
-  },
-};
-
-const Topics = [
-  'Economy',
-  'veganism',
-  ' Russia-Ukraine war',
-  'politics',
-  'environment',
-  'philosophy',
-  'Biden',
-  'Karl Marx',
-  'Law reform',
-];
-
-function getStyles(name, topicName, theme) {
-  return {
-    fontWeight:
-      topicName.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
-
-function MultipleSelectTopic() {
-  const theme = useTheme();
-  const [topicName, settopicName] = React.useState([]);
-
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    settopicName(typeof value === 'string' ? value.split(',') : value);
-  };
-
-  return (
-    <div>
-      <FormControl sx={{ width: 550 }}>
-        <InputLabel id="demo-multiple-chip-label">Relevant issues</InputLabel>
-        <Select
-          labelId="demo-multiple-chip-label"
-          id="demo-multiple-chip"
-          multiple
-          value={topicName}
-          onChange={handleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
-            </Box>
-          )}
-          MenuProps={MenuProps}
-        >
-          {Topics.map((topic) => (
-            <MenuItem
-              key={topic}
-              value={topic}
-              style={getStyles(topic, topicName, theme)}
-            >
-              {topic}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </div>
-  );
-};
