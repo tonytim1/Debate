@@ -5,6 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import reportWebVitals from './reportWebVitals';
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
 
 
@@ -21,7 +22,8 @@ const firebaseConfig = {
   
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
+const auth = getAuth(app);
+export { auth };
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(<App />);

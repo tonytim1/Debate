@@ -6,7 +6,9 @@ import Iconify from 'src/components/iconify/Iconify';
 import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
 import axios from 'axios';
 import { initializeApp } from 'firebase/app';
+import { auth } from '../../../src/index.js';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
+import { AutoModeSharp } from '@mui/icons-material';
 
 const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alreadyLogin }) => {
   const [emailMissing, setEmailMissing] = useState(false);
@@ -21,25 +23,27 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
     password: "",
   })
 
-  useEffect(() => {
-    const getAuth = async () => {
-      try {
-        const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-        });
-        setConfig(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setLoading(false);
-      }
-    };
+useEffect(() => {  setLoading(false); }, []);
 
-    getAuth();
-  }, []);
+  // useEffect(() => {
+  //   const getAuth = async () => {
+  //     try {
+  //       const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         },
+  //       });
+  //       setConfig(response.data);
+
+  //     } catch (error) {
+  //       console.error('Error fetching user data:', error);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   getAuth();
+  // }, []);
   
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -50,8 +54,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
   };
 
   const signInWithGoogle = () => {
-    const app = initializeApp(config, "secondary");
-    const auth = getAuth(app);
+    // const app = initializeApp(config, "secondary");
+    // const auth = getAuth(app);
     const loginUser = {
       username: ''};
     const provider = new GoogleAuthProvider();
@@ -116,8 +120,8 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
   };
 
   const signInWithFacebook = () => {
-    const app = initializeApp(config, "secondary");
-    const auth = getAuth(app);
+    // const app = initializeApp(config, "secondary");
+    // const auth = getAuth(app);
     const provider = new FacebookAuthProvider();
     const loginUser = {
       username: ''};
