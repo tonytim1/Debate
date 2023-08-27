@@ -15,6 +15,7 @@ V fix profile page in the imagesection + enable the "Name" field for google/face
 - refresh on LoginStage not delete the user - need to fix it
 - routes for user/userId need to restrict other users
 - consider auth0 subtitution
+- teest
 
 # OMER:
 - vidoe start after the timer ends
