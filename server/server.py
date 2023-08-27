@@ -128,13 +128,6 @@ def upload_file():
             blob = existing_blob
             blob.upload_from_file(file, content_type=file.content_type)
             profilePhotoURL = manage_blob(blob, username, False)
-
-            # metadata = blob.metadata
-            # blob_token = metadata['firebaseStorageDownloadTokens']
-
-            # profilePhotoURL = 'https://firebasestorage.googleapis.com/v0/b/{}/o/{}?alt=media&token={}'.format(blob.bucket.name, destination_blob_name_url, blob_token)
-            # blob_token = bucket.get_blob(destination_blob_name).metadata['firebaseStorageDownloadTokens']
-            # profilePhotoURL = f"https://firebasestorage.googleapis.com/v0/b/{blob.bucket.name}/o/{destination_blob_name.replace('/', '%2F')}?alt=media&token={blob_token}"
         else:
             blob = bucket.blob(destination_blob_name)
             blob.upload_from_file(file, content_type=file.content_type)
@@ -143,29 +136,6 @@ def upload_file():
         blob = bucket.blob(destination_blob_name)
         blob.upload_from_file(file, content_type=file.content_type)
         profilePhotoURL = manage_blob(blob, username, True)
-        # # Blob doesn't exist, create a new one
-        # blob = bucket.blob(destination_blob_name)
-        # token = uuid.uuid4()
-        # metadata = {"firebaseStorageDownloadTokens": token}
-        # # Assign the token as metadata
-        # blob.metadata = metadata
-        # blob.upload_from_file(file, content_type=file.content_type)
-        # blob.make_public()
-        # # Fetches a public URL from GCS.
-        # gcs_storageURL = blob.public_url
-        # destination_blob_name_url = f'users%2F{username}%2Fprofile _image'
-        # # Generates a URL with Access Token from Firebase.
-        # firebase_storageURL = 'https://firebasestorage.googleapis.com/v0/b/{}/o/{}?alt=media&token={}'.format(blob.bucket.name, destination_blob_name_url, token)
-        # profilePhotoURL = firebase_storageURL
-    
-
-
-    # blob = bucket.blob(destination_blob_name)
-    # blob.upload_from_file(file, content_type=file.content_type)
-
-    # Get the public URL of the uploaded file
-    # blob.make_public()
-    # profilePhotoURL = blob.public_url
     
     user_ref.update({
         'image': profilePhotoURL
@@ -178,29 +148,16 @@ def upload_file():
 def manage_blob(blob, username ,is_first_time):
     try:
         destination_blob_name_url = f'users%2F{username}%2Fprofile _image'
-        print("-----1-----")
         token = uuid.uuid4()
-        print("-----2-----")
         metageneration_match_precondition = None
-        # Optional: set a metageneration-match precondition to avoid potential race
-        # conditions and data corruptions. The request to patch is aborted if the
-        # object's metageneration does not match your precondition.
-        print("-----3-----")
-        print("-----4-----")
         metadata = {"firebaseStorageDownloadTokens": token}
-        print("-----5-----")
         blob.metadata = metadata
-        print("-----6-----")
         blob.make_public()
-        print("-----7-----")
         blob.patch(if_metageneration_match=metageneration_match_precondition)
         # Fetches a public URL from GCS.
         gcs_storageURL = blob.public_url
-        print("-----8-----")
         # Generates a URL with Access Token from Firebase.
         firebase_storageURL = 'https://firebasestorage.googleapis.com/v0/b/{}/o/{}?alt=media&token={}'.format(blob.bucket.name, destination_blob_name_url, token)
-        print("-----9-----")
-        print(firebase_storageURL)
         return firebase_storageURL
     except Exception as e:
         return jsonify({'error': e}), 500
@@ -389,7 +346,7 @@ def join_debate_room(data):
     sid = request.sid
     room_id = data.get('roomId')
     user_id = data.get('userId')
-    photo_url = data.get('profilePhotoURL')
+    photo_url = data.get('photoUrl')
     print("photo_url: ", photo_url)
     if user_id is None or room_id is None:
         print("user_id or room_id is None")

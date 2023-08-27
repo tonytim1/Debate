@@ -7,11 +7,14 @@ ToDOs:
 
 # IDO:
 V add field "EverConnected" [bool] to the firebase user data to welcome the new user and give tutorial (show rules of the web)
-- joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
 V design sign up pages + save profile image
 V delete from storage when delete user
 V check what happend after delete user and the storage delete.. somehow the url still active.(check user ido1@gmail.com pass:222222)
 V fix profile page in the imagesection + enable the "Name" field for google/facebook account
+- joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
+- refresh on LoginStage not delete the user - need to fix it
+- routes for user/userId need to restrict other users
+- consider auth0 subtitution
 
 # OMER:
 - vidoe start after the timer ends
