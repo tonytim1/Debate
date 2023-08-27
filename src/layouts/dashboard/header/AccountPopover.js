@@ -6,18 +6,9 @@ import { useNavigate } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
+
   const [open, setOpen] = useState(null);
   const navigate = useNavigate();
-
-  const [photoURL, setPhotoURL] = useState('');
-
-  useEffect(() => {
-    const storedPhotoURL = localStorage.getItem('profilePhotoURL');
-    console.log(storedPhotoURL);
-    if (storedPhotoURL) {
-      setPhotoURL(storedPhotoURL);
-    }
-  }, []);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -36,8 +27,10 @@ export default function AccountPopover() {
     console.log("logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
+    localStorage.removeItem("tags");
     localStorage.removeItem("profilePhotoURL");
     localStorage.removeItem("provider");
+    localStorage.removeItem("UserAuthenticated");
     navigate('/');
   };
 
@@ -63,7 +56,7 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={photoURL} alt="photoURL" />
+        <Avatar src={localStorage.getItem('profilePhotoURL')} alt="photoURL" />
       </IconButton>
 
       <Popover

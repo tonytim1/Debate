@@ -16,7 +16,7 @@ import {
     IconButton,
 } from '@mui/material';
 
-const SignupCard = ({ showCard, onBackClick }) => {
+const SignupCard = ({ showCard, onBackClick, onFirstTimeUser }) => {
     // fields
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -37,7 +37,6 @@ const SignupCard = ({ showCard, onBackClick }) => {
     const [passwordMissingText, setPasswordMissingText] = useState('');
     const [confpasswordMissingText, setconfpasswordMissingText] = useState('');
     
-
     // consts
     const tagOptions = [
         "Music",
@@ -115,14 +114,14 @@ const SignupCard = ({ showCard, onBackClick }) => {
                 localStorage.setItem('provider', 'password');
                 setEmailMissingBool(false);
                 setUsernameMissing(false);
+
+                // upload profile photo
                 try {
                     const formData = new FormData();
-                    formData.append('file', image); // Assuming you have a 'file' state containing the selected image file
+                    formData.append('file', image); 
                     formData.append('token', responseData.token);
-                    formData.append('username', newUser.username); // Add the username to the form data
+                    formData.append('username', newUser.username);
                     
-
-                    // Upload the image and include the username in the request
                     const imageResponse = await fetch('http://' + window.location.hostname + ':8000/api/upload_image', {
                         method: 'POST',
                         body: formData,
@@ -137,7 +136,10 @@ const SignupCard = ({ showCard, onBackClick }) => {
                 } catch (error) {
                     console.error(error);
                 }
-                window.location.reload();
+
+                localStorage.setItem('UserAuthenticated', 'true');
+                onFirstTimeUser();
+
             } else {
                 if ('email' in responseData){
                     setEmailMissingBool(true);

@@ -38,10 +38,6 @@ export default function RoomPage() {
   const isAuthenticated = useAuthentication();
 
   useEffect(() => {
-    setShowLoginCard(!isAuthenticated);
-  }, [isAuthenticated]);
-
-  useEffect(() => {
     socket.current = io('ws://' + window.location.hostname + ':8000')
   }, []);
 
@@ -105,6 +101,12 @@ export default function RoomPage() {
   
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
+    // else setShowLoginCard(true) });
+  //   setShowLoginCard(!isAuthenticated);
+  // }, [isAuthenticated]);
 
   // loading screen
   if (roomState === 0) {

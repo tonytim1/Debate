@@ -112,7 +112,7 @@ def upload_file():
         user_ref.update({
             'image': ''
         })
-        jsonify({'message': 'Empty upload successful'})
+        return jsonify({'message': 'Empty upload successful', 'profilePhotoURL': ''})
     
     file = request.files['file']
     if file.filename == '':
@@ -121,20 +121,93 @@ def upload_file():
     # Upload the file to Firebase Storage
     destination_blob_name = f'users/{username}/profile _image'
     bucket = storage.bucket(app=app_firestore)
-    blob = bucket.blob(destination_blob_name)
-    blob.upload_from_file(file, content_type=file.content_type)
+    # Check if the blob already exists
+    try:
+        existing_blob = bucket.get_blob(destination_blob_name)
+        if existing_blob:
+            blob = existing_blob
+            blob.upload_from_file(file, content_type=file.content_type)
+            profilePhotoURL = manage_blob(blob, username, False)
+
+            # metadata = blob.metadata
+            # blob_token = metadata['firebaseStorageDownloadTokens']
+
+            # profilePhotoURL = 'https://firebasestorage.googleapis.com/v0/b/{}/o/{}?alt=media&token={}'.format(blob.bucket.name, destination_blob_name_url, blob_token)
+            # blob_token = bucket.get_blob(destination_blob_name).metadata['firebaseStorageDownloadTokens']
+            # profilePhotoURL = f"https://firebasestorage.googleapis.com/v0/b/{blob.bucket.name}/o/{destination_blob_name.replace('/', '%2F')}?alt=media&token={blob_token}"
+        else:
+            blob = bucket.blob(destination_blob_name)
+            blob.upload_from_file(file, content_type=file.content_type)
+            profilePhotoURL = manage_blob(blob, username, True)
+    except Exception as e:
+        blob = bucket.blob(destination_blob_name)
+        blob.upload_from_file(file, content_type=file.content_type)
+        profilePhotoURL = manage_blob(blob, username, True)
+        # # Blob doesn't exist, create a new one
+        # blob = bucket.blob(destination_blob_name)
+        # token = uuid.uuid4()
+        # metadata = {"firebaseStorageDownloadTokens": token}
+        # # Assign the token as metadata
+        # blob.metadata = metadata
+        # blob.upload_from_file(file, content_type=file.content_type)
+        # blob.make_public()
+        # # Fetches a public URL from GCS.
+        # gcs_storageURL = blob.public_url
+        # destination_blob_name_url = f'users%2F{username}%2Fprofile _image'
+        # # Generates a URL with Access Token from Firebase.
+        # firebase_storageURL = 'https://firebasestorage.googleapis.com/v0/b/{}/o/{}?alt=media&token={}'.format(blob.bucket.name, destination_blob_name_url, token)
+        # profilePhotoURL = firebase_storageURL
+    
+
+
+    # blob = bucket.blob(destination_blob_name)
+    # blob.upload_from_file(file, content_type=file.content_type)
 
     # Get the public URL of the uploaded file
-    blob.make_public()
-    profilePhotoURL = blob.public_url
+    # blob.make_public()
+    # profilePhotoURL = blob.public_url
     
     user_ref.update({
         'image': profilePhotoURL
         })
 
+
+
     return jsonify({'message': 'Upload successful', 'profilePhotoURL': profilePhotoURL})
 
-# ---------- SIGN IN ---------- #
+def manage_blob(blob, username ,is_first_time):
+    try:
+        destination_blob_name_url = f'users%2F{username}%2Fprofile _image'
+        print("-----1-----")
+        token = uuid.uuid4()
+        print("-----2-----")
+        metageneration_match_precondition = None
+        # Optional: set a metageneration-match precondition to avoid potential race
+        # conditions and data corruptions. The request to patch is aborted if the
+        # object's metageneration does not match your precondition.
+        print("-----3-----")
+        print("-----4-----")
+        metadata = {"firebaseStorageDownloadTokens": token}
+        print("-----5-----")
+        blob.metadata = metadata
+        print("-----6-----")
+        blob.make_public()
+        print("-----7-----")
+        blob.patch(if_metageneration_match=metageneration_match_precondition)
+        # Fetches a public URL from GCS.
+        gcs_storageURL = blob.public_url
+        print("-----8-----")
+        # Generates a URL with Access Token from Firebase.
+        firebase_storageURL = 'https://firebasestorage.googleapis.com/v0/b/{}/o/{}?alt=media&token={}'.format(blob.bucket.name, destination_blob_name_url, token)
+        print("-----9-----")
+        print(firebase_storageURL)
+        return firebase_storageURL
+    except Exception as e:
+        return jsonify({'error': e}), 500
+
+
+
+# ---------- SIGN IN REGULAR ---------- #
 @app.route('/api/signin', methods=['POST'])
 def signin():
     user_data = request.get_json()
@@ -143,22 +216,22 @@ def signin():
     try:
         login_user = auths.sign_in_with_email_and_password(email, password)
         token = login_user['idToken']
-
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
-
         users_ref = db_firestore.collection('users').document(user_id)
         users_user_data = users_ref.get().to_dict()
         username = users_user_data['username']
         tags = users_user_data['tags']
-        profilePhotoURL = users_user_data['image']
+        try:
+            profilePhotoURL = users_user_data['image']
+        except Exception as e:
+            profilePhotoURL = ''
 
         # Return success response
         return jsonify({'message': 'Login successful', 'userId': username, 'token': token, 'tags': tags, 'profilePhotoURL': profilePhotoURL }), 200
     
     except Exception as e:
         # Handle other errors
-        print(e)
         return jsonify({'error': str(e)}), 500
 
 # ---------- USER INFO ---------- #
@@ -172,14 +245,8 @@ def get_user():
         user_doc = {}
         user_doc["email"] = decoded_token['email']
         user_doc["provider"] = provider
-        try:
-            user_ref = db_firestore.collection('users').document(user_uid)
-            user_doc.update(user_ref.get().to_dict())
-        except Exception as e:
-            if provider != "password":
-                user_doc['name'] = decoded_token['displayName']
-                user_doc['profilePhotoURL'] = decoded_token['profilePhotoURL']
-
+        user_ref = db_firestore.collection('users').document(user_uid)
+        user_doc.update(user_ref.get().to_dict())
         return jsonify(user_doc)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -201,7 +268,6 @@ def update_user():
     user_dict = dict(user_data)
     try:
         user_dict.pop('token')
-        user_dict.pop('provider')
 
     except Exception as e:
         pass
@@ -211,7 +277,7 @@ def update_user():
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
         user_ref = db_firestore.collection('users').document(user_id).update(user_dict)
-        return jsonify({'message': 'Update successful', 'userId': user_data.get('username'), 'token': token, "tags": user_dict["tags"] }), 200
+        return jsonify({'message': 'Update successful', "tags": user_dict["tags"] }), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -231,12 +297,11 @@ def update_stage_user():
             return jsonify({'error': 'Username already exists'}), 500
     
     # the first time google/facebook account login
-    if (user_data.get('provider') != 'password'):
-        token = user_data.get('token')
-        user_info = auths.get_account_info(token)['users'][0]
-        user_id = user_info['localId']
-        user_ref = db_firestore.collection('users').document(user_id).set(user_dict)
-        return jsonify({'message': 'Create Database, Update successful', 'userId': user_data.get('username'), 'token': token, "tags": user_dict["tags"]  }), 200
+    token = user_data.get('token')
+    user_info = auths.get_account_info(token)['users'][0]
+    user_id = user_info['localId']
+    user_ref = db_firestore.collection('users').document(user_id).set(dict(user_data))
+    return jsonify({'message': 'Create Database, Update successful', 'token': token, 'userId': user_data["username"], "tags": user_dict["tags"]  }), 200
 
 # ---------- DELETE USER ---------- #
 @app.route('/api/delete_user', methods=['POST'])
@@ -244,14 +309,26 @@ def delete_user():
     user_data = request.get_json()
     try:
         token = user_data.get('token')
-        provider = user_data.get('provider')
+        print(token)
         user_info = auths.get_account_info(token)['users'][0]
         user_id = user_info['localId']
-        user_ref = db_firestore.collection('users').document(user_id).delete()
+        print("here1")
         auths.delete_user_account(token)
+        print("here2")
+        user_ref = db_firestore.collection('users').document(user_id).delete()
+        print("here3")
 
-        ##### ADD DELETE USER STORAGE IMAGE - this is also prevent duplication in storage #####
-
+        destination_blob_name = f'users/{user_data.get("username")}/profile _image'
+        print(destination_blob_name)
+        bucket = storage.bucket(app=app_firestore)
+        # Check if the blob already exists
+        try:
+            existing_blob = bucket.get_blob(destination_blob_name)
+            if existing_blob:
+                print("deleting blob")
+                existing_blob.delete()
+        except Exception as e:
+            pass
 
         return jsonify({'message': 'Delete successful', 'userId': user_data.get('username'), 'token': token }), 200
 

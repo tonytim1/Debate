@@ -1,4 +1,4 @@
-import { Box, TextField, Avatar, Button, Card, CardActions, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
+import { TextField, Avatar, Button, Card, CardActions, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { useState, useEffect } from 'react';
 import * as React from 'react';
 import Chip from '@mui/material/Chip';
@@ -6,8 +6,10 @@ import LoadingScreen from 'src/components/Room/LoadingScreen';
 import { Autocomplete } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 
-export const AccountProfileDetails = () => {
+export const AccountProfileDetails = ({ onFirstTimeUser }) => {
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [tags, setTags] = useState([]);
     const [usernameMiss, setUsernameMiss] = useState(null);
@@ -37,11 +39,11 @@ export const AccountProfileDetails = () => {
     const handleClick = async (e) => {
         e.preventDefault();
         if (validateForm(username)) {
-            validateUser(username, tags);
+            loginAfterStage(username, tags);
         }
     };
 
-    const validateUser = async (username, tags) => {
+    const loginAfterStage = async (username, tags) => {
         try {
             const loginUser = {
                 username: username,
@@ -60,8 +62,10 @@ export const AccountProfileDetails = () => {
                 localStorage.setItem('token', responseData.token);
                 localStorage.setItem('userId', responseData.userId);
                 localStorage.setItem('tags', responseData.tags);
-                localStorage.setItem('finishBoardingPass', 'true');
-                window.location.reload();
+                localStorage.setItem('UserAuthenticated', 'true');
+                // local variable 'profilePhotoURL' already set in LoginCard page
+                // local variable 'provider' already set in LoginCard page
+                onFirstTimeUser();
             }
             else{
                 setUsernameMiss(true);
@@ -139,7 +143,7 @@ export const AccountProfileDetails = () => {
 };
 
 
-const LoginStageCard = ({ showCard, onBackClick }) => {
+const LoginStageCard = ({ showCard, onBackClick, onFirstTimeUser}) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -158,7 +162,6 @@ const LoginStageCard = ({ showCard, onBackClick }) => {
     const deleteTempUser = async () => {
         const user = {
           token: localStorage.getItem('token'),
-          provider: localStorage.getItem('provider')
         };
         try {
           const response = await fetch('http://' + window.location.hostname + ':8000/api/delete_user', {
@@ -169,12 +172,12 @@ const LoginStageCard = ({ showCard, onBackClick }) => {
             body: JSON.stringify(user),
           });
           if (response.ok) {
-            console.log("logout");
+            console.log("Logout");
             localStorage.removeItem("token");
             localStorage.removeItem("userId");
             localStorage.removeItem("profilePhotoURL");
             localStorage.removeItem("provider");
-    
+            localStorage.removeItem('UserAuthenticated');
           }
         }
         catch (error) {
@@ -186,7 +189,6 @@ const LoginStageCard = ({ showCard, onBackClick }) => {
     if (!showCard) {
         return null;
     }
-
 
     if (loading) {
         return (
@@ -229,7 +231,7 @@ const LoginStageCard = ({ showCard, onBackClick }) => {
                                 </Typography>
 
                                 <br></br>
-                                <AccountProfileDetails />
+                                <AccountProfileDetails onFirstTimeUser={onFirstTimeUser}/>
                             </div>
                         </Stack>
                     </Container>

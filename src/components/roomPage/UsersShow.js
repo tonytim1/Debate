@@ -10,13 +10,13 @@ import { Container, Stack, Box, Tooltip, Button, Card, IconButton} from '@mui/ma
 import { useState } from 'react';
 import {useNavigate} from 'react-router-dom';
 import ReportMenu from '../Room/ReportMenu';
+import { LocalParking } from '@mui/icons-material';
 
 const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize, user_reports}) => {
     const [isDesabled, setIsDisabled] = useState(false);
     const navigate = useNavigate();
     
     const handle_switch = async () => {
-
         setIsDisabled(true);
         socket.current.emit('switch_team', { 
             'roomId': roomId, 

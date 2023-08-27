@@ -1,49 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Stack, Link, Card, IconButton, Button, InputAdornment, Alert, TextField, Typography, Collapse } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import Iconify from 'src/components/iconify/Iconify';
-import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
-import axios from 'axios';
-import { initializeApp } from 'firebase/app';
+import { signInWithPopup, FacebookAuthProvider, GoogleAuthProvider } from "firebase/auth";
 import { auth } from '../../../src/index.js';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
-import { AutoModeSharp } from '@mui/icons-material';
 
-const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alreadyLogin }) => {
+const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick }) => {
   const [emailMissing, setEmailMissing] = useState(false);
   const [passwordMissing, setPasswordMissing] = useState(false);
-  const [loginFailed, setLoginFailed] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false); // var for the login error alert
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [user_uid, setUserUid] = useState();
-  const [config, setConfig] = useState();
   const [user, setUserDetails] = useState({
     email: "",
     password: "",
   })
 
-useEffect(() => {  setLoading(false); }, []);
 
-  // useEffect(() => {
-  //   const getAuth = async () => {
-  //     try {
-  //       const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json'
-  //         },
-  //       });
-  //       setConfig(response.data);
-
-  //     } catch (error) {
-  //       console.error('Error fetching user data:', error);
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   getAuth();
-  // }, []);
+useEffect(() => {  setLoading(false);  } )
   
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -53,13 +28,8 @@ useEffect(() => {  setLoading(false); }, []);
     });
   };
 
-  const signInWithGoogle = () => {
-    // const app = initializeApp(config, "secondary");
-    // const auth = getAuth(app);
-    const loginUser = {
-      username: ''};
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
+  const signInWithExternalPlatform = (platform_provider) => {
+    signInWithPopup(auth, platform_provider)
       .then((result) => {
         result.user.getIdToken().then(async (idToken) => {
           const user = {
@@ -70,9 +40,22 @@ useEffect(() => {  setLoading(false); }, []);
             photoURL: result.user.photoURL,
             provider: result.user.providerData[0].providerId
           };
-          setUserUid(user.userId);
+
           localStorage.setItem('token', user.token);
 
+          // set profilePhotoURL local variable
+          let cred;
+          if (user.provider === 'google') {
+            cred = GoogleAuthProvider.credentialFromResult(result);
+          } else {
+            cred = FacebookAuthProvider.credentialFromResult(result);
+          }
+          
+          
+          const token = cred.accessToken;
+          localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
+
+          // check if the first time this user connected to the app
           const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
             method: 'GET',
             headers: {
@@ -80,106 +63,31 @@ useEffect(() => {  setLoading(false); }, []);
               'UserId': user.userId
             }
           });
+
           const userDoc = await response.json();
-          if (userDoc != null) {
+
+          localStorage.setItem('provider', user.provider);
+          setLoginFailed(false);
+
+          if (userDoc != null) { // if not first time
+            localStorage.setItem('userId', userDoc.username);
             localStorage.setItem('tags', userDoc.tags);
-            alreadyLogin();
-            localStorage.setItem('finishBoardingPass', 'true');
-            console.log(userDoc.username);
-            if (userDoc.username != ''){
-              localStorage.setItem('userId', userDoc.username);
-            }
-          }
-          else{
-            localStorage.setItem('userId', user.displayName);
-            localStorage.setItem('finishBoardingPass', 'false');
-            onLoginStageClick();
-          }
+            localStorage.setItem('UserAuthenticated', 'true');
 
-          const cred = GoogleAuthProvider.credentialFromResult(result);
-          const token = cred.accessToken;
-          localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
-          console.log(user.provider);
-          localStorage.setItem('provider', user.provider);
-          sessionStorage.setItem('loggedIn', 'true');
-          setLoginFailed(false);
-          if (userDoc != null) {
-          window.location.reload();
-          }
-        });
-      })
-      .catch((error) => {
-        if (error.code === "auth/account-exists-with-different-credential") {
-          setLoginFailed(true);
-          //setErrorAlertOpen(true);
-        } else {
-          // Other errors
-          console.log("Error:", error);
-        }
-      });
-  };
-
-  const signInWithFacebook = () => {
-    // const app = initializeApp(config, "secondary");
-    // const auth = getAuth(app);
-    const provider = new FacebookAuthProvider();
-    const loginUser = {
-      username: ''};
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        result.user.getIdToken().then(async (idToken) => {
-          const user = {
-            token: idToken,
-            userId: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL,
-            provider: result.user.providerData[0].providerId
-          };
-          setUserUid(user.userId);
-          localStorage.setItem('token', user.token);
-
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'UserId': user.userId
-            }
-          });
-          const userDoc = await response.json();
-          if (userDoc != null) {
-            alreadyLogin();
-            localStorage.setItem('finishBoardingPass', 'true');
-            if (loginUser.username != ''){
-              localStorage.setItem('userId', loginUser.username);
-            }
-          }
-          else{
-            localStorage.setItem('userId', user.displayName);
-            localStorage.setItem('finishBoardingPass', 'false');
-            onLoginStageClick();
-          }
-
-
-          const cred = FacebookAuthProvider.credentialFromResult(result);
-          const token = cred.accessToken;
-          localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
-          localStorage.setItem('provider', user.provider);
-          sessionStorage.setItem('loggedIn', 'true');
-          setLoginFailed(false);
-          if (userDoc != null) {
+            sessionStorage.setItem('loggedIn', 'true'); // for the login success alert
+            
             window.location.reload();
-            }
+          }
+          else{ // first time connected
+            localStorage.setItem('userId', user.displayName);
+            localStorage.setItem('UserAuthenticated', 'false');
+            onLoginStageClick();
+          }
         });
       })
       .catch((error) => {
-        if (error.code === "auth/account-exists-with-different-credential") {
-          setLoginFailed(true);
-          //setErrorAlertOpen(true);
-        } else {
-          // Other errors
-          console.log("Error:", error);
-        }
+        setLoginFailed(true);
+        console.log("Error:", error);
       });
   };
 
@@ -199,20 +107,24 @@ useEffect(() => {  setLoading(false); }, []);
         },
         body: JSON.stringify(loginUser),
       });
-      console.log(response);
+
       if (response.ok) {
-        // clearLoginErrorMes();
-        setLoginFailed(false)
+        setLoginFailed(false);
         const responseData = await response.json();
-        setUserUid(responseData.userId);
+
+        // local variables for continuous 
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('userId', responseData.userId);
         localStorage.setItem('tags', responseData.tags);
-        localStorage.setItem('provider', 'password');
-        localStorage.setItem('finishBoardingPass', 'true');
         localStorage.setItem('profilePhotoURL', responseData.profilePhotoURL);
-        // console.log(localStorage.getItem("token"));
+        localStorage.setItem('provider', 'password');
+        localStorage.setItem('UserAuthenticated', 'true');
+        sessionStorage.setItem('loggedIn', 'true'); // for the login success alert
+        
+
         window.location.reload();
+
+
       }
       else {
         setLoginFailed(true);
@@ -326,11 +238,11 @@ useEffect(() => {  setLoading(false); }, []);
                 Login
               </LoadingButton>
 
-              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={signInWithGoogle}>
+              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={() => signInWithExternalPlatform(new GoogleAuthProvider())}>
                 <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
               </Button>
 
-              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={signInWithFacebook}>
+              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={() => signInWithExternalPlatform(new FacebookAuthProvider())}>
                 <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
               </Button>
             </Stack>
