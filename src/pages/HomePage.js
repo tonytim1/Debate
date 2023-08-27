@@ -266,6 +266,7 @@ export default function HomePage() {
                       color={data.color}
                       timeout={(index + 1) * 250}
                       pictureId={data.pictureId}
+                      socket={socket}
                     />
                   ))
                 ) : (
