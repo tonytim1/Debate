@@ -122,7 +122,7 @@ const SignupCard = ({ showCard, onBackClick, onFirstTimeUser }) => {
                     formData.append('token', responseData.token);
                     formData.append('username', newUser.username);
                     
-                    const imageResponse = await fetch('http://' + window.location.hostname + ':8000/api/upload_image', {
+                    const imageResponse = await fetch('https://debate-back.onrender.com/api/upload_image', {
                         method: 'POST',
                         body: formData,
                     });

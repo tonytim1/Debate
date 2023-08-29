@@ -50,7 +50,7 @@ export const AccountProfileDetails = ({ onFirstTimeUser }) => {
                 tags: tags,
                 token: localStorage.getItem('token'),
             };
-            const response = await fetch('http://' + window.location.hostname + ':8000/api/update_stage_user', {
+            const response = await fetch('https://debate-back.onrender.com/api/update_stage_user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ const LoginStageCard = ({ showCard, onBackClick, onFirstTimeUser}) => {
           token: localStorage.getItem('token'),
         };
         try {
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/delete_user', {
+          const response = await fetch('https://debate-back.onrender.com/api/delete_user', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

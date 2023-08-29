@@ -38,7 +38,7 @@ export default function RoomPage() {
   const isAuthenticated = useAuthentication();
 
   useEffect(() => {
-    socket.current = io('ws://' + window.location.hostname + ':8000')
+    socket.current = io('wss://debate-back.onrender.com')
   }, []);
 
   const currUserId = localStorage.getItem("userId");
