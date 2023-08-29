@@ -44,7 +44,7 @@ const VideoGrid = ({ myVideo, peers, isSpectator }) => {
   
   if (!myVideo || !peers) return null;
   return (
-    <div style={{display: 'grid', gridTemplateColumns: `repeat(${numOfVids <= 4 ? 2 : 3}, 1fr)`, gridAutoRows: `1fr`, height: '95%', alignItems: 'center', gridGap:'15px'}}>
+    <div style={{overflow: 'auto', display: 'grid', gridTemplateColumns: `repeat(${numOfVids <= 4 ? 2 : 3}, 1fr)`, gridAutoRows: `1fr`, height: '95%', alignItems: 'center', gridGap:'15px'}}>
       {!isSpectator && myVideo !== null ? (
         <VideoBox me={true} peer={myVideo}/>
       ) : null}

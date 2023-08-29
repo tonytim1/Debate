@@ -45,7 +45,7 @@ const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages
           })}
         </Scrollbar>
         {/* Send message container */}
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack style={{marginTop:"10px"}} direction="row" spacing={2} alignItems="center">
           <TextField
             label="Type a message"
             value={messageRef}
