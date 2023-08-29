@@ -41,7 +41,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
   useEffect(() => {
     const getAuth = async () => {
       try {
-        const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
+        const response = await axios.get('https://debate-back.onrender.com/api/get_auth', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
           setUserUid(user.userId);
           localStorage.setItem('token', user.token);
 
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
+          const response = await fetch('https://debate-back.onrender.com/api/check_user_data', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
           setUserUid(user.userId);
           localStorage.setItem('token', user.token);
 
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
+          const response = await fetch('https://debate-back.onrender.com/api/check_user_data', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://' + window.location.hostname + ':8000/api/signin', {
+      const response = await fetch('https://debate-back.onrender.com/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

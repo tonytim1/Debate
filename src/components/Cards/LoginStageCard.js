@@ -48,7 +48,7 @@ export const AccountProfileDetails = () => {
                 tags: tags,
                 token: localStorage.getItem('token'),
             };
-            const response = await fetch('http://' + window.location.hostname + ':8000/api/update_user', {
+            const response = await fetch('https://debate-back.onrender.com/api/update_user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -102,7 +102,7 @@ const SignupCard = ({ showCard, onBackClick }) => {
             };
 
             // Send the new user data to the backend server
-            const response = await fetch('http://' + window.location.hostname + ':8000/api/signup', {
+            const response = await fetch('https://debate-back.onrender.com/api/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -82,7 +82,7 @@ export const AccountProfileDetails = ({ user }) => {
       token: localStorage.getItem('token')
     };
 
-    const response = await fetch('http://' + window.location.hostname + ':8000/api/update_user', {
+    const response = await fetch('https://debate-back.onrender.com/api/update_user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -238,7 +238,7 @@ const Page = () => {
   useEffect(() => {
     const getAuth = async () => {
       try {
-        const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
+        const response = await axios.get('https://debate-back.onrender.com/api/get_auth', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -259,7 +259,7 @@ const Page = () => {
       provider: localStorage.getItem('provider')
     };
     try {
-      const response = await fetch('http://' + window.location.hostname + ':8000/api/delete_user', {
+      const response = await fetch('https://debate-back.onrender.com/api/delete_user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -297,7 +297,7 @@ const Page = () => {
         try {
           const token = localStorage.getItem('token');
           // Send the new user data to the backend server
-          const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
+          const response = await axios.get('https://debate-back.onrender.com/api/user', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
