@@ -346,7 +346,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           style={{
             display: 'flex',
             paddingBottom: '20px',
-            paddingTop: '20px',
+            // paddingTop: '20px',
             backgroundColor: '#dbe4f3',
             maxHeight: '97%',
             minHeight: '97%',
