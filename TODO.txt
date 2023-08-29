@@ -1,11 +1,14 @@
 ToDOs:
-
+- add rooms with unlimited time?? so site doesnt look empty when testers test it
+- add popup (Snackbar) to indicate you cant join if a room is full / conversation started (instead of the ugly roomFull page)
+- the first time a user creates a room, add a tutorial about being a moderator
 
 # TONY:
 V HTTPS protocol transform
 - use the server data to indicate whether a user is already entered to a room and restrict him to enter multiple rooms
 - refresh should return to room/conversation
 - make teams balanced (for example if roomSize=5 limit 3 people per team)
+- fix welcome username
 
 
 # IDO:
