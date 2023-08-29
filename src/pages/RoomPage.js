@@ -38,17 +38,13 @@ export default function RoomPage() {
   const isAuthenticated = useAuthentication();
 
   useEffect(() => {
-    setShowLoginCard(!isAuthenticated);
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    socket.current = io('wss://debate-back.onrender.com')
+    socket.current = io('ws://' + window.location.hostname + ':8000')
   }, []);
 
   const currUserId = localStorage.getItem("userId");
 
   const join_room = () => {
-    socket.current.emit('join_room', { roomId: roomId, userId: currUserId, photoUrl: localStorage.getItem("photoURL") });
+    socket.current.emit('join_room', { roomId: roomId, userId: currUserId, photoUrl: localStorage.getItem("profilePhotoURL") });
   
     socket.current.once('user_join', ( roomData ) => {
       setRoomData(roomData);
@@ -105,6 +101,12 @@ export default function RoomPage() {
   
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
+    // else setShowLoginCard(true) });
+  //   setShowLoginCard(!isAuthenticated);
+  // }, [isAuthenticated]);
 
   // loading screen
   if (roomState === 0) {

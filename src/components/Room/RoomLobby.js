@@ -7,7 +7,7 @@ import Chat from 'src/components/messages/Chat';
 import { Card } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { map } from 'lodash';
-
+import { useTimer } from 'react-timer-hook';
 
 const RoomLobby = ({ roomData, currUserId, roomId, isSpectator, setIsSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
   const { name, teams, team_names, users_list, moderator, allow_spectators, room_size, blacklist, user_reports} = roomData;
@@ -31,6 +31,25 @@ const RoomLobby = ({ roomData, currUserId, roomId, isSpectator, setIsSpectator, 
     socket.current.emit('debater_click', { 'roomId': roomId, 'userId':currUserId });
   }
 
+  const time = new Date();
+  const diff = time - new Date(roomData['time_to_start'] * 1000);
+  const seconds = Math.abs(diff / 1000);
+  time.setSeconds(time.getSeconds() + seconds);
+
+  function MyTimer({ expiryTimestamp }) {
+    const { seconds, minutes, isRunning } = useTimer({ expiryTimestamp, onExpire: () => socket.current.emit('start_conversation_click', { 'roomId': roomId, 'userId':123 })});
+    const formatTime = (time) => {
+      return String(time).padStart(2, '0')
+    }
+    return (
+      <div style={{ textAlign: 'center'}}>
+        <div style={{ fontSize: '60', fontWeight: 'bold' }}>
+          {diff < 0 && isRunning ? <div>Debate start in {formatTime(minutes)}:{formatTime(seconds)}</div> : 'Debate started'}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Container style={{
@@ -50,6 +69,7 @@ const RoomLobby = ({ roomData, currUserId, roomId, isSpectator, setIsSpectator, 
         }}>
         <Stack direction="column" alignItems="center" spacing={3} sx={{ width: '100%' }}>
           <Typography variant="h2">{name}</Typography>
+          <MyTimer expiryTimestamp={time}/>
         <Stack direction="row" sx={{ width: '95%' }} spacing={2} style={{flexGrow: '1', overflow: 'auto', marginTop: '11px', maxHeight:'40%', minHeight:'40%'}}>
           <UsersShow user_reports={user_reports} onSpecClick={handleDebaterClick} allowSpectators={allow_spectators} teamNames={team_names} teams={teams} usersList={users_list} currUserId={currUserId} roomId={roomId} socket={socket} moderator={moderator} isSpectator={isSpectator} roomSize={room_size} />
           <SpectatorsList onIconClick={handleSpectatorClick} isSpectator={isSpectator} allowSpectators={allow_spectators} spectsList={roomData.spectators_list} isConversation={false}/>

@@ -4,7 +4,6 @@ import { Grid, Button, Skeleton, Container, TextField, Stack, Typography, Toggle
 import Iconify from '../components/iconify';
 import { io } from 'socket.io-client';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { random } from 'lodash';
 import { alpha, styled } from '@mui/system';
 import useAuthentication from "../hooks/useAuthentication";
@@ -14,6 +13,7 @@ import SignupCard from 'src/components/Cards/SignupCard';
 import LoginCard from 'src/components/Cards/LoginCard';
 import RoomCard from 'src/components/homepage/RoomCard';
 import LoginStageCard from 'src/components/Cards/LoginStageCard';
+import SuccessPage from 'src/components/Cards/FirstTimeUser';
 
 // ----------------------------------------------------------------------
 
@@ -53,12 +53,13 @@ export default function HomePage() {
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
   const [showLoginStageCard, setShowLoginStageCard] = useState(false);
+  const [showSuccessPageCard, setShowSuccessPageCard] = useState(false);
   const [sortType, setSortType] = useState('recommended'); // ['soon', 'recommended', 'popular']
   const socket = useRef();
-  const navigate = useNavigate();
   const username = localStorage.getItem("userId");
   const tags = localStorage.getItem("tags");
   const isAuthenticated = useAuthentication();
+  const [staging, setStaging] = useState(false);
   const [loginAlert, setLoginAlert] = useState(true);
 
   const handelClose = (event, reason) => {
@@ -121,29 +122,32 @@ export default function HomePage() {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     };
-  }, []);
-
-  useEffect(() => {
-    filterRooms('');
-  }, [sortedRooms]);
-
-  useEffect(() => {
-    setSortedRooms(sortRooms(roomsData));
-  }, [sortType, roomsData]);
-
-  useEffect(() => {
-    setShowLoginCard(!isAuthenticated);
-  }, [isAuthenticated]);
+  },[]);
 
   const filterRooms = (query) => {
     const filtered = Array.from(sortedRooms).filter(([roomId, data]) => {
       const tags = data.tags || [];
       const name = data.name || '';
       const lowerQuery = query.toLowerCase();
-      return tags.some((tag) => tag.toLowerCase().includes(lowerQuery)) || name.toLowerCase().includes(lowerQuery);
+      
+      // Filter out rooms where is_conversation is true and spectators is false
+      if (data.is_conversation && !data.spectators) {
+        return false;
+      }
+      
+      // Filter out rooms that are full
+      if (data.room_size <= data.users_list.length) {
+        return false;
+      }
+      
+      return (
+        (tags.some((tag) => tag.toLowerCase().includes(lowerQuery)) ||
+         name.toLowerCase().includes(lowerQuery))
+      );
     });
     setFilteredRooms(filtered);
   };
+
 
   const sortRooms = () => {
     if (sortType === 'soon') {
@@ -167,6 +171,22 @@ export default function HomePage() {
     return Array.from(roomsData);
   };
 
+
+  useEffect(() => {
+    filterRooms('');
+  }, [sortedRooms]);
+
+  useEffect(() => {
+    setSortedRooms(sortRooms(roomsData));
+  }, [sortType, roomsData]);
+
+  useEffect(() => {
+    if ( localStorage.getItem('UserAuthenticated') === 'true' || staging === true )  setShowLoginCard(false);
+    else setShowLoginCard(true) });
+  //   setShowLoginCard(!isAuthenticated);
+  // }, [isAuthenticated]);
+
+
   function countCommonValues(array1, array2) {
     let count = 0
     for (let i = 0; i < array1.length; i++) {
@@ -187,11 +207,10 @@ export default function HomePage() {
         <Snackbar open={isAuthenticated && loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
         anchorOrigin={{
           vertical: 'top',  // Set the vertical position of the Snackbar (top, bottom)
-          horizontal: 'right'  // Set the horizontal position of the Snackbar (left, center, right)
+          horizontal: 'center'  // Set the horizontal position of the Snackbar (left, center, right)
         }}>
           <Alert severity="success" onClose={handelClose}>
             <AlertTitle>Login successful!</AlertTitle>
-            Welcome <strong>{username}</strong>
           </Alert>
           </Snackbar>
           <Typography variant="h2">
@@ -247,6 +266,7 @@ export default function HomePage() {
                       color={data.color}
                       timeout={(index + 1) * 250}
                       pictureId={data.pictureId}
+                      socket={socket}
                     />
                   ))
                 ) : (
@@ -275,10 +295,13 @@ export default function HomePage() {
           )}
         </Stack>
       </Container>
-      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setShowLoginCard(false); }} onLoginStageClick={() => { setShowLoginStageCard(true); setShowLoginCard(false);}}
-      alreadyLogin={() => { setShowLoginCard(false); }}/>
-      <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setShowLoginCard(true); }} />
-      <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setShowLoginCard(true); }} />
+      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setStaging(true); }} 
+      onLoginStageClick={() => { setShowLoginStageCard(true); setStaging(true);}} />
+      <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setStaging(false); }} 
+      onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowLoginStageCard(false);}} />
+      <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setStaging(false); }} 
+      onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowSignupCard(false);}} />
+      <SuccessPage showCard={showSuccessPageCard} onCloseClick={() => setShowSuccessPageCard(false)} />
       <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
     </>
   );

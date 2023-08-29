@@ -5,6 +5,7 @@ import Page404 from './pages/Page404';
 import RoomPage from './pages/RoomPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './components/Cards/ProfileCard';
+import SuccessPage from './components/Cards/FirstTimeUser'
 
 export default function Router() {
   return (
@@ -33,6 +34,10 @@ export default function Router() {
             element={<ProfilePage />}
           />
         </Route>
+        <Route
+            path="success"
+            element={<SuccessPage />}
+          />
         
         <Route
           path="room/:roomId"
