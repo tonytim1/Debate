@@ -33,8 +33,7 @@ const VideoBox = ({ me, peer }) => {
           variant="h4" 
           style={{
             position: 'absolute',
-            marginLeft: '15px',
-            marginTop: '15px',
+            marginTop: '8px',
             color: 'black',
             borderRadius: '12px',
             backgroundColor: '#ffffff73',
