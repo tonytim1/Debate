@@ -34,7 +34,6 @@ export default function RoomPage() {
   const [ messages, setMessages ] = useState([]);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
-  const [ openSnackbar, setOpenSnackbar ] = useState(false);
 
   const isAuthenticated = useAuthentication();
 
@@ -90,10 +89,6 @@ export default function RoomPage() {
       alert('you got kicked from this room!')
     });
   };
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
   
   useEffect(() => {
     const fetchData = async () => {
@@ -145,20 +140,8 @@ export default function RoomPage() {
 
   // Room conversation screen
   if (roomState === 2){
-    setOpenSnackbar(true);
     return (
-      <>
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={openSnackbar}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert onClose={handleCloseSnackbar} severity="info" sx={{ width: '100%' }}>
-          If you have video issues, try refreshing the page
-        </Alert>  
-      </Snackbar>
       <Conversation roomData={roomData} setRoomData={setRoomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
-      </>
     );
   }
 
@@ -170,8 +153,8 @@ export default function RoomPage() {
       </Helmet>
       <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} setIsSpectator={setIsSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
-      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
-      <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
+    <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
+    <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
     </>
   );
 }
