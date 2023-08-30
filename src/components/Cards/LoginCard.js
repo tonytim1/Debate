@@ -56,7 +56,7 @@ useEffect(() => {  setLoading(false);  } )
           localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
 
           // check if the first time this user connected to the app
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
+          const response = await fetch('https://debate-back.onrender.com/api/check_user_data', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ useEffect(() => {  setLoading(false);  } )
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://' + window.location.hostname + ':8000/api/signin', {
+      const response = await fetch('https://debate-back.onrender.com/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

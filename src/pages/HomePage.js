@@ -55,12 +55,12 @@ export default function HomePage() {
   const [showLoginStageCard, setShowLoginStageCard] = useState(false);
   const [showSuccessPageCard, setShowSuccessPageCard] = useState(false);
   const [sortType, setSortType] = useState('recommended'); // ['soon', 'recommended', 'popular']
-  const socket = useRef();
+  const [loginAlert, setLoginAlert] = useState(true);
   const username = localStorage.getItem("userId");
   const tags = localStorage.getItem("tags");
   const isAuthenticated = useAuthentication();
   const [staging, setStaging] = useState(false);
-  const [loginAlert, setLoginAlert] = useState(true);
+  const socket = useRef(null);
 
   const handelClose = (event, reason) => {
     setLoginAlert(false);
@@ -68,7 +68,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    socket.current = io('ws://' + window.location.hostname + ':8000')
+    socket.current = io('wss://debate-back.onrender.com')
   }, []);
 
   const fetchRooms = async () => {

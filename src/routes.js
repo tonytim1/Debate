@@ -44,7 +44,7 @@ export default function Router() {
           element={<RoomPage />}
         />
         <Route
-          path="user/:userId"
+          path="user"
           element={<ProfilePage />}
         />
         <Route

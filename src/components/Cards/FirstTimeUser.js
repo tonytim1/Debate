@@ -71,7 +71,7 @@ const SuccessPage = ({ showCard, onCloseClick }) => {
                             ) : (
                                 <>
                                     <Typography variant="h4" sx={{ marginBottom: 2 }}>
-                                        Welcome, User!
+                                        Welcome, {localStorage.getItem('userId')}!
                                     </Typography>
                                     <CheckCircleIcon
                                         color="success"

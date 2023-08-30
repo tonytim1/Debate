@@ -96,7 +96,7 @@ const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId,soc
     return (
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '60', fontWeight: 'bold' }}>
-          {diff < 0 && isRunning && !is_conversation ? <div>Debate start in {formatTime(minutes)}:{formatTime(seconds)}</div> : 'Debate started'}
+          {diff < 0 && isRunning && !is_conversation ? <div>Starts in {minutes}:{seconds}</div> : 'Debate started'}
         </div>
       </div>
     );

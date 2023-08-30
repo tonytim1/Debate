@@ -1,9 +1,15 @@
 ToDOs:
-
+- add rooms with unlimited time?? so site doesnt look empty when testers test it
+- add popup (Snackbar) to indicate you cant join if a room is full / conversation started (instead of the ugly roomFull page)
+- the first time a user creates a room, add a tutorial about being a moderator
 
 # TONY:
-- HTTPS protocol transform
+V HTTPS protocol transform
 - use the server data to indicate whether a user is already entered to a room and restrict him to enter multiple rooms
+- refresh should return to room/conversation
+- make teams balanced (for example if roomSize=5 limit 3 people per team)
+- fix welcome username
+
 
 # IDO:
 V add field "EverConnected" [bool] to the firebase user data to welcome the new user and give tutorial (show rules of the web)
@@ -11,10 +17,15 @@ V design sign up pages + save profile image
 V delete from storage when delete user
 V check what happend after delete user and the storage delete.. somehow the url still active.(check user ido1@gmail.com pass:222222)
 V fix profile page in the imagesection + enable the "Name" field for google/facebook account
+V routes for user/userId need to restrict other users
 - joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
+    - check if can delete useAuthentication()
 - refresh on LoginStage not delete the user - need to fix it
-- routes for user/userId need to restrict other users
-- consider auth0 subtitution
+- PDF
+- improve tutorial on first signup (add more info on how to use the site)
+- add tutorial when joining a room for the first time (explain how to move teams, spectator, ban system, ready check)
+- if user is banned popup notification for him (Snackbar)
+
 
 # OMER:
 - vidoe start after the timer ends
@@ -22,7 +33,6 @@ V fix profile page in the imagesection + enable the "Name" field for google/face
 - Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
 
 # ASAF:
-- limit the room capacity (after prod - test max limit) and make both side balanced 
 V when you report on someone "Snackbar" mui need to explain the action
 - kind of debate logic - the user can choose if he wants "free style" debate or "program debate" (2 min for knowledge the team, 10 min for the "pros", 10 min for "against", ...)
 V (need to check) - If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)

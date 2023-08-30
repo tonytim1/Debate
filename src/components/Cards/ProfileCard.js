@@ -62,7 +62,7 @@ const Page = () => {
       token: localStorage.getItem('token')
     };
 
-    const response = await fetch('http://' + window.location.hostname + ':8000/api/update_user', {
+    const response = await fetch('https://debate-back.onrender.com/api/update_user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ const Page = () => {
           formData.append('token', UpdatedUser.token);
           formData.append('username', localStorage.getItem('userId'));
 
-          const imageResponse = await fetch('http://' + window.location.hostname + ':8000/api/upload_image', {
+          const imageResponse = await fetch('https://debate-back.onrender.com/api/upload_image', {
             method: 'POST',
             body: formData,
           });
@@ -110,7 +110,7 @@ const Page = () => {
       username: localStorage.getItem('userId')
     };
     try {
-      const response = await fetch('http://' + window.location.hostname + ':8000/api/delete_user', {
+      const response = await fetch('https://debate-back.onrender.com/api/delete_user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ const Page = () => {
         try {
           const token = localStorage.getItem('token');
           // Send the new user data to the backend server
-          const response = await axios.get('http://' + window.location.hostname + ':8000/api/user', {
+          const response = await axios.get('https://debate-back.onrender.com/api/user', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

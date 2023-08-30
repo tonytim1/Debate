@@ -38,7 +38,7 @@ export default function RoomPage() {
   const isAuthenticated = useAuthentication();
 
   useEffect(() => {
-    socket.current = io('ws://' + window.location.hostname + ':8000')
+    socket.current = io('wss://debate-back.onrender.com')
   }, []);
 
   const currUserId = localStorage.getItem("userId");
@@ -73,6 +73,9 @@ export default function RoomPage() {
     });
     socket.current.once('conversation already started', () => {
       setRoomState(4);
+    });
+    socket.current.once('user already in another room', () => {
+      setRoomState(5);
     });
     socket.current.once('conversation_start', () => {
       console.log('conversation_start')
@@ -122,12 +125,18 @@ export default function RoomPage() {
     );
   }
 
-    // room full screen
-    if (roomState === 4){
-      return (
-        <RoomFull message='The Conversation Already Started'/>
-      );
-    }
+  // room full screen
+  if (roomState === 4){
+    return (
+      <RoomFull message='The Conversation Already Started'/>
+    );
+  }
+
+  if (roomState === 5){
+    return (
+      <RoomFull message='You are already in another room, Please leave it before joining another'/>
+    );
+  }
 
   // Room conversation screen
   if (roomState === 2){
