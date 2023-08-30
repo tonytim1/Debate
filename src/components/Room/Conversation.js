@@ -29,7 +29,6 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
-    const [ openSnackbar, setOpenSnackbar ] = useState(true);
     const spectatorsRef = useRef([]);
     const [ showChat, setShowChat ] = useState(true);
     const navigate = useNavigate();
@@ -331,19 +330,10 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
       }
     }
 
-    const handleCloseSnackbar = () => {
-      setOpenSnackbar(false);
-    };
+    
 
     return (
       <>
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={openSnackbar}
-        onClose={handleCloseSnackbar}
-        message="I love snacks"
-        key={'video info'}
-      />
       <Helmet>
         <title> Debate Center | Debate </title>
       </Helmet>
