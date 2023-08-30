@@ -55,7 +55,7 @@ const SuccessPage = ({ showCard, onCloseClick }) => {
                 </IconButton>
                 <Box className={`container ${showDetails ? 'show-details' : ''}`}>
                     { <Confetti recycle={false} />} {/* Show confetti */}
-                    <Box className={`success-message ${showDetails ? 'move-up' : ''}`}>
+                    <Box className={`success-message ${showDetails ? 'move-up' : ''}`} sx={{ marginTop: '-10px' }} >
                         <Box>
                             {loading ? (
                                 <>

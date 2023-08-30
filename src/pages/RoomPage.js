@@ -11,7 +11,6 @@ import SpectatorsList from 'src/components/roomPage/SpectatorsList';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
 import Chat from 'src/components/messages/Chat';
-import useAuthentication from "../hooks/useAuthentication";
 import SignupCard from 'src/components/Cards/SignupCard';
 import LoginCard from 'src/components/Cards/LoginCard';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
@@ -34,8 +33,6 @@ export default function RoomPage() {
   const [ messages, setMessages ] = useState([]);
   const [showSignupCard, setShowSignupCard] = useState(false);
   const [showLoginCard, setShowLoginCard] = useState(false);
-
-  const isAuthenticated = useAuthentication();
 
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
@@ -105,11 +102,8 @@ export default function RoomPage() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
-    // else setShowLoginCard(true) });
-  //   setShowLoginCard(!isAuthenticated);
-  // }, [isAuthenticated]);
+  useEffect(() => { if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
+    
 
   // loading screen
   if (roomState === 0) {
