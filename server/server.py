@@ -1,4 +1,5 @@
 import dataclasses
+import requests
 import os
 import time
 import uuid
@@ -58,6 +59,20 @@ def is_username_exists(username):
 def get_auth():
     return jsonify(config)
 
+def verify_email(email):
+    api_key = 'cff82f55aa4b5f3656ba3f76fc558b9f9eeca925'
+    api_url = f'https://api.hunter.io/v2/email-verifier?email={email}&api_key={api_key}'
+
+    try:
+        response = requests.get(api_url)
+        data = response.json()
+        if data['data']['result'] == 'deliverable':
+            return True
+        return False
+    except Exception as e:
+        return True
+
+
 # ---------- SIGN UP ---------- #
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -74,19 +89,22 @@ def signup():
             raise Exception('Username already exists')
         
         # create new user base on email and password
-        new_user = auths.create_user_with_email_and_password(email=email, password=password)
-        login_user = auths.sign_in_with_email_and_password(email, password)
-        token = login_user['idToken']
-        user_info = auths.get_account_info(token)['users'][0]
-        user_id = user_info['localId']
+        if verify_email(email):
+            new_user = auths.create_user_with_email_and_password(email=email, password=password)
+            login_user = auths.sign_in_with_email_and_password(email, password)
+            token = login_user['idToken']
+            user_info = auths.get_account_info(token)['users'][0]
+            user_id = user_info['localId']
 
-        # Add user details to database
-        user_ref = db_firestore.collection('users').document(user_id)
-        user_ref.set({
-            'name': name,
-            'username': username,
-            'tags':tags
-        })
+            # Add user details to database
+            user_ref = db_firestore.collection('users').document(user_id)
+            user_ref.set({
+                'name': name,
+                'username': username,
+                'tags':tags
+            })
+        else:
+            return jsonify({'email': 'Email not Found'}), 500
         
         # Return success response
         return jsonify({'message': 'Signup successful', 'userId': username, 'token': token, 'tags': tags }), 200
