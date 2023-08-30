@@ -18,13 +18,14 @@ V delete from storage when delete user
 V check what happend after delete user and the storage delete.. somehow the url still active.(check user ido1@gmail.com pass:222222)
 V fix profile page in the imagesection + enable the "Name" field for google/facebook account
 V routes for user/userId need to restrict other users
-- joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
-    - check if can delete useAuthentication()
+V joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
+    V check if can delete useAuthentication()
 - refresh on LoginStage not delete the user - need to fix it
 - PDF
 - improve tutorial on first signup (add more info on how to use the site)
 - add tutorial when joining a room for the first time (explain how to move teams, spectator, ban system, ready check)
 - if user is banned popup notification for him (Snackbar)
+- user need to be expire token
 
 
 # OMER:
