@@ -71,7 +71,7 @@ const SuccessPage = ({ showCard, onCloseClick }) => {
                             ) : (
                                 <>
                                     <Typography variant="h4" sx={{ marginBottom: 2 }}>
-                                        Welcome, {localStorage.getItem('userId')}!
+                                    🌟 Welcome to {localStorage.getItem('userId')}! 🌟
                                     </Typography>
                                     <CheckCircleIcon
                                         color="success"
@@ -87,16 +87,15 @@ const SuccessPage = ({ showCard, onCloseClick }) => {
                     {showDetails && (
                         <Typography className="details-paragraph"
                         style={{ marginLeft: '30px', textAlign: 'left' }}>
-                            Welcome to our website!
-                            Here are some rules about our services:
+                            🎉 Greetings and a Hearty Welcome! 🎉
                             <ul>
                                 <li>
-                                    You can report users by clicking on their name in the room
+                                Dive into discussions that intrigue you by creating or joining rooms based on your interests.
                                 </li>
                                 <li>
-                                    You must not abuse, harass, threaten, impersonate or intimidate
-                                    other users of our services.
+                                Treat others as you would like to be treated. Do not engage in abusive, harassing, threatening, or intimidating behavior towards fellow users.
                                 </li>
+                                Delight in the world of thoughtful exchange during your stay.
                             </ul>
                         </Typography>
                     )}
