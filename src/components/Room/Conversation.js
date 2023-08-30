@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, createRef } from "react";
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
-import { Typography, Stack, Snackbar, Alert, Box, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
+import { Typography, Stack, Box, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
 import Chat from 'src/components/messages/Chat';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -29,7 +29,6 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
-    const [ openSnackbar, setOpenSnackbar ] = useState(true);
     const spectatorsRef = useRef([]);
     const [ showChat, setShowChat ] = useState(true);
     const navigate = useNavigate();
@@ -331,19 +330,8 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
       }
     }
 
-    const handleCloseSnackbar = () => {
-      setOpenSnackbar(false);
-    };
-
     return (
       <>
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={openSnackbar}
-        onClose={handleCloseSnackbar}
-        message="I love snacks"
-        key={'video info'}
-      />
       <Helmet>
         <title> Debate Center | Debate </title>
       </Helmet>
