@@ -15,7 +15,7 @@ import { LocalParking } from '@mui/icons-material';
 const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize, user_reports}) => {
     const [isDisabled, setIsDisabled] = useState(false);
     const navigate = useNavigate();
-    const userTeam = usersList[currUserId].team;
+    const userTeam = usersList[currUserId] ? usersList[currUserId].team : false;
     
     const handle_switch = async () => {
         setIsDisabled(true);
