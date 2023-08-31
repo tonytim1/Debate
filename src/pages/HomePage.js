@@ -296,14 +296,14 @@ export default function HomePage() {
           )}
         </Stack>
       </Container>
-      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setStaging(true); }} 
-      onLoginStageClick={() => { setShowLoginStageCard(true); setStaging(true);}} />
-      <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setStaging(false); }} 
-      onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowLoginStageCard(false);}} />
-      <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setStaging(false); }} 
-      onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowSignupCard(false);}} />
-      <SuccessPage showCard={showSuccessPageCard} onCloseClick={() => setShowSuccessPageCard(false)} />
-      <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
+      // <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setStaging(true); }} 
+      // onLoginStageClick={() => { setShowLoginStageCard(true); setStaging(true);}} />
+      // <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setStaging(false); }} 
+      // onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowLoginStageCard(false);}} />
+      // <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setStaging(false); }} 
+      // onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowSignupCard(false);}} />
+      // <SuccessPage showCard={showSuccessPageCard} onCloseClick={() => setShowSuccessPageCard(false)} />
+      // <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
     </>
   );
 }
