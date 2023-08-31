@@ -112,7 +112,7 @@ export default function RoomPage() {
   useEffect(() => {
     if ( localStorage.getItem('RoomExplaination') === 'true' ){
       setShowRoomExplainationCard(true);  
-      localStorage.setItem('RoomExplaination', 'false');
+      localStorage.removeItem('RoomExplaination');
     }
   }, []);
     
@@ -151,6 +151,8 @@ export default function RoomPage() {
     );
   }
 
+  if (showRoomExplainationCard) console.log('showRoomExplainationCard is true');
+
   // Room lobby screen
   return (
     <>
@@ -159,7 +161,9 @@ export default function RoomPage() {
       </Helmet>
       <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} setIsSpectator={setIsSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
-      <RoomExplaination showCard={showRoomExplainationCard} onCloseClick={() => setShowRoomExplainationCard(false)} />
+      {/* <RoomExplaination showCard={showRoomExplainationCard} onCloseClick={() => setShowRoomExplainationCard(false)} /> */}
+
+      
 
     </>
   );

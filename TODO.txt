@@ -35,5 +35,5 @@ V joining a room when not logged in should popup login instead of stuck on loadi
 
 # ASAF:
 V when you report on someone "Snackbar" mui need to explain the action
-- kind of debate logic - the user can choose if he wants "free style" debate or "program debate" (2 min for knowledge the team, 10 min for the "pros", 10 min for "against", ...)
+V kind of debate logic - the user can choose if he wants "free style" debate or "program debate" (2 min for knowledge the team, 10 min for the "pros", 10 min for "against", ...)
 V (need to check) - If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)

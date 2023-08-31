@@ -133,6 +133,21 @@ const Page = () => {
         }, 1000);
 
       }
+      else {
+        window.alert("Error deleting account, please try to login again and delete your account");
+        console.log("logout");
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("tags");
+        localStorage.removeItem("profilePhotoURL");
+        localStorage.removeItem("provider");
+        localStorage.removeItem("UserAuthenticated");
+        setIsSnackbarOpenDelete(true);
+        setTimeout(() => {
+          const homepage = "/dashboard/home";
+          navigate(homepage);
+        }, 1000);
+      }
     }
     catch (error) {
       console.log(error);
