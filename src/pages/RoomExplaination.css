@@ -1,0 +1,28 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    position: relative;
+  }
+  
+  .success-message {
+    transition: transform 0.5s;
+    text-align: center;
+  }
+  
+  .move-up {
+    transform: translateY(-50%);
+  }
+  
+  .details-paragraph {
+    opacity: 0;
+    transition: opacity 1s;
+    margin-top: 16px; /* Add some space between details and success message */
+  }
+  
+  .show-details .details-paragraph {
+    opacity: 1;
+  }
+  

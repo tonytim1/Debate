@@ -17,6 +17,7 @@ import LoadingScreen from 'src/components/Room/LoadingScreen';
 import RoomFull from 'src/components/Room/RoomFull';
 import RoomLobby from 'src/components/Room/RoomLobby';
 import Conversation from 'src/components/Room/Conversation';
+import RoomExplaination from 'src/pages/RoomExplaination';
 
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
@@ -31,8 +32,7 @@ export default function RoomPage() {
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
   const [ messageRef, setMessageRef ] = useState(''); 
   const [ messages, setMessages ] = useState([]);
-  const [showSignupCard, setShowSignupCard] = useState(false);
-  const [showLoginCard, setShowLoginCard] = useState(false);
+  const [ showRoomExplainationCard, setShowRoomExplainationCard ] = useState(false);
 
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
@@ -103,6 +103,13 @@ export default function RoomPage() {
   }, []);
 
   useEffect(() => { if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
+
+  useEffect(() => {
+    if ( localStorage.getItem('RoomExplaination') === 'true' ){
+      setShowRoomExplainationCard(true);  
+      localStorage.setItem('RoomExplaination', 'false');
+    }
+  }, []);
     
 
   // loading screen
@@ -147,8 +154,8 @@ export default function RoomPage() {
       </Helmet>
       <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} setIsSpectator={setIsSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
-    <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
-    <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
+      <RoomExplaination showCard={showRoomExplainationCard} onCloseClick={() => setShowRoomExplainationCard(false)} />
+
     </>
   );
 }
