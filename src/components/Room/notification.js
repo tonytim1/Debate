@@ -12,7 +12,7 @@ const Notification = ({}) => {
   return (
     <Snackbar
       open={open}
-      autoHideDuration={800}
+      autoHideDuration={6000}
       onClose={handleClose}
       everity="info"
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

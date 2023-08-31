@@ -95,12 +95,13 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
 
         //user left and server send its peerId to disconnect from that peer
         socket.current.on('userLeft', payload => {
-          const peerObj = peersRef.current.find(p => p.peerId === payload.sid);
+          console.log("user disconnected with payload: ", payload)
+          const peerObj = peersRef.current.find(p => p.userId === payload.userId);
           if(peerObj) {
             console.log("destroying peer", peerObj);
             peerObj.peer.destroy(); //cancel connection with disconnected peer
           }
-          const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
+          const peers = peersRef.current.filter(p => p.userId !== payload.userId);
           peersRef.current = peers;
           setPeers(peers);
         });
@@ -229,13 +230,15 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     
           //user left and server send its peerId to disconnect from that peer
           socket.current.on('userLeft', payload => {
-            const peerObj = peersRef.current.find(p => p.peerId === payload.sid);
+            console.log("user disconnected with payload: ", payload)
+            const peerObj = peersRef.current.find(p => p.userId === payload.userId);
             if(peerObj) {
               console.log("destroying peer", peerObj);
               peerObj.peer.destroy(); //cancel connection with disconnected peer
             }
-            const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
+            const peers = peersRef.current.filter(p => p.userId !== payload.userId);
             peersRef.current = peers;
+            console.log("numPeers", peers.length);
             setPeers(peers);
 
             // const spectatorObj = spectatorsRef.current.filter(p => p.peerId !== id);
@@ -386,7 +389,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           {/*My own video stream, muted*/}
             <Card style={{backgroundColor:"#5a66a440", padding:'20px', marginTop:'10px', flexGrow:'1'}}>
             {/*<VideoGrid myVideo={myVideo} peers={peers} />*/}
-            <VideoGrid myVideo={myVideo} peers={peers} isSpectator={isSpectator}/>
+            <VideoGrid myVideo={myVideo} peersRef={peersRef} isSpectator={isSpectator}/>
             <CardActions style={{justifyContent: 'center', position:'absolute', bottom:'0px', left:'0px', width:'100%'}}>
               <Stack direction={'row'} spacing={2} style={{width:'100%', justifyContent:'center'}}>
               <Stack style={{alignContent:'center'}}>
