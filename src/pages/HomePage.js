@@ -13,6 +13,7 @@ import LoginCard from 'src/components/Cards/LoginCard';
 import RoomCard from 'src/components/homepage/RoomCard';
 import LoginStageCard from 'src/components/Cards/LoginStageCard';
 import SuccessPage from 'src/components/Cards/FirstTimeUser';
+import Notification from "src/components/Room/notification.js";
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +60,7 @@ export default function HomePage() {
   const tags = localStorage.getItem("tags");
   const [staging, setStaging] = useState(false);
   const socket = useRef(null);
+  const [showNotification, setShowNotification] = useState(false);
 
   const handelClose = (event, reason) => {
     setLoginAlert(false);
@@ -67,10 +69,12 @@ export default function HomePage() {
 
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
-    function onConnect() {
-      socket.current.sendBuffer = [];
+
+    const storedValue = localStorage.getItem('showNotification');
+    if (storedValue === 'true') {
+      setShowNotification(true);
+      localStorage.removeItem('showNotification');
     }
-    socket.current.on('connect', onConnect);
   }, []);
 
   const fetchRooms = async () => {
@@ -304,6 +308,7 @@ export default function HomePage() {
         onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowSignupCard(false);}} />
       <SuccessPage showCard={showSuccessPageCard} onCloseClick={() => setShowSuccessPageCard(false)} />
       <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
+      {showNotification && <Notification/>}
       
     </> 
   );
