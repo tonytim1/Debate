@@ -58,7 +58,7 @@ export default function HomePage() {
   const username = localStorage.getItem("userId");
   const tags = localStorage.getItem("tags");
   const [staging, setStaging] = useState(false);
-  const socket = useRef(null);
+  var socket = useRef(null);
 
   const handelClose = (event, reason) => {
     setLoginAlert(false);
@@ -67,6 +67,10 @@ export default function HomePage() {
 
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
+    function onConnect() {
+      socket.current.sendBuffer = [];
+    }
+    socket.current.on('connect', onConnect);
   }, []);
 
   const fetchRooms = async () => {
