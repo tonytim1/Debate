@@ -1,24 +1,23 @@
 import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Container, Stack, Box, Tooltip, Button, Card, IconButton} from '@mui/material';
 import { useState } from 'react';
-import  ReportIcon  from '@mui/icons-material/Report';
 import {useNavigate} from 'react-router-dom';
+import ReportMenu from '../Room/ReportMenu';
+import { LocalParking } from '@mui/icons-material';
 
 const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize, user_reports}) => {
-    const [isDesabled, setIsDisabled] = useState(false);
+    const [isDisabled, setIsDisabled] = useState(false);
     const navigate = useNavigate();
+    const userTeam = usersList[currUserId] ? usersList[currUserId].team : false;
     
     const handle_switch = async () => {
-
         setIsDisabled(true);
         socket.current.emit('switch_team', { 
             'roomId': roomId, 
@@ -29,12 +28,6 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
         }, 3000);
     };
 
-    const report_user = (userId) => {   
-            socket.current.emit('report_user', {
-                 'userId': currUserId,
-                  'reportedUserId': userId,
-                  'roomId': roomId });  
-    }
     socket.current.once('check_report_user_list', data => {
             if(currUserId === data.reportedUserId){
                 socket.current.emit('kick_user', { 'roomId': roomId, 'userId':currUserId });
@@ -74,7 +67,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
             <Box sx={{width:'50%'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                    {teamNames[0]}
+                    {teamNames[0]} {Object.keys(usersList).reduce((acc, userId) => usersList[userId].team === true ? acc + 1 : acc, 0)} / {Math.ceil(roomSize / 2)}
                     </ListSubheader>
                 }
                 >
@@ -92,17 +85,12 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                                     <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
+                                    primary={<>{userId} <span style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</span></>}
                                     secondary={moderator === userId ? "Moderator" : "" }
                                 />
                                 {userId !== currUserId ? 
-                                <>
-                                <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}>
-                                    <ReportIcon/>
-                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
-                                </IconButton>
-                                </>
-                                    : ''
+                                    <ReportMenu userId={userId} currUserId={currUserId} roomId={roomId} socket={socket}/>
+                                    : null
                                 }
                             </ListItem>
                             );
@@ -112,13 +100,15 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                     
                 </List>
             </Box>
-            <Button style={{backgroundColor: '#e6ebf9ab', margin: '0px'}} disabled={isDesabled} onClick={handle_switch} sx={{width:'0%'}}>
+            <Button style={{backgroundColor: '#e6ebf9ab', margin: '0px'}} 
+            disabled={isDisabled || Object.keys(usersList).reduce((acc, userId) => usersList[userId].team !== userTeam ? acc + 1 : acc, 0) >= Math.ceil(roomSize / 2)} 
+            onClick={handle_switch} sx={{width:'0%'}}>
                 change team
             </Button>
             <Box sx={{width:'50%'}} style={{margin: '0px'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                    {teamNames[1]}
+                    {teamNames[1]} {Object.keys(usersList).reduce((acc, userId) => usersList[userId].team === false ? acc + 1 : acc, 0)} / {Math.ceil(roomSize / 2)}
                     </ListSubheader>
                 }>
                     {Object.entries(usersList).map(([userId, user]) => {
@@ -135,23 +125,13 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                                     <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                                 </ListItemAvatar>
                                 <ListItemText
-                                    primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
+                                    primary={<>{userId} <span style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</span></>}
                                     secondary={moderator === userId ? "Moderator" : ""}
                                 />
                                 {userId !== currUserId ? 
-                                <>
-                                <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}>
-                                    <ReportIcon/>
-                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
-                                </IconButton>
-                                </>
-                                    : ''
+                                    <ReportMenu userId={userId} currUserId={currUserId} roomId={roomId} socket={socket}/>
+                                    : null
                                 }
-                                {/* <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}> */}
-                                    {/* <ReportIcon/>  */}
-                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
-                                {/* </IconButton> */}
-
                             </ListItem>
                             );
                             }
@@ -178,17 +158,12 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                             <Avatar src={user.photo_url} alt="photoURL" referrerPolicy="no-referrer" />
                         </ListItemAvatar>
                         <ListItemText
-                            primary={<>{userId} <a style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</a></>}
+                            primary={<>{userId} <span style={{ color: 'black', fontWeight: 'bold' }}>{user.ready ? 'Ready' : ''}</span></>}
                             secondary={moderator === userId ? "Moderator" : ""}
                         />
                         {userId !== currUserId ? 
-                                <>
-                                <IconButton className={userId} color= {user_reports[userId].includes(currUserId)? 'error' : 'warning' } onClick={() => report_user(userId)}>
-                                    <ReportIcon/>
-                                    {/* {<><a style={{fontSize: 'medium'}}>{user_reports[userId].length} </a></>} */}
-                                </IconButton>
-                                </>
-                                    : ''
+                            <ReportMenu userId={userId} currUserId={currUserId} roomId={roomId} socket={socket}/>
+                            :null
                         }
                     </ListItem>
                     );

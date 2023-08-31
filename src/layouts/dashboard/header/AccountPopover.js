@@ -1,25 +1,14 @@
 import { useState, useEffect} from 'react';
-// @mui
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
-// mocks_
-import account from '../../../_mock/account';
 import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
+
   const [open, setOpen] = useState(null);
   const navigate = useNavigate();
-
-  const [photoURL, setPhotoURL] = useState('');
-
-  useEffect(() => {
-    const storedPhotoURL = localStorage.getItem('photoURL');
-    if (storedPhotoURL) {
-      setPhotoURL(storedPhotoURL);
-    }
-  }, []);
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -30,16 +19,17 @@ export default function AccountPopover() {
   };
 
   const handleProfile = () => {
-    const userId = localStorage.getItem("userId");
-    navigate(`/user/${userId}`);
+    navigate(`/user`);
   };
 
   const handleLogout = () => {
     console.log("logout");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    localStorage.removeItem("photoURL");
+    localStorage.removeItem("tags");
+    localStorage.removeItem("profilePhotoURL");
     localStorage.removeItem("provider");
+    localStorage.removeItem("UserAuthenticated");
     navigate('/');
   };
 
@@ -65,7 +55,7 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={photoURL} alt="photoURL" />
+        <Avatar src={localStorage.getItem('profilePhotoURL')} alt="photoURL" />
       </IconButton>
 
       <Popover

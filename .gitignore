@@ -28,3 +28,13 @@ yarn-error.log*
 server/venv/
 venv/
 server/debate-center-firebase-key.json
+server/debate-center-dd720-firebase-adminsdk-pepv1-aeaa29360b.json
+yarn.lock
+firebase-debug.log
+server/__pycache__/models.cpython-310.pyc
+.gitignore
+server/__pycache__/default_rooms.cpython-310.pyc
+.firebase/hosting.YnVpbGQ.cache
+.firebase/hosting.YnVpbGQ.cache
+.firebase/hosting.YnVpbGQ.cache
+.firebase/hosting.YnVpbGQ.cache

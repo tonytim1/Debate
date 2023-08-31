@@ -1,55 +1,39 @@
 ToDOs:
-- add default rooms
-- joining a room when not logged in should popup login instead of stuck on loading screen
-- pop up window for spectators when conversation is closed
-- If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)
-- make video chat room prettier (change the layout, if the conversation has teams show them)
-
-
-for next phase maybe:
-    - make website in https to allow joining from other devices
-    - add a time checker that starts the conversation when time reaches 0
-    - add an option for conversation length, and destroy conversation when time reaches 0
-    - Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
-
+- add rooms with unlimited time?? so site doesnt look empty when testers test it
+- add popup (Snackbar) to indicate you cant join if a room is full / conversation started (instead of the ugly roomFull page)
+- the first time a user creates a room, add a tutorial about being a moderator
 
 # TONY:
-V Fix clients make multiple socket connections to the server
-V Move the rooms managment to the server and not on the firebase
-V Add a feature that if a room is full but spectators are allowed then add to the spec list
-
-V Have a functioning video chat:
-    V Have inital video working
-    V Handle users who leave/disconnect in the middle
-    V Handle users who join a conversation that already started (make him a spectator)
-    V Fix issue where users call every other user resulting 2 streams between a pair of users
+V HTTPS protocol transform
+- use the server data to indicate whether a user is already entered to a room and restrict him to enter multiple rooms
+- refresh should return to room/conversation
+- make teams balanced (for example if roomSize=5 limit 3 people per team)
+- fix welcome username
 
 
 # IDO:
-V design login 
-- design sign up pages
-V Fix account page
-- Add a profile picture feature (see it on Home, Room, Conversation pages)
-V in login page remove this profile icon
-V add facebook/google login/signup options
-- BUG: if a user is in a room and get in the website it takes him to the home page again. we need it to navigate him to the room page. maybe add a "room" field to a user so we know the user's state at every moment
+V add field "EverConnected" [bool] to the firebase user data to welcome the new user and give tutorial (show rules of the web)
+V design sign up pages + save profile image
+V delete from storage when delete user
+V check what happend after delete user and the storage delete.. somehow the url still active.(check user ido1@gmail.com pass:222222)
+V fix profile page in the imagesection + enable the "Name" field for google/facebook account
+V routes for user/userId need to restrict other users
+V joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
+    V check if can delete useAuthentication()
+- refresh on LoginStage not delete the user - need to fix it
+- PDF
+- improve tutorial on first signup (add more info on how to use the site)
+- add tutorial when joining a room for the first time (explain how to move teams, spectator, ban system, ready check)
+- if user is banned popup notification for him (Snackbar)
+- user need to be expire token
 
 
 # OMER:
-- Add reporting system
-- Implement a custom sort to rooms in the home page based on user favorite topics (in the frontend side...)
-    - Maybe make buttons like "Top", "Recommended", "Starting Soon" that change rooms sort in home page
-
+- vidoe start after the timer ends
+- pop up window for spectators when conversation is closed
+- Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
 
 # ASAF:
-V Remove nav bar and add somthing else (we need to decide)
-V home page: when scrolling for more rooms it should move only the room cards and not the whole page
-V Create a landing page for explaining about the website and log in
-V Make the room cards (in the home page) more informative (add pics, users icon, fix text alignment)
-V make the whole room card (in home page) clickable rather then just the text
-V Add a feature to chat that if you press 'enter' it sends the msg
-V Make the room page prettier
-V add a "be a spectator" button & add a "be a debator"
-    - "be debator" should show only if number of current debators is smaller than room size, maybe we should show "2/4" also inside the room
-V Add team names feature to the moderator (in the create room page)
-- MISLTONE 3 PRESENTATION 
+V when you report on someone "Snackbar" mui need to explain the action
+V kind of debate logic - the user can choose if he wants "free style" debate or "program debate" (2 min for knowledge the team, 10 min for the "pros", 10 min for "against", ...)
+V (need to check) - If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)

@@ -19,21 +19,22 @@ const VideoBox = ({ me, peer }) => {
   }
 
   return (
-    <div>
-      <Typography
-        variant="h4" 
-        style={{
-          position: 'absolute',
-          marginLeft: '80px',
-          marginTop: '15px',
-          color: 'black',
-          borderRadius: '12px',
-          backgroundColor: '#ffffff73',
-          padding: '3px',
-        }}>
-          {me ? "You" : (peer.userId || 'Uknown')}
-      </Typography>
-
+    <div style={{
+      display: 'grid',
+      placeItems: 'center',
+    }}>
+        <Typography
+          variant="h4" 
+          style={{
+            position: 'relative',
+            color: 'black',
+            borderRadius: '12px',
+            backgroundColor: '#ffffff73',
+            padding: '3px',
+            transform: 'translateY(120%)',
+          }}>
+            {me ? "You" : (peer.userId || 'Uknown')}
+        </Typography>
       {me ? (
         <video muted autoPlay playsInline ref={peer} width="auto" style={{borderRadius:"30px", maxWidth:'80%'}}/>
       ) : (

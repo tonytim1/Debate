@@ -54,7 +54,7 @@ const StyledCover = styled('img')({
   position: 'absolute',
 });
 
-const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId }, ref) => {
+const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId,socket }, ref) => {
   const { name, tags, time_to_start, spectators, teams, room_size, users_list, is_conversation } = room;
   const index = 1;
   const latestPostLarge = index === 0;
@@ -87,12 +87,16 @@ const RoomCard = React.forwardRef(({ room, roomId, color, timeout, pictureId }, 
   time.setSeconds(time.getSeconds() + seconds);
 
   function MyTimer({ expiryTimestamp }) {
-    const { seconds, minutes, isRunning } = useTimer({ expiryTimestamp, onExpire: () => console.warn('onExpire called') });
+    const { seconds, minutes, isRunning } = useTimer({ expiryTimestamp, onExpire: () => socket.current.emit('start_conversation_click', { 'roomId': roomId, 'userId':123 })});
+    
+    const formatTime = (time) => {
+      return String(time).padStart(2, '0')
+    }
 
     return (
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '60', fontWeight: 'bold' }}>
-          {diff < 0 && isRunning && !is_conversation ? <div>Debate start in {minutes}:{seconds}</div> : 'Debate started'}
+          {diff < 0 && isRunning && !is_conversation ? <div>Starts in {minutes}:{seconds}</div> : 'Debate started'}
         </div>
       </div>
     );

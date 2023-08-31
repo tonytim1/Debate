@@ -1,195 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-// @mui
-import { Stack, Link, Card, IconButton, Fade, Snackbar, Button, InputAdornment, Alert, AlertTitle, TextField, Typography, Divider, Collapse } from '@mui/material';
+import { Stack, Link, Card, IconButton, Button, InputAdornment, Alert, TextField, Typography, Collapse } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-// components
 import Iconify from 'src/components/iconify/Iconify';
-import { getAuth, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
-import axios from 'axios';
-import { initializeApp } from 'firebase/app';
+import { signInWithPopup, FacebookAuthProvider, GoogleAuthProvider } from "firebase/auth";
+import { auth } from '../../../src/index.js';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
 
-
-
-const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alreadyLogin }) => {
-  const navigate = useNavigate();
-  const [formErrors, setFormErrors] = useState({});
-  const [loginError, setLoginError] = useState({});
+const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick }) => {
   const [emailMissing, setEmailMissing] = useState(false);
   const [passwordMissing, setPasswordMissing] = useState(false);
-  const [loginFailed, setLoginFailed] = useState(false);
-  const [isSubmit, setIsSubmit] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false); // var for the login error alert
   const [loading, setLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [user, setUserDetails] = useState({
     email: "",
     password: "",
   })
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginSignup, setLoginSignup] = useState(true);
-  const [user_uid, setUserUid] = useState();
-  const [config, setConfig] = useState();
-
-  const [errorAlertOpen, setErrorAlertOpen] = useState(false); // State to control the visibility of the error alert
 
 
-  const handleAlertClose = () => {
-    setErrorAlertOpen(false);
-  };
-
-
-  useEffect(() => {
-    const getAuth = async () => {
-      try {
-        const response = await axios.get('http://' + window.location.hostname + ':8000/api/get_auth', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-        });
-        setConfig(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        setLoading(false);
-      }
-    };
-
-    getAuth();
-  }, []);
-
-  const signInWithGoogle = () => {
-    const app = initializeApp(config, "secondary");
-    const auth = getAuth(app);
-    const loginUser = {
-      username: ''};
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        result.user.getIdToken().then(async (idToken) => {
-          const user = {
-            token: idToken,
-            userId: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL
-          };
-          setUserUid(user.userId);
-          localStorage.setItem('token', user.token);
-
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'UserId': user.userId
-            }
-          });
-          const userDoc = await response.json();
-          if (userDoc != null) {
-            localStorage.setItem('tags', userDoc.tags);
-            alreadyLogin();
-            localStorage.setItem('finishBoardingPass', 'true');
-            if (userDoc.username != ''){
-              localStorage.setItem('userId', userDoc.username);
-            }
-            else{
-              localStorage.setItem('userId', user.displayName);
-            }
-          }
-          else{
-            localStorage.setItem('userId', user.displayName);
-            localStorage.setItem('finishBoardingPass', 'false');
-            onLoginStageClick();
-          }
-
-          const cred = GoogleAuthProvider.credentialFromResult(result);
-          const token = cred.accessToken;
-          localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
-          localStorage.setItem('provider', user.providerData[0].providerId);
-          sessionStorage.setItem('loggedIn', 'true');
-          setLoginFailed(false);
-          if (userDoc != null) {
-          window.location.reload();
-          }
-        });
-      })
-      .catch((error) => {
-        if (error.code === "auth/account-exists-with-different-credential") {
-          setLoginFailed(true);
-          //setErrorAlertOpen(true);
-        } else {
-          // Other errors
-          console.log("Error:", error);
-        }
-      });
-  };
-
-  const signInWithFacebook = () => {
-    const app = initializeApp(config, "secondary");
-    const auth = getAuth(app);
-    const provider = new FacebookAuthProvider();
-    const loginUser = {
-      username: ''};
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        result.user.getIdToken().then(async (idToken) => {
-          const user = {
-            token: idToken,
-            userId: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL
-          };
-          setUserUid(user.userId);
-          localStorage.setItem('token', user.token);
-
-          const response = await fetch('http://' + window.location.hostname + ':8000/api/check_user_data', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'UserId': user.userId
-            }
-          });
-          const userDoc = await response.json();
-          if (userDoc != null) {
-            alreadyLogin();
-            localStorage.setItem('finishBoardingPass', 'true');
-            if (loginUser.username != ''){
-              localStorage.setItem('userId', loginUser.username);
-            }
-            else{
-              localStorage.setItem('userId', user.displayName);
-            }
-          }
-          else{
-            localStorage.setItem('userId', user.displayName);
-            localStorage.setItem('finishBoardingPass', 'false');
-            onLoginStageClick();
-          }
-
-
-          const cred = FacebookAuthProvider.credentialFromResult(result);
-          const token = cred.accessToken;
-          localStorage.setItem('photoURL', user.photoURL + "?height=500&access_token=" + token);
-          localStorage.setItem('provider', user.providerData[0].providerId);
-          sessionStorage.setItem('loggedIn', 'true');
-          setLoginFailed(false);
-          if (userDoc != null) {
-            window.location.reload();
-            }
-        });
-      })
-      .catch((error) => {
-        if (error.code === "auth/account-exists-with-different-credential") {
-          setLoginFailed(true);
-          //setErrorAlertOpen(true);
-        } else {
-          // Other errors
-          console.log("Error:", error);
-        }
-      });
-  };
-
+useEffect(() => {  setLoading(false);  } )
+  
   const changeHandler = (e) => {
     const { name, value } = e.target;
     setUserDetails({
@@ -198,14 +28,70 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
     });
   };
 
-  const handleClick = async (e) => {
-    e.preventDefault();
-    if (validateForm(user)) {
-      validateUser(user);
-    }
+  const signInWithExternalPlatform = (platform_provider) => {
+    signInWithPopup(auth, platform_provider)
+      .then((result) => {
+        result.user.getIdToken().then(async (idToken) => {
+          const user = {
+            token: idToken,
+            userId: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+            provider: result.user.providerData[0].providerId
+          };
+
+          localStorage.setItem('token', user.token);
+
+          // set profilePhotoURL local variable
+          let cred;
+          if (user.provider === 'google') {
+            cred = GoogleAuthProvider.credentialFromResult(result);
+          } else {
+            cred = FacebookAuthProvider.credentialFromResult(result);
+          }
+          
+          
+          const token = cred.accessToken;
+          localStorage.setItem('profilePhotoURL', user.photoURL + "?height=500&access_token=" + token);
+
+          // check if the first time this user connected to the app
+          const response = await fetch('https://debate-back.onrender.com/api/check_user_data', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'UserId': user.userId
+            }
+          });
+
+          const userDoc = await response.json();
+
+          localStorage.setItem('provider', user.provider);
+          setLoginFailed(false);
+
+          if (userDoc != null) { // if not first time
+            localStorage.setItem('userId', userDoc.username);
+            localStorage.setItem('tags', userDoc.tags);
+            localStorage.setItem('UserAuthenticated', 'true');
+
+            sessionStorage.setItem('loggedIn', 'true'); // for the login success alert
+            
+            window.location.reload();
+          }
+          else{ // first time connected
+            localStorage.setItem('userId', user.displayName);
+            localStorage.setItem('UserAuthenticated', 'false');
+            onLoginStageClick();
+          }
+        });
+      })
+      .catch((error) => {
+        setLoginFailed(true);
+        console.log("Error:", error);
+      });
   };
 
-  const validateUser = async (user) => {
+  const signInRegular = async (user) => {
     try {
       //user details
       const loginUser = {
@@ -214,26 +100,31 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
       };
 
       // Send the new user data to the backend server
-      const response = await fetch('http://' + window.location.hostname + ':8000/api/signin', {
+      const response = await fetch('https://debate-back.onrender.com/api/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(loginUser),
       });
-      console.log(response);
+
       if (response.ok) {
-        // clearLoginErrorMes();
-        setLoginFailed(false)
+        setLoginFailed(false);
         const responseData = await response.json();
-        setUserUid(responseData.userId);
+
+        // local variables for continuous 
         localStorage.setItem('token', responseData.token);
         localStorage.setItem('userId', responseData.userId);
         localStorage.setItem('tags', responseData.tags);
+        localStorage.setItem('profilePhotoURL', responseData.profilePhotoURL);
         localStorage.setItem('provider', 'password');
-        localStorage.setItem('finishBoardingPass', 'true');
-        // console.log(localStorage.getItem("token"));
+        localStorage.setItem('UserAuthenticated', 'true');
+        sessionStorage.setItem('loggedIn', 'true'); // for the login success alert
+        
+
         window.location.reload();
+
+
       }
       else {
         setLoginFailed(true);
@@ -243,17 +134,6 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
       setLoginFailed(true);
     }
   };
-
-  // const setLoginErrorMes = () =>{
-  //   const errors = {};
-  //   errors.login = "User not found";
-  //   setLoginError(errors);
-  // }
-
-  // const clearLoginErrorMes = () =>{
-  //   const errors = {};
-  //   setLoginError(errors);
-  // }
 
   const validateForm = (values) => {
     const email_err = !values.email
@@ -265,35 +145,39 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
     return !(email_err || pass_err)
   };
 
-  // useEffect(() => {
-  //   if (Object.keys(formErrors).length == 0 && Object.keys(loginError).length == 0 && isSubmit) {
-  //     const userURL = `/user/${user_uid}`;
-  //     navigate('/');
-  //   }
-  // }, [formErrors], [loginError]);
+  const handleClick = async (e) => {
+    e.preventDefault();
+    if (validateForm(user)) {
+      signInRegular(user);
+    }
+  };
 
   if (!showLoginReminder) {
-    return null; // Return null if the prop is false, hiding the component
+    return null;
   }
+
   if (loading) {
     return (
       <LoadingScreen />
     );
   }
 
-
   return (
     <div className="base-card">
       <div className="overlay-background" />
-      <Card className='welcome-card' sx={{ width: '90%' }}>
+      <Card className='welcome-card' sx={{
+            minHeight: 'fit-content',
+            minWidth: 'fit-content',
+            width: '80%',
+            maxWidth: '500px',
+            maxHeight: '80%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+            }}>
 
         <Stack spacing={4} alignItems="center">
           <Stack spacing={1}>
-            {/* <Snackbar open={errorAlertOpen ? true : false} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <Alert onClose={handleAlertClose} severity="error">
-                The email is already registered with a different account.
-              </Alert>
-            </Snackbar> */}
             <Typography variant="h2">
               Welcome
             </Typography>
@@ -314,7 +198,7 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
 
             <Typography variant="body2">
               Don’t have an account? {''}
-              <Link variant="subtitle2" onClick={onSignupClick}>Get started</Link>
+              <Link variant="subtitle2" onClick={onSignupClick} style={{ cursor: 'pointer' }}>Get started</Link>
             </Typography>
 
             <Stack spacing={2}>
@@ -354,11 +238,11 @@ const LoginCard = ({ showLoginReminder, onSignupClick, onLoginStageClick, alread
                 Login
               </LoadingButton>
 
-              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={signInWithGoogle}>
+              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={() => signInWithExternalPlatform(new GoogleAuthProvider())}>
                 <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
               </Button>
 
-              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={signInWithFacebook}>
+              <Button sx={{ width: '25%' }} size="large" color="inherit" variant="outlined" onClick={() => signInWithExternalPlatform(new FacebookAuthProvider())}>
                 <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
               </Button>
             </Stack>
