@@ -186,6 +186,7 @@ export default function HomePage() {
   useEffect(() => { 
     if (localStorage.getItem('showUserBanAlert') === 'true') {
       setBanAlert(true);
+      localStorage.removeItem('showUserBanAlert') 
     }
   });
 
