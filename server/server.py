@@ -314,12 +314,9 @@ def join_debate_room(data):
     if room.is_conversation:
         if user_id in room.disconnected:
             print("user reconnected", user_id, sid)
-            socket_to_room[sid] = room
-            socket_to_user[sid] = user_id
             room.disconnected.remove(user_id)
             room.users_list[user_id] = User(sid=sid, photo_url=photo_url)
             emit('user_join', dataclasses.asdict(room), room=sid)
-            return
 
         elif not room.allow_spectators:
             emit('conversation already started', room=sid)
