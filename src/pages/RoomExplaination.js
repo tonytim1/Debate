@@ -10,9 +10,9 @@ const RoomExplaination = ({ showCard, onCloseClick }) => {
     }
 
     return (
-        <div className="base-card">
-            <div className="overlay-background" />
-            <Card className='welcome-card' sx={{
+        <div>
+            <div/>
+            <Card sx={{
                 position: 'relative',
                 minHeight: 'fit-content',
                 width: '80%',
@@ -26,14 +26,12 @@ const RoomExplaination = ({ showCard, onCloseClick }) => {
                     sx={{ position: 'absolute', left: 15, top: 15, zIndex: 1 }} // Adjusted zIndex
                     onClick={() => {
                         onCloseClick();
-                        window.location.reload();
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
                 <Box>
-                    <Typography className="details-paragraph"
-                        style={{ marginLeft: '30px', textAlign: 'left' }}>
+                    <Typography style={{ marginLeft: '30px', textAlign: 'left' }}>
                             🎉 First Time in a Room! 🎉
                             <br></br>
                             <ul>

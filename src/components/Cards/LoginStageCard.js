@@ -62,6 +62,7 @@ export const AccountProfileDetails = ({ onFirstTimeUser }) => {
                 localStorage.setItem('token', responseData.token);
                 localStorage.setItem('userId', responseData.userId);
                 localStorage.setItem('tags', responseData.tags);
+                localStorage.setItem('RoomExplaination', 'true');
                 localStorage.setItem('UserAuthenticated', 'true');
                 // local variable 'profilePhotoURL' already set in LoginCard page
                 // local variable 'provider' already set in LoginCard page
@@ -177,7 +178,6 @@ const LoginStageCard = ({ showCard, onBackClick, onFirstTimeUser}) => {
             localStorage.removeItem("userId");
             localStorage.removeItem("profilePhotoURL");
             localStorage.removeItem("provider");
-            localStorage.setItem('RoomExplaination', 'true');
             localStorage.removeItem('UserAuthenticated');
           }
         }
