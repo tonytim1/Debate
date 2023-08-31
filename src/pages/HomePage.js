@@ -6,7 +6,6 @@ import { io } from 'socket.io-client';
 import { useState, useEffect, useRef } from 'react';
 import { random } from 'lodash';
 import { alpha, styled } from '@mui/system';
-import useAuthentication from "../hooks/useAuthentication";
 import './HomePage.css'
 import CreateRoomCard from 'src/components/Cards/CreateRoomCard';
 import SignupCard from 'src/components/Cards/SignupCard';
@@ -58,7 +57,6 @@ export default function HomePage() {
   const [loginAlert, setLoginAlert] = useState(true);
   const username = localStorage.getItem("userId");
   const tags = localStorage.getItem("tags");
-  const isAuthenticated = useAuthentication();
   const [staging, setStaging] = useState(false);
   const socket = useRef(null);
 
@@ -69,6 +67,10 @@ export default function HomePage() {
 
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
+    function onConnect() {
+      socket.current.sendBuffer = [];
+    }
+    socket.current.on('connect', onConnect);
   }, []);
 
   const fetchRooms = async () => {
@@ -181,10 +183,9 @@ export default function HomePage() {
   }, [sortType, roomsData]);
 
   useEffect(() => {
+    console.log('token', localStorage.getItem('token'));
     if ( localStorage.getItem('UserAuthenticated') === 'true' || staging === true )  setShowLoginCard(false);
     else setShowLoginCard(true) });
-  //   setShowLoginCard(!isAuthenticated);
-  // }, [isAuthenticated]);
 
 
   function countCommonValues(array1, array2) {
@@ -204,7 +205,7 @@ export default function HomePage() {
       </Helmet>
       <Container>
         <Stack spacing={2} alignItems="center" justifyContent="center" mb={1}>
-        <Snackbar open={isAuthenticated && loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
+        <Snackbar open={localStorage.getItem('UserAuthenticated') === 'true' && loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
         anchorOrigin={{
           vertical: 'top',  // Set the vertical position of the Snackbar (top, bottom)
           horizontal: 'center'  // Set the horizontal position of the Snackbar (left, center, right)
@@ -295,14 +296,14 @@ export default function HomePage() {
           )}
         </Stack>
       </Container>
-      <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setStaging(true); }} 
-      onLoginStageClick={() => { setShowLoginStageCard(true); setStaging(true);}} />
-      <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setStaging(false); }} 
-      onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowLoginStageCard(false);}} />
-      <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setStaging(false); }} 
-      onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowSignupCard(false);}} />
-      <SuccessPage showCard={showSuccessPageCard} onCloseClick={() => setShowSuccessPageCard(false)} />
-      <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
+      // <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => { setShowSignupCard(true); setStaging(true); }} 
+      // onLoginStageClick={() => { setShowLoginStageCard(true); setStaging(true);}} />
+      // <LoginStageCard showCard={showLoginStageCard} onBackClick={() => { setShowLoginStageCard(false); setStaging(false); }} 
+      // onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowLoginStageCard(false);}} />
+      // <SignupCard showCard={showSignupCard} onBackClick={() => { setShowSignupCard(false); setStaging(false); }} 
+      // onFirstTimeUser = {() => {setShowSuccessPageCard(true); setShowSignupCard(false);}} />
+      // <SuccessPage showCard={showSuccessPageCard} onCloseClick={() => setShowSuccessPageCard(false)} />
+      // <CreateRoomCard showCard={showCreateRoomCard} onCloseClick={() => setShowCreateRoomCard(false)} />
     </>
   );
 }

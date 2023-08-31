@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, createRef } from "react";
 import SpectatorsList from 'src/components/roomPage/SpectatorsList';
-import { Typography, Stack, Box, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
+import { Typography, Stack, Snackbar, Alert, Box, Button, Container, Grid, Card, CardActions, IconButton, Skeleton } from '@mui/material';
 import Chat from 'src/components/messages/Chat';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -13,6 +13,8 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import VideoGrid from "./VideoGrid";
+import CloseIcon from '@mui/icons-material/Close';
+
 
 const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, socket, messageRef, setMessageRef, messages, setMessages }) => {
     const config = {
@@ -29,9 +31,18 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     const [ isVideoMuted, setIsVideoMuted ] = useState(false);
     const [ isAudioMuted, setIsAudioMuted ] = useState(false);
     const [ spectators, setSpectators ] = useState([]);
+    const [ openSnackbar, setOpenSnackbar ] = useState(true);
     const spectatorsRef = useRef([]);
     const [ showChat, setShowChat ] = useState(true);
     const navigate = useNavigate();
+
+    const handleClose = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+  
+      setOpenSnackbar(false);
+    };
 
     useEffect(() => {
       if (isSpectator) {
@@ -332,6 +343,17 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
 
     return (
       <>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert  severity="info" sx={{ width: '100%' }} onClose={handleClose}>
+          If you have any issues with the video, try refreshing the page.
+        </Alert>
+      </Snackbar>
+      
       <Helmet>
         <title> Debate Center | Debate </title>
       </Helmet>
@@ -346,7 +368,7 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
           style={{
             display: 'flex',
             paddingBottom: '20px',
-            paddingTop: '20px',
+            // paddingTop: '20px',
             backgroundColor: '#dbe4f3',
             maxHeight: '97%',
             minHeight: '97%',

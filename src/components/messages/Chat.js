@@ -31,12 +31,22 @@ const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages
         <Scrollbar style={{}}>
           {messages.map((message, i) => {
             const user = message.userId;
+            const isBot = message.bot;
             return (
               <div key={i}>
-                <Typography>
-                  <strong>{user}: </strong>
-                  {message.message}
-                </Typography>
+                {
+                  isBot ? (
+                    <Typography color='green'>
+                      <strong>Bot: </strong>
+                      {message.message}
+                    </Typography>
+                  ) : (
+                  <Typography>
+                    <strong>{user}: </strong>
+                    {message.message}
+                  </Typography>
+                  )
+                }
                 {/* <Typography variant="body1" gutterBottom>
                   
                 </Typography> */}
@@ -45,7 +55,7 @@ const Chat = ({ roomId, socket, messageRef, setMessageRef, messages, setMessages
           })}
         </Scrollbar>
         {/* Send message container */}
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack style={{marginTop:"10px"}} direction="row" spacing={2} alignItems="center">
           <TextField
             label="Type a message"
             value={messageRef}

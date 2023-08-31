@@ -13,8 +13,9 @@ import ReportMenu from '../Room/ReportMenu';
 import { LocalParking } from '@mui/icons-material';
 
 const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, roomId, currUserId, socket, moderator, isSpectator, roomSize, user_reports}) => {
-    const [isDesabled, setIsDisabled] = useState(false);
+    const [isDisabled, setIsDisabled] = useState(false);
     const navigate = useNavigate();
+    const userTeam = usersList[currUserId].team;
     
     const handle_switch = async () => {
         setIsDisabled(true);
@@ -66,7 +67,7 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
             <Box sx={{width:'50%'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                    {teamNames[0]}
+                    {teamNames[0]} {Object.keys(usersList).reduce((acc, userId) => usersList[userId].team === true ? acc + 1 : acc, 0)} / {Math.ceil(roomSize / 2)}
                     </ListSubheader>
                 }
                 >
@@ -99,13 +100,15 @@ const UsersShow = ({ onSpecClick, allowSpectators, teamNames, teams, usersList, 
                     
                 </List>
             </Box>
-            <Button style={{backgroundColor: '#e6ebf9ab', margin: '0px'}} disabled={isDesabled} onClick={handle_switch} sx={{width:'0%'}}>
+            <Button style={{backgroundColor: '#e6ebf9ab', margin: '0px'}} 
+            disabled={isDisabled || Object.keys(usersList).reduce((acc, userId) => usersList[userId].team !== userTeam ? acc + 1 : acc, 0) >= Math.ceil(roomSize / 2)} 
+            onClick={handle_switch} sx={{width:'0%'}}>
                 change team
             </Button>
             <Box sx={{width:'50%'}} style={{margin: '0px'}}>
                 <List subheader={
                     <ListSubheader component="div" id="nested-list-subheader" sx={{ textAlign: 'center' }}>
-                    {teamNames[1]}
+                    {teamNames[1]} {Object.keys(usersList).reduce((acc, userId) => usersList[userId].team === false ? acc + 1 : acc, 0)} / {Math.ceil(roomSize / 2)}
                     </ListSubheader>
                 }>
                     {Object.entries(usersList).map(([userId, user]) => {

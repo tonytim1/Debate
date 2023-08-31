@@ -19,8 +19,7 @@ export default function AccountPopover() {
   };
 
   const handleProfile = () => {
-    const userId = localStorage.getItem("userId");
-    navigate(`/user/${userId}`);
+    navigate(`/user`);
   };
 
   const handleLogout = () => {
