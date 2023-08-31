@@ -7,8 +7,8 @@ import Typography from '@mui/material/Typography';
 import VideoBox from './VideoBox';
 import { useEffect, useState } from 'react';
 
-const VideoGrid = ({ myVideo, peers, isSpectator }) => {
-  const [numOfVids, setNumOfVids] = useState(myVideo !== null ? peers.length + 1 : peers.length);
+const VideoGrid = ({ myVideo, peersRef, isSpectator }) => {
+  const [numOfVids, setNumOfVids] = useState(myVideo !== null ? peersRef.current.length + 1 : peersRef.current.length);
   const calcGrid = (n) => {
     const gridMap = [];
 
@@ -38,17 +38,17 @@ const VideoGrid = ({ myVideo, peers, isSpectator }) => {
   }
 
   useEffect(() => {
-    setNumOfVids(myVideo !== null ? peers.length + 1 : peers.length);
+    setNumOfVids(myVideo !== null ? peersRef.current.length + 1 : peersRef.current.length);
     console.log("numOfVids", numOfVids);
-  }, [peers]);
+  }, [peersRef]);
   
-  if (!myVideo || !peers) return null;
+  if (!myVideo || !peersRef.current) return null;
   return (
     <div style={{overflow: 'auto', display: 'grid', gridTemplateColumns: `repeat(${numOfVids <= 4 ? 2 : 3}, 1fr)`, gridAutoRows: `1fr`, height: '95%', alignItems: 'center', gridGap:'15px'}}>
       {!isSpectator && myVideo !== null ? (
         <VideoBox me={true} peer={myVideo}/>
       ) : null}
-      {peers.map((peer) => (
+      {peersRef.current.map((peer) => (
         <VideoBox me={false} peer={peer}/>
       ))}
       {/* <Skeleton variant="rectangular" height="100px" width="30%" style={{flex:'1 1 30%'}} />
