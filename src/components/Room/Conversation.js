@@ -108,8 +108,10 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
         // if all users left, go back to home page
         socket.current.on('allUsersLeft', () => {
           console.log("allUsersLeft");
-          // TODO: add popup to inform user that all users left
           navigate('/');
+          if (isSpectator) {
+            localStorage.setItem('showNotification', 'true');
+          }
         });
       }
 

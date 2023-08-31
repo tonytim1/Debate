@@ -19,7 +19,7 @@ const SpectatorsList = ({ isSpectator, spectsList, allowSpectators, isConversati
               <VisibilityIcon/>
             </IconButton>
           </Tooltip>)}
-                Scpectators
+            Spectators
           </ListSubheader>
           {Object.entries(spectsList).map(([userId, user]) => {
             return (
