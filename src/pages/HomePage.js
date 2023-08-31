@@ -187,7 +187,6 @@ export default function HomePage() {
   }, [sortType, roomsData]);
 
   useEffect(() => {
-    console.log('token', localStorage.getItem('token'));
     if ( localStorage.getItem('UserAuthenticated') === 'true' || staging === true )  setShowLoginCard(false);
     else setShowLoginCard(true) });
 
