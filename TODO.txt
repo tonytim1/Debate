@@ -22,7 +22,7 @@ V joining a room when not logged in should popup login instead of stuck on loadi
     V check if can delete useAuthentication()
 - refresh on LoginStage not delete the user - need to fix it
 - PDF
-- improve tutorial on first signup (add more info on how to use the site)
+V improve tutorial on first signup (add more info on how to use the site)
 - add tutorial when joining a room for the first time (explain how to move teams, spectator, ban system, ready check)
 - if user is banned popup notification for him (Snackbar)
 - user need to be expire token

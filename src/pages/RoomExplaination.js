@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress, Typography, Card } from '@mui/material';
+import { Box, Typography, Card } from '@mui/material';
 import './RoomExplaination.css';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
