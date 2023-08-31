@@ -45,6 +45,7 @@ const Page = () => {
     "Culture",
     "Politics",
   ];
+  useEffect(() => { if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
 
   const handleImageChange = async (event) => {
     setImage(event.target.files[0]);

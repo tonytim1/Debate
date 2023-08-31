@@ -177,6 +177,7 @@ const LoginStageCard = ({ showCard, onBackClick, onFirstTimeUser}) => {
             localStorage.removeItem("userId");
             localStorage.removeItem("profilePhotoURL");
             localStorage.removeItem("provider");
+            localStorage.setItem('RoomExplaination', 'true');
             localStorage.removeItem('UserAuthenticated');
           }
         }

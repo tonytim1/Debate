@@ -40,7 +40,7 @@ const VideoGrid = ({ myVideo, peers, isSpectator }) => {
   useEffect(() => {
     setNumOfVids(myVideo !== null ? peers.length + 1 : peers.length);
     console.log("numOfVids", numOfVids);
-  }, [peers, myVideo]);
+  }, [peers]);
   
   if (!myVideo || !peers) return null;
   return (

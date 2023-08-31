@@ -11,13 +11,13 @@ import SpectatorsList from 'src/components/roomPage/SpectatorsList';
 import { Typography, Grid, Card,Paper, List, Stack, ListItem, ListItemAvatar, Avatar, ListItemText, TextField, Button, Container } from '@mui/material';
 import { io } from 'socket.io-client';
 import Chat from 'src/components/messages/Chat';
-import useAuthentication from "../hooks/useAuthentication";
 import SignupCard from 'src/components/Cards/SignupCard';
 import LoginCard from 'src/components/Cards/LoginCard';
 import LoadingScreen from 'src/components/Room/LoadingScreen';
 import RoomFull from 'src/components/Room/RoomFull';
 import RoomLobby from 'src/components/Room/RoomLobby';
 import Conversation from 'src/components/Room/Conversation';
+import RoomExplaination from 'src/pages/RoomExplaination';
 
 export default function RoomPage() {
   const [messageInput, setMessageInput] = useState('');
@@ -32,13 +32,15 @@ export default function RoomPage() {
   const [roomState, setRoomState] = useState(0); // 0 - loading, 1 - loby, 2 - conversation, 3 - full,
   const [ messageRef, setMessageRef ] = useState(''); 
   const [ messages, setMessages ] = useState([]);
-  const [showSignupCard, setShowSignupCard] = useState(false);
-  const [showLoginCard, setShowLoginCard] = useState(false);
+  const [ showRoomExplainationCard, setShowRoomExplainationCard ] = useState(false);
 
-  const isAuthenticated = useAuthentication();
 
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
+    function onConnect() {
+      socket.current.sendBuffer = [];
+    }
+    socket.current.on('connect', onConnect);
   }, []);
 
   const currUserId = localStorage.getItem("userId");
@@ -105,11 +107,15 @@ export default function RoomPage() {
     fetchData();
   }, []);
 
+  useEffect(() => { if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
+
   useEffect(() => {
-    if ( localStorage.getItem('UserAuthenticated') !== 'true' )  navigate('/');  });
-    // else setShowLoginCard(true) });
-  //   setShowLoginCard(!isAuthenticated);
-  // }, [isAuthenticated]);
+    if ( localStorage.getItem('RoomExplaination') === 'true' ){
+      setShowRoomExplainationCard(true);  
+      localStorage.setItem('RoomExplaination', 'false');
+    }
+  }, []);
+    
 
   // loading screen
   if (roomState === 0) {
@@ -153,8 +159,8 @@ export default function RoomPage() {
       </Helmet>
       <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} setIsSpectator={setIsSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
-    <LoginCard showLoginReminder={showLoginCard} onSignupClick={() => {setShowSignupCard(true); setShowLoginCard(false);}} />
-    <SignupCard showCard={showSignupCard} onBackClick={() => {setShowSignupCard(false); setShowLoginCard(true); }} />
+      <RoomExplaination showCard={showRoomExplainationCard} onCloseClick={() => setShowRoomExplainationCard(false)} />
+
     </>
   );
 }

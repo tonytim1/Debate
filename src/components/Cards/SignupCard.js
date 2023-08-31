@@ -138,6 +138,7 @@ const SignupCard = ({ showCard, onBackClick, onFirstTimeUser }) => {
                 }
 
                 localStorage.setItem('UserAuthenticated', 'true');
+                localStorage.setItem('RoomExplaination', 'true');
                 onFirstTimeUser();
 
             } else {
