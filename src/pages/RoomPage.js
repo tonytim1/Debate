@@ -34,8 +34,13 @@ export default function RoomPage() {
   const [ messages, setMessages ] = useState([]);
   const [ showRoomExplainationCard, setShowRoomExplainationCard ] = useState(false);
 
+
   useEffect(() => {
     socket.current = io('wss://debate-back.onrender.com')
+    function onConnect() {
+      socket.current.sendBuffer = [];
+    }
+    socket.current.on('connect', onConnect);
   }, []);
 
   const currUserId = localStorage.getItem("userId");
