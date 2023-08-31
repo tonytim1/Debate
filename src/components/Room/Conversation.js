@@ -84,12 +84,13 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
 
         //user left and server send its peerId to disconnect from that peer
         socket.current.on('userLeft', payload => {
-          const peerObj = peersRef.current.find(p => p.peerId === payload.sid);
+          console.log("user disconnected with payload: ", payload)
+          const peerObj = peersRef.current.find(p => p.userId === payload.userId);
           if(peerObj) {
             console.log("destroying peer", peerObj);
             peerObj.peer.destroy(); //cancel connection with disconnected peer
           }
-          const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
+          const peers = peersRef.current.filter(p => p.userId !== payload.userId);
           peersRef.current = peers;
           setPeers(peers);
         });
@@ -216,13 +217,15 @@ const Conversation = ({ roomData, setRoomData, currUserId, roomId, isSpectator, 
     
           //user left and server send its peerId to disconnect from that peer
           socket.current.on('userLeft', payload => {
-            const peerObj = peersRef.current.find(p => p.peerId === payload.sid);
+            console.log("user disconnected with payload: ", payload)
+            const peerObj = peersRef.current.find(p => p.userId === payload.userId);
             if(peerObj) {
               console.log("destroying peer", peerObj);
               peerObj.peer.destroy(); //cancel connection with disconnected peer
             }
-            const peers = peersRef.current.filter(p => p.peerId !== payload.sid);
+            const peers = peersRef.current.filter(p => p.userId !== payload.userId);
             peersRef.current = peers;
+            console.log("numPeers", peers.length);
             setPeers(peers);
 
             // const spectatorObj = spectatorsRef.current.filter(p => p.peerId !== id);

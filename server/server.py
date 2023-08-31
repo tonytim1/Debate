@@ -312,12 +312,22 @@ def join_debate_room(data):
     
     
     if room.is_conversation:
-        if not room.allow_spectators:
+        if user_id in room.disconnected:
+            print("user reconnected", user_id, sid)
+            socket_to_room[sid] = room
+            socket_to_user[sid] = user_id
+            room.disconnected.remove(user_id)
+            room.users_list[user_id] = User(sid=sid, photo_url=photo_url)
+            emit('user_join', dataclasses.asdict(room), room=sid)
+            return
+
+        elif not room.allow_spectators:
             emit('conversation already started', room=sid)
             return
         
-        room.spectators_list[user_id] = User(sid=sid, photo_url=photo_url)
-        emit('spectator_join', dataclasses.asdict(room), room=sid)
+        else:
+            room.spectators_list[user_id] = User(sid=sid, photo_url=photo_url)
+            emit('spectator_join', dataclasses.asdict(room), room=sid)
 
     elif len(room.users_list) >= room.room_size:
         if not room.allow_spectators:
@@ -337,11 +347,6 @@ def join_debate_room(data):
     # Notify all users in the room about the change
     emit('room_data_updated', dataclasses.asdict(room), to=room_id)
     emit('rooms_updated', dataclasses.asdict(room), broadcast=True, skip_sid=room_id)
-    
-    # Join the SocketIO broadcast room
-    socket_to_room[sid] = room_id
-    socket_to_user[sid] = user_id
-    join_room(room_id)
     
     # Join the SocketIO broadcast room
     socket_to_room[sid] = room_id
@@ -679,6 +684,8 @@ def handle_disconnect():
         return
     if user_id in room.users_list:
         room.users_list.pop(user_id)
+        if room.is_conversation:
+            room.disconnected.append(user_id)
     if user_id in room.spectators_list:
         room.spectators_list.pop(user_id)
 
