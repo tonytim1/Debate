@@ -71,7 +71,7 @@ const ReportMenu = ({userId, currUserId, roomId, socket}) => {
         </Menu>
         <Snackbar open={openAlert} autoHideDuration={6000} onClose={handleCloseAlert}>
         <Alert onClose={handleCloseAlert} severity="info" sx={{ width: '100%' }}>
-            Report received. If 3 reports are received, the user will be exited from the room 
+            Report received. If the user receives reports at least from half of the participants, he will be kicked off from the conversation.
         </Alert>
       </Snackbar>
     </>

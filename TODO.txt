@@ -12,28 +12,13 @@ V HTTPS protocol transform
 
 
 # IDO:
-V add field "EverConnected" [bool] to the firebase user data to welcome the new user and give tutorial (show rules of the web)
-V design sign up pages + save profile image
-V delete from storage when delete user
-V check what happend after delete user and the storage delete.. somehow the url still active.(check user ido1@gmail.com pass:222222)
-V fix profile page in the imagesection + enable the "Name" field for google/facebook account
-V routes for user/userId need to restrict other users
-V joining a room when not logged in should popup login instead of stuck on loading screen - homepage back pop up login window
-    V check if can delete useAuthentication()
 - refresh on LoginStage not delete the user - need to fix it
 - PDF
-V improve tutorial on first signup (add more info on how to use the site)
 - add tutorial when joining a room for the first time (explain how to move teams, spectator, ban system, ready check)
 - if user is banned popup notification for him (Snackbar)
-- user need to be expire token
 
 
 # OMER:
-- vidoe start after the timer ends
-- pop up window for spectators when conversation is closed
-- Clean all unnecessary shit in the project without breaking the website (template files, pictures, and so on)
+
 
 # ASAF:
-V when you report on someone "Snackbar" mui need to explain the action
-V kind of debate logic - the user can choose if he wants "free style" debate or "program debate" (2 min for knowledge the team, 10 min for the "pros", 10 min for "against", ...)
-V (need to check) - If (room is full or conversation started) and doesn't allow spectators - dont show in home page (or show in the end)

@@ -103,6 +103,20 @@ const Page = () => {
       }, 1000);
       // window.location.reload();
     }
+    else {
+      window.alert("Error while fetch your data account, please try to login again");
+        console.log("logout");
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("tags");
+        localStorage.removeItem("profilePhotoURL");
+        localStorage.removeItem("provider");
+        localStorage.removeItem("UserAuthenticated");
+        setIsSnackbarOpenDelete(true);
+        setTimeout(() => {
+          const homepage = "/dashboard/home";
+          navigate(homepage);
+        }, 1000);}
   };
 
   const handleDelete = async () => {

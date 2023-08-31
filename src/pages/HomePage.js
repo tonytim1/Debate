@@ -56,15 +56,21 @@ export default function HomePage() {
   const [showSuccessPageCard, setShowSuccessPageCard] = useState(false);
   const [sortType, setSortType] = useState('recommended'); // ['soon', 'recommended', 'popular']
   const [loginAlert, setLoginAlert] = useState(true);
+  const [banAlert, setBanAlert] = useState(false);
   const username = localStorage.getItem("userId");
   const tags = localStorage.getItem("tags");
   const [staging, setStaging] = useState(false);
   const socket = useRef(null);
   const [showNotification, setShowNotification] = useState(false);
 
-  const handelClose = (event, reason) => {
+  const handelCloseLogin = (event, reason) => {
     setLoginAlert(false);
     sessionStorage.removeItem('loggedIn');
+  };
+
+  const handelCloseBan = (event, reason) => {
+    setBanAlert(false);
+    localStorage.removeItem('showUserBanAlert');
   };
 
   useEffect(() => {
@@ -177,6 +183,11 @@ export default function HomePage() {
     return Array.from(roomsData);
   };
 
+  useEffect(() => { 
+    if (localStorage.getItem('showUserBanAlert') === 'true') {
+      setBanAlert(true);
+    }
+  });
 
   useEffect(() => {
     filterRooms('');
@@ -208,13 +219,22 @@ export default function HomePage() {
       </Helmet>
       <Container>
         <Stack spacing={2} alignItems="center" justifyContent="center" mb={1}>
-        <Snackbar open={localStorage.getItem('UserAuthenticated') === 'true' && loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelClose}
+        <Snackbar open={localStorage.getItem('UserAuthenticated') === 'true' && loginAlert && sessionStorage.getItem('loggedIn') === 'true'} autoHideDuration={6000} onClose={handelCloseLogin}
         anchorOrigin={{
           vertical: 'top',  // Set the vertical position of the Snackbar (top, bottom)
           horizontal: 'center'  // Set the horizontal position of the Snackbar (left, center, right)
         }}>
-          <Alert severity="success" onClose={handelClose}>
+          <Alert severity="success" onClose={handelCloseLogin}>
             <AlertTitle>Login successful!</AlertTitle>
+          </Alert>
+          </Snackbar>
+          <Snackbar open={banAlert} autoHideDuration={3000} onClose={handelCloseBan}
+          anchorOrigin={{
+          vertical: 'top',  // Set the vertical position of the Snackbar (top, bottom)
+          horizontal: 'center'  // Set the horizontal position of the Snackbar (left, center, right)
+          }}>
+          <Alert severity="info" onClose={handelCloseBan}>
+            <AlertTitle>You got kicked from this room!</AlertTitle>
           </Alert>
           </Snackbar>
           <Typography variant="h2">

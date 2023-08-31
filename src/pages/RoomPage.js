@@ -87,8 +87,8 @@ export default function RoomPage() {
       setMessages(messages => [...messages, payload]);
     });
     socket.current.once('kick from room', () => {
+      localStorage.setItem('showUserBanAlert', 'true');
       navigate('/');
-      alert('you got kicked from this room!')
     });
   };
   
@@ -164,9 +164,6 @@ export default function RoomPage() {
       <RoomLobby roomData={roomData} currUserId={currUserId} roomId={roomId} isSpectator={isSpectator} setIsSpectator={setIsSpectator} socket={socket} messageRef={messageRef} setMessageRef={setMessageRef} messages={messages} setMessages={setMessages} />
 
       <RoomExplaination showCard={showRoomExplainationCard} onCloseClick={() => setShowRoomExplainationCard(false)} />
-
-      
-
     </>
   );
 }
