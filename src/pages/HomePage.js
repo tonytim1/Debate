@@ -58,7 +58,7 @@ export default function HomePage() {
   const username = localStorage.getItem("userId");
   const tags = localStorage.getItem("tags");
   const [staging, setStaging] = useState(false);
-  var socket = useRef(null);
+  const socket = useRef(null);
 
   const handelClose = (event, reason) => {
     setLoginAlert(false);
