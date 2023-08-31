@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, CircularProgress, Typography, Card } from '@mui/material';
+import { Box, CircularProgress, Typography, Card, Stack } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Confetti from 'react-confetti';
 import './FirstTimeUser.css';
@@ -53,36 +53,34 @@ const SuccessPage = ({ showCard, onCloseClick }) => {
                 >
                     <CloseIcon />
                 </IconButton>
-                <Box className={`container ${showDetails ? 'show-details' : ''}`}>
+                <Stack className={`container ${showDetails ? 'show-details' : ''}`}>
                     { <Confetti recycle={false} />} {/* Show confetti */}
                     <Box className={`success-message ${showDetails ? 'move-up' : ''}`} sx={{ marginTop: '-10px' }} >
-                        <Box>
-                            {loading ? (
-                                <>
-                                    <CircularProgress
-                                        color="success"
-                                        size={100}
-                                        sx={{ color: '#388e3c' }} // Make CircularProgress green
-                                    />
-                                    <Typography variant="h5" sx={{ marginTop: 2 }}>
-                                        Creating your debate account...
-                                    </Typography>
-                                </>
-                            ) : (
-                                <>
-                                    <Typography variant="h4" sx={{ marginBottom: 2 }}>
-                                    🌟 Welcome to {localStorage.getItem('userId')}! 🌟
-                                    </Typography>
-                                    <CheckCircleIcon
-                                        color="success"
-                                        sx={{ fontSize: 100, color: '#388e3c' }}
-                                    />
-                                    <Typography variant="h4" sx={{ marginTop: 2 }}>
-                                        Successfully Connected!
-                                    </Typography>
-                                </>
-                            )}
-                        </Box>
+                        {loading ? (
+                            <>
+                                <CircularProgress
+                                    color="success"
+                                    size={100}
+                                    sx={{ color: '#388e3c' }} // Make CircularProgress green
+                                />
+                                <Typography variant="h5" sx={{ marginTop: 2 }}>
+                                    Creating your debate account...
+                                </Typography>
+                            </>
+                        ) : (
+                            <>
+                                <Typography variant="h4" sx={{ marginBottom: 2 }}>
+                                🌟 Welcome to {localStorage.getItem('userId')}! 🌟
+                                </Typography>
+                                <CheckCircleIcon
+                                    color="success"
+                                    sx={{ fontSize: 100, color: '#388e3c' }}
+                                />
+                                <Typography variant="h4" sx={{ marginTop: 2 }}>
+                                    Successfully Connected!
+                                </Typography>
+                            </>
+                        )}
                     </Box>
                     {showDetails && (
                         <Typography className="details-paragraph"
@@ -99,7 +97,7 @@ const SuccessPage = ({ showCard, onCloseClick }) => {
                             </ul>
                         </Typography>
                     )}
-                </Box>
+                </Stack>
             </Card>
         </div>
     );

@@ -9,9 +9,9 @@ const RoomExplaination = ({ showCard, onCloseClick }) => {
     }
 
     return (
-        <div>
-            <div/>
-            <Card sx={{
+        <div className="base-card">
+            <div className="overlay-background" />
+            <Card className='welcome-card' sx={{
                 position: 'relative',
                 minHeight: 'fit-content',
                 width: '80%',
@@ -25,24 +25,34 @@ const RoomExplaination = ({ showCard, onCloseClick }) => {
                     sx={{ position: 'absolute', left: 15, top: 15, zIndex: 1 }} // Adjusted zIndex
                     onClick={() => {
                         onCloseClick();
-                    }}
-                >
+                }}>
                     <CloseIcon />
                 </IconButton>
-                <Box>
+                <Box style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                 }}>
                     <Typography style={{ marginLeft: '30px', textAlign: 'left' }}>
-                            🎉 First Time in a Room! 🎉
-                            <br></br>
+                        <b>🎉 First Time in a Room!! 🎉</b><br></br>
+                            Here are some tips to help you get started:<br></br><br></br>
                             <ul>
-                                <li>
-                                Dive into discussions that intrigue you by creating or joining rooms based on your interests.
-                                </li>
-                                <li>
-                                Treat others as you would like to be treated. Do not engage in abusive, harassing, threatening, or intimidating behavior towards fellow users.
-                                </li>
-                                Delight in the world of thoughtful exchange during your stay.
-                            </ul>
-                        </Typography>
+                            <li>
+                                The "Moderator" will start the conversation when all users are ready.
+                            </li>
+                            <li>
+                                Press "Ready" to inform the "Moderator" you are ready.
+                            </li>
+                            <li>
+                                Use the chat to communicate with other users.
+                            </li>
+                            <li>
+                                Use ⋮ to report a user if nessesary.
+                            </li>
+                        </ul>
+                    </Typography>
                 </Box>
             </Card>
         </div>
